@@ -1,0 +1,9 @@
+VACUUM ANALYZE customer;
+VACUUM ANALYZE district;
+VACUUM ANALYZE history;
+VACUUM ANALYZE warehouse;
+VACUUM ANALYZE stock;
+VACUUM ANALYZE new_order;
+VACUUM ANALYZE orders;
+VACUUM ANALYZE order_line;
+VACUUM ANALYZE item;
