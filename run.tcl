@@ -20,9 +20,7 @@ diset tpcc pg_storedprocs true
 diset tpcc pg_driver timed
 diset tpcc pg_rampup 3
 diset tpcc pg_duration 20
-diset tpcc pg_timeprofile false
 diset tpcc pg_allwarehouse true
-diset tpcc pg_keyandthink false
 loadscript
 print dict
 vuset vu 250
@@ -31,7 +29,7 @@ vuset logtotemp 1
 vuset showoutput 0
 vuset unique 1
 vuset delay 100
-vuset repeat 0
+vuset repeat 1
 vurun
 wait_to_complete
 vwait forever
