@@ -13,11 +13,15 @@ is_tpcc=$3
 is_ch=$4
 username=$5
 
+password=""
+port=5432
+
 CH_THREAD_COUNT=1
 RAMPUP_TIME=3
 DEFAULT_CH_RUNTIME_IN_SECS=1800
 
 
+connection_string=postgres://${username}:${password}@${coordinator_ip_address}:${port}
 
 export PGUSER=${username}
 export PGDATABASE=${username}
@@ -25,13 +29,13 @@ export PGDATABASE=${username}
 cd ${HOME}/HammerDB-3.3
 
 # drop tables if they exist since we might be running hammerdb multiple times with different configs
-psql -v "ON_ERROR_STOP=1" -h ${coordinator_ip_address} -f drop-tables.sql
+psql -v "ON_ERROR_STOP=1" "${connection_string}" -f drop-tables.sql
 
 # create ch-benchmark tables in cluster
-psql -v "ON_ERROR_STOP=1" -h ${coordinator_ip_address} -f ch-benchmark-tables.sql
+psql -v "ON_ERROR_STOP=1" "${connection_string}" -f ch-benchmark-tables.sql
 
 # distribute ch-benchmark tables
-psql -v "ON_ERROR_STOP=1" -h ${coordinator_ip_address} -f ch-benchmark-distribute.sql
+psql -v "ON_ERROR_STOP=1" "${connection_string}" -f ch-benchmark-distribute.sql
 
 # build hammerdb related tables
 ./hammerdbcli auto build.tcl | tee -a ./results/build_${file_name}.log
@@ -40,12 +44,12 @@ psql -v "ON_ERROR_STOP=1" -h ${coordinator_ip_address} -f ch-benchmark-distribut
 # psql -h ${coordinator_ip_address} -f tpcc-distribute.sql
 
 # distribute functions in cluster 
-psql -v "ON_ERROR_STOP=1" -h ${coordinator_ip_address} -f tpcc-distribute-funcs.sql
+psql -v "ON_ERROR_STOP=1" "${connection_string}" -f tpcc-distribute-funcs.sql
 
-psql -v "ON_ERROR_STOP=1" -h ${coordinator_ip_address} -f vacuum-ch.sql
-psql -v "ON_ERROR_STOP=1" -h ${coordinator_ip_address} -f vacuum-tpcc.sql
+psql -v "ON_ERROR_STOP=1" "${connection_string}" -f vacuum-ch.sql
+psql -v "ON_ERROR_STOP=1" "${connection_string}" -f vacuum-tpcc.sql
 
-psql -v "ON_ERROR_STOP=1" -h ${coordinator_ip_address} -f do-checkpoint.sql
+psql -v "ON_ERROR_STOP=1" "${connection_string}" -f do-checkpoint.sql
 
 if [ $is_ch = true ] ; then
     ./ch_benchmark.py ${CH_THREAD_COUNT} ${coordinator_ip_address} ${RAMPUP_TIME} >> results/ch_benchmarks.log &
@@ -67,4 +71,4 @@ if [ $is_ch = true ] ; then
     sleep 30
 fi
 
-psql -h ${coordinator_ip_address} -f tables-total-size.sql >> ./results/table_total_size.out
+psql "${connection_string}" -f tables-total-size.sql >> ./results/table_total_size.out
