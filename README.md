@@ -28,6 +28,8 @@ You can change hammerdb configurations from those files.
 In order to make the build step faster, we have forked the hammerdb and add `distribute tables` at the beginning of the build.
 You should replace `pgoltp.tcl` with https://github.com/SaitTalhaNisanci/HammerDB/blob/citus/src/postgresql/pgoltp.tcl
 
+`ch_benchmark.py` is a utility script to send the extra 22 queries(analytical queries). It will send the queries starting from the beginning so that when we use the script in different platform, we try the same queries the same amount of time. Alternatively, we can use random numbers for the start index with a fixed seed. This could be useful while using multiple threads for sending the analytical queries.
+
 Checklist for running benchmark:
 
 * Make sure that node count is a divisor of shard count, otherwise some nodes will have more shards and the load will not be distribuded evenly.
