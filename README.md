@@ -14,14 +14,16 @@ CH-benCHmark is a mixed workload, it sends analytical queries along with transac
 ./build-and-run.sh <coordinator_ip> <is_tpcc> <is_ch> <username>
 ```
 
-if `is_tpcc` is `true`, then the transaction queries will be run.
-if `is_ch` is `true`, then the analytical queries will be run.
+* if `is_tpcc` is `true`, then the transaction queries will be run.
+* if `is_ch` is `true`, then the analytical queries will be run.
+
 So if you want to run both tpcc and analytical queries concurrently, you should set both of them to true.
+**You can set your psql connection string in this file**.
 
 `build.tcl` is used to build hammerdb tables and `run.tcl` is used to run the test.
 You can change hammerdb configurations from those files.
 
-*pg_count_ware/pg_num_vu* should be at least 4.
+*pg_count_ware/pg_num_vu* should be at least 4. https://www.hammerdb.com/blog/uncategorized/how-many-warehouses-for-the-hammerdb-tpc-c-test/
 
 In order to make the build step faster, we have forked the hammerdb and add `distribute tables` at the beginning of the build.
 You should replace `pgoltp.tcl` with https://github.com/SaitTalhaNisanci/HammerDB/blob/citus/src/postgresql/pgoltp.tcl
