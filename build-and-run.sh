@@ -41,7 +41,7 @@ psql -v "ON_ERROR_STOP=1" "${connection_string}" -f ch-benchmark-distribute.sql
 ./hammerdbcli auto build.tcl | tee -a ./results/build_${file_name}.log
 
 # distribute tpcc tables in cluster
-# psql -h ${coordinator_ip_address} -f tpcc-distribute.sql
+psql -h ${coordinator_ip_address} -f tpcc-distribute.sql
 
 # distribute functions in cluster 
 psql -v "ON_ERROR_STOP=1" "${connection_string}" -f tpcc-distribute-funcs.sql
