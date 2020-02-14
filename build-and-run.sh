@@ -38,7 +38,7 @@ psql -v "ON_ERROR_STOP=1" "${connection_string}" -f ch-benchmark-tables.sql
 psql -v "ON_ERROR_STOP=1" "${connection_string}" -f ch-benchmark-distribute.sql
 
 # build hammerdb related tables
-./hammerdbcli auto build.tcl | tee -a ./results/build_${file_name}.log
+hammerdbcli auto build.tcl | tee -a ./results/build_${file_name}.log
 
 # distribute tpcc tables in cluster
 psql -h ${coordinator_ip_address} -f tpcc-distribute.sql
@@ -59,7 +59,7 @@ fi
 
 if [ $is_tpcc = true ] ; then
     # run hammerdb tpcc benchmark
-    ./hammerdbcli auto run.tcl | tee -a ./results/run_${file_name}.log
+    hammerdbcli auto run.tcl | tee -a ./results/run_${file_name}.log
     # filter and save the NOPM( new orders per minute) to a new file
     grep -oP '[0-9]+(?= NOPM)' ./results/run_${file_name}.log >> ./results/${file_name}_NOPM.log
 else
