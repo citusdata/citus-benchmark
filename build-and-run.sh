@@ -20,12 +20,13 @@ CH_THREAD_COUNT=1
 RAMPUP_TIME=3
 DEFAULT_CH_RUNTIME_IN_SECS=7200
 
-
 export PGHOST=${hostname}
 export PGPORT=${port}
 export PGPASSWORD=${password}
 export PGUSER=${username}
 export PGDATABASE=${username}
+
+mkdir -p results/
 
 # drop tables if they exist since we might be running hammerdb multiple times with different configs
 psql -v "ON_ERROR_STOP=1" -f sql/drop-tables.sql
@@ -37,7 +38,7 @@ psql -v "ON_ERROR_STOP=1" -f sql/ch-benchmark-tables.sql
 psql -f sql/ch-benchmark-distribute.sql
 
 # build hammerdb related tables
-hammerdbcli auto build.tcl | tee -a ./results/build_${file_name}.log
+(cd $HOME/HammerDB-3.3 && ./hammerdbcli auto build.tcl | tee -a ./results/build_${file_name}.log)
 
 # distribute tpcc tables in cluster
 psql -f sql/tpcc-distribute.sql
@@ -45,10 +46,10 @@ psql -f sql/tpcc-distribute.sql
 # distribute functions in cluster 
 psql -f sql/tpcc-distribute-funcs.sql
 
-psql -v "ON_ERROR_STOP=1" -f sql/vacuum-ch.sql
-psql -v "ON_ERROR_STOP=1" -f sql/vacuum-tpcc.sql
+psql -f sql/vacuum-ch.sql
+psql -f sql/vacuum-tpcc.sql
 
-psql -v "ON_ERROR_STOP=1" -f sql/do-checkpoint.sql
+psql -f sql/do-checkpoint.sql
 
 if [ $is_ch = true ] ; then
     ./ch_benchmark.py ${CH_THREAD_COUNT} ${hostname} ${RAMPUP_TIME} >> results/ch_benchmarks.log &
@@ -58,7 +59,7 @@ fi
 
 if [ $is_tpcc = true ] ; then
     # run hammerdb tpcc benchmark
-    hammerdbcli auto run.tcl | tee -a ./results/run_${file_name}.log
+    (cd $HOME/HammerDB-3.3 && ./hammerdbcli auto run.tcl | tee -a ./results/run_${file_name}.log)
     # filter and save the NOPM( new orders per minute) to a new file
     grep -oP '[0-9]+(?= NOPM)' ./results/run_${file_name}.log >> ./results/${file_name}_NOPM.log
 else
