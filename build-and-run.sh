@@ -7,7 +7,7 @@ set -e
 # echo commands
 set -x
 
-coordinator_ip_address=$1
+hostname=$1
 file_name=$2
 is_tpcc=$3
 is_ch=$4
@@ -21,38 +21,37 @@ RAMPUP_TIME=3
 DEFAULT_CH_RUNTIME_IN_SECS=1800
 
 
-connection_string=postgres://${username}:${password}@${coordinator_ip_address}:${port}
-
+export PGHOST=${hostname}
+export PGPORT=${port}
+export PGPASSWORD=${password}
 export PGUSER=${username}
 export PGDATABASE=${username}
 
-cd ${HOME}/HammerDB-3.3
-
 # drop tables if they exist since we might be running hammerdb multiple times with different configs
-psql -v "ON_ERROR_STOP=1" "${connection_string}" -f drop-tables.sql
+psql -v "ON_ERROR_STOP=1" -f drop-tables.sql
 
 # create ch-benchmark tables in cluster
-psql -v "ON_ERROR_STOP=1" "${connection_string}" -f ch-benchmark-tables.sql
+psql -v "ON_ERROR_STOP=1" -f ch-benchmark-tables.sql
 
 # distribute ch-benchmark tables
-psql "${connection_string}" -f ch-benchmark-distribute.sql
+psql -f ch-benchmark-distribute.sql
 
 # build hammerdb related tables
 hammerdbcli auto build.tcl | tee -a ./results/build_${file_name}.log
 
 # distribute tpcc tables in cluster
-psql "${connection_string}" -f tpcc-distribute.sql
+psql -f tpcc-distribute.sql
 
 # distribute functions in cluster 
-psql "${connection_string}" -f tpcc-distribute-funcs.sql
+psql -f tpcc-distribute-funcs.sql
 
-psql -v "ON_ERROR_STOP=1" "${connection_string}" -f vacuum-ch.sql
-psql -v "ON_ERROR_STOP=1" "${connection_string}" -f vacuum-tpcc.sql
+psql -v "ON_ERROR_STOP=1" -f vacuum-ch.sql
+psql -v "ON_ERROR_STOP=1" -f vacuum-tpcc.sql
 
-psql -v "ON_ERROR_STOP=1" "${connection_string}" -f do-checkpoint.sql
+psql -v "ON_ERROR_STOP=1" -f do-checkpoint.sql
 
 if [ $is_ch = true ] ; then
-    ./ch_benchmark.py ${CH_THREAD_COUNT} ${coordinator_ip_address} ${RAMPUP_TIME} >> results/ch_benchmarks.log &
+    ./ch_benchmark.py ${CH_THREAD_COUNT} ${hostname} ${RAMPUP_TIME} >> results/ch_benchmarks.log &
     ch_pid=$!
     echo ${ch_pid}
 fi
