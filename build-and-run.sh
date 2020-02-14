@@ -28,27 +28,27 @@ export PGUSER=${username}
 export PGDATABASE=${username}
 
 # drop tables if they exist since we might be running hammerdb multiple times with different configs
-psql -v "ON_ERROR_STOP=1" -f drop-tables.sql
+psql -v "ON_ERROR_STOP=1" -f sql/drop-tables.sql
 
 # create ch-benchmark tables in cluster
-psql -v "ON_ERROR_STOP=1" -f ch-benchmark-tables.sql
+psql -v "ON_ERROR_STOP=1" -f sql/ch-benchmark-tables.sql
 
 # distribute ch-benchmark tables
-psql -f ch-benchmark-distribute.sql
+psql -f sql/ch-benchmark-distribute.sql
 
 # build hammerdb related tables
 hammerdbcli auto build.tcl | tee -a ./results/build_${file_name}.log
 
 # distribute tpcc tables in cluster
-psql -f tpcc-distribute.sql
+psql -f sql/tpcc-distribute.sql
 
 # distribute functions in cluster 
-psql -f tpcc-distribute-funcs.sql
+psql -f sql/tpcc-distribute-funcs.sql
 
-psql -v "ON_ERROR_STOP=1" -f vacuum-ch.sql
-psql -v "ON_ERROR_STOP=1" -f vacuum-tpcc.sql
+psql -v "ON_ERROR_STOP=1" -f sql/vacuum-ch.sql
+psql -v "ON_ERROR_STOP=1" -f sql/vacuum-tpcc.sql
 
-psql -v "ON_ERROR_STOP=1" -f do-checkpoint.sql
+psql -v "ON_ERROR_STOP=1" -f sql/do-checkpoint.sql
 
 if [ $is_ch = true ] ; then
     ./ch_benchmark.py ${CH_THREAD_COUNT} ${hostname} ${RAMPUP_TIME} >> results/ch_benchmarks.log &
@@ -70,4 +70,4 @@ if [ $is_ch = true ] ; then
     sleep 30
 fi
 
-psql "${connection_string}" -f tables-total-size.sql >> ./results/table_total_size.out
+psql "${connection_string}" -f sql/tables-total-size.sql >> ./results/table_total_size.out
