@@ -14,6 +14,7 @@ import time
 
 ch_queries = [
     """
+-- Q1
 select   ol_number,
      sum(ol_quantity) as sum_qty,
      sum(ol_amount) as sum_amount,
@@ -24,6 +25,7 @@ from     order_line
 group by ol_number order by ol_number LIMIT 10;
     """,
 """
+-- Q2
 select      su_suppkey, su_name, n_name, i_id, i_name, su_address, su_phone, su_comment
 from     item, supplier, stock, nation, region,
      (select s_i_id as m_i_id,
@@ -45,6 +47,7 @@ where      i_id = s_i_id
 order by n_name, su_name, i_id LIMIT 10;
 """,
 """
+-- Q3
 select   ol_o_id, ol_w_id, ol_d_id,
      sum(ol_amount) as revenue, o_entry_d
 from      customer, new_order, orders, order_line
@@ -62,6 +65,7 @@ group by ol_o_id, ol_w_id, ol_d_id, o_entry_d
 order by revenue desc, o_entry_d LIMIT 10;
 """,
 """
+-- Q4
 select    o_ol_cnt, count(*) as order_count
 from    orders
     where exists (select *
@@ -74,11 +78,35 @@ group    by o_ol_cnt
 order    by o_ol_cnt LIMIT 10;
 """,
 """
+-- Q5
+select     n_name,
+     sum(ol_amount) as revenue
+from     customer, orders, order_line, stock, supplier, nation, region
+where     c_id = o_c_id
+     and c_w_id = o_w_id
+     and c_d_id = o_d_id
+     and ol_o_id = o_id
+     and ol_w_id = o_w_id
+     and ol_d_id=o_d_id
+     and ol_w_id = s_w_id
+     and ol_i_id = s_i_id
+     and mod((s_w_id * s_i_id),10000) = su_suppkey
+     and ascii(substr(c_state,1,1)) = su_nationkey
+     and su_nationkey = n_nationkey
+     and n_regionkey = r_regionkey
+     and r_name = 'Europe'
+     and o_entry_d >= '2015-01-02 00:00:00.000000'
+group by n_name
+order by revenue desc LIMIT 10;
+""",
+"""
+-- Q6
 select    sum(ol_amount) as revenue
 from order_line
 where ol_quantity between 1 and 100000 LIMIT 10;
 """,
 """
+-- Q7
 select     su_nationkey as supp_nation,
      substr(c_state,1,1) as cust_nation,
      extract(year from o_entry_d) as l_year,
@@ -104,6 +132,7 @@ group by su_nationkey, substr(c_state,1,1), extract(year from o_entry_d)
 order by su_nationkey, cust_nation, l_year LIMIT 10;
 """,
 """
+-- Q8
 select     extract(year from o_entry_d) as l_year,
      sum(case when n2.n_name = 'Germany' then ol_amount else 0 end) / sum(ol_amount) as mkt_share
 from     item, supplier, stock, order_line, orders, customer, nation n1, nation n2, region
@@ -128,6 +157,7 @@ group by extract(year from o_entry_d)
 order by l_year LIMIT 10;
 """,
 """
+-- Q9
 select     n_name, extract(year from o_entry_d) as l_year, sum(ol_amount) as sum_profit
 from     item, stock, supplier, order_line, orders, nation
 where     ol_i_id = s_i_id
@@ -143,6 +173,7 @@ group by n_name, extract(year from o_entry_d)
 order by n_name, l_year desc LIMIT 10;
 """,
 """
+-- Q10
 select     c_id, c_last, sum(ol_amount) as revenue, c_city, c_phone, n_name
 from     customer, orders, order_line, nation
 where     c_id = o_c_id
@@ -157,6 +188,7 @@ group by c_id, c_last, c_city, c_phone, n_name
 order by revenue desc LIMIT 10;
 """,
 """
+-- Q11
 select     s_i_id, sum(s_order_cnt) as ordercount
 from     stock, supplier, nation
 where     mod((s_w_id * s_i_id),10000) = su_suppkey
@@ -172,6 +204,7 @@ having   sum(s_order_cnt) >
 order by ordercount desc LIMIT 10;
 """,
 """
+-- Q12
 select     o_ol_cnt,
      sum(case when o_carrier_id = 1 or o_carrier_id = 2 then 1 else 0 end) as high_line_count,
      sum(case when o_carrier_id <> 1 and o_carrier_id <> 2 then 1 else 0 end) as low_line_count
@@ -184,6 +217,7 @@ group by o_ol_cnt
 order by o_ol_cnt LIMIT 10;
 """,
 """
+-- Q13
 select     c_count, count(*) as custdist
 from     (select c_id, count(o_id)
      from customer left outer join orders on (
@@ -196,12 +230,14 @@ group by c_count
 order by custdist desc, c_count desc LIMIT 10;
 """,
 """
+-- Q14
 select    100.00 * sum(case when i_data like 'PR%' then ol_amount else 0 end) / (1+sum(ol_amount)) as promo_revenue
 from order_line, item
 where ol_i_id = i_id 
     LIMIT 10;
 """,
 """
+-- Q15
 with     revenue (supplier_no, total_revenue) as (
      select mod((s_w_id * s_i_id),10000) as supplier_no,
         sum(ol_amount) as total_revenue
@@ -215,6 +251,7 @@ where     su_suppkey = supplier_no
 order by su_suppkey LIMIT 10;
 """,
 """
+-- Q16
 select     i_name,
      substr(i_data, 1, 3) as brand,
      i_price,
@@ -230,6 +267,7 @@ group by i_name, substr(i_data, 1, 3), i_price
 order by supplier_cnt desc LIMIT 10;
 """,
 """
+-- Q17
 select    sum(ol_amount) / 2.0 as avg_yearly
 from order_line, (select   i_id, avg(ol_quantity) as a
             from     item, order_line
@@ -240,6 +278,7 @@ where ol_i_id = t.i_id
     and ol_quantity < t.a LIMIT 10;
 """,
 """
+-- Q18
 select     c_last, c_id o_id, o_entry_d, o_ol_cnt, sum(ol_amount)
 from     customer, orders, order_line
 where     c_id = o_c_id
@@ -253,6 +292,7 @@ having     sum(ol_amount) > 200
 order by sum(ol_amount) desc, o_entry_d LIMIT 10;
 """,
 """
+-- Q19
 select    sum(ol_amount) as revenue
 from order_line, item
 where    (
@@ -279,6 +319,7 @@ where    (
     ) LIMIT 10;
 """,
 """
+-- Q20
 select   su_name, su_address
 from     supplier, nation
 where    su_suppkey in
@@ -296,6 +337,7 @@ where    su_suppkey in
 order by su_name LIMIT 10;
 """,
 """
+-- Q21
 select     su_name, count(*) as numwait
 from     supplier, order_line l1, orders, stock, nation
 where     ol_o_id = o_id
@@ -317,6 +359,7 @@ group by su_name
 order by numwait desc, su_name LIMIT 10;
 """,
 """
+-- Q22
 select     substr(c_state,1,1) as country,
      count(*) as numcust,
      sum(c_balance) as totacctbal
@@ -338,6 +381,7 @@ order by substr(c_state,1,1) LIMIT 10;
 
 sent_query_amount = 0
 is_terminated = False
+file_suffix="0"
 
 
 def save_pid_to_file():
@@ -359,7 +403,7 @@ def start_ch_thread():
 #     cur_index = random.randint(0, size-1)
     cur_index = 0
     while not is_terminated:
-        return_code = send_query(ch_queries[cur_index])
+        return_code = send_query(ch_queries[cur_index],cur_index)
         # if there was an error, we will retry the same query
         if return_code != 0:
              continue
@@ -368,20 +412,24 @@ def start_ch_thread():
         cur_index += 1
         cur_index %= size
 
-def send_query(query):
+def send_query(query,cur_index):
     global coord_ip
     pg = ['psql', '-P', 'pager=off', '-v', 'ON_ERROR_STOP=1', '-h', coord_ip, '-c', query]
-    return subprocess.call(pg)
-    
 
+    start_time = int(round(time.time() * 1000));
+    return_code = subprocess.call(pg)
+    end_time = int(round(time.time() * 1000));
 
+    f = open("results/ch_queries_{}.txt".format(file_suffix), "a")
+    f.write("{} finished in {} milliseconds\n".format(cur_index+1, end_time - start_time))
+    f.close
+
+    return return_code
 
 def give_stats(sent_query_amount, time_lapsed_in_secs):
-    stat = "sent {} operations in {} seconds\n".format(sent_query_amount, time_lapsed_in_secs)
-    print(stat)
-
-    f = open("results/ch_results.txt", "a")
-    f.write(stat)
+    f = open("results/ch_results_{}.txt".format(file_suffix), "w")
+    f.write("queries {} in {} seconds".format(sent_query_amount, time_lapsed_in_secs))
+    f.write("QPH {}".format(3600.0 * sent_query_amount / time_lapsed_in_secs))
     f.close()
 
 def get_curtime_in_seconds():
@@ -416,6 +464,7 @@ if __name__ == "__main__":
     thread_count = int(sys.argv[1])
     coord_ip = sys.argv[2]
     initial_sleep_in_mins=int(sys.argv[3])
+    file_suffix=sys.argv[4]
     
     save_pid_to_file()
     jobs = []
@@ -430,10 +479,5 @@ if __name__ == "__main__":
         j.start()
         
     killer = GracefulKiller()
-    f = open("results/ch_logs.txt", "a")
     while not killer.kill_now:
         time.sleep(10)
-
-        now = get_curtime_in_seconds()
-        f.write("running ch benchmarks ... sent {} queries in {} seconds\n".format(sent_query_amount, now - start_time_in_secs))    
-    f.close()
