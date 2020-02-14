@@ -40,7 +40,7 @@ psql -v "ON_ERROR_STOP=1" -f sql/ch-benchmark-tables.sql
 psql -f sql/ch-benchmark-distribute.sql
 
 # build hammerdb related tables
-(cd $HOME/HammerDB-3.3 && ./hammerdbcli auto $current_dir/build.tcl | tee -a ./results/build_${file_name}.log)
+(cd $HOME/HammerDB-3.3 && time ./hammerdbcli auto $current_dir/build.tcl 2>&1 | tee -a ./results/build_${file_name}.log)
 
 # distribute tpcc tables in cluster
 psql -f sql/tpcc-distribute.sql
