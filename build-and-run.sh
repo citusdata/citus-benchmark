@@ -26,6 +26,8 @@ export PGPASSWORD=${password}
 export PGUSER=${username}
 export PGDATABASE=${username}
 
+current_dir=$PWD
+
 mkdir -p results/
 
 # drop tables if they exist since we might be running hammerdb multiple times with different configs
@@ -38,7 +40,7 @@ psql -v "ON_ERROR_STOP=1" -f sql/ch-benchmark-tables.sql
 psql -f sql/ch-benchmark-distribute.sql
 
 # build hammerdb related tables
-(cd $HOME/HammerDB-3.3 && ./hammerdbcli auto build.tcl | tee -a ./results/build_${file_name}.log)
+(cd $HOME/HammerDB-3.3 && ./hammerdbcli auto $current_dir/build.tcl | tee -a ./results/build_${file_name}.log)
 
 # distribute tpcc tables in cluster
 psql -f sql/tpcc-distribute.sql
@@ -59,7 +61,7 @@ fi
 
 if [ $is_tpcc = true ] ; then
     # run hammerdb tpcc benchmark
-    (cd $HOME/HammerDB-3.3 && ./hammerdbcli auto run.tcl | tee -a ./results/run_${file_name}.log)
+    (cd $HOME/HammerDB-3.3 && ./hammerdbcli auto $current_dir/run.tcl | tee -a ./results/run_${file_name}.log)
     # filter and save the NOPM( new orders per minute) to a new file
     grep -oP '[0-9]+(?= NOPM)' ./results/run_${file_name}.log >> ./results/${file_name}_NOPM.log
 else
