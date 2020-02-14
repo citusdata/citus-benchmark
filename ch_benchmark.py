@@ -428,8 +428,8 @@ def send_query(query,cur_index):
 
 def give_stats(sent_query_amount, time_lapsed_in_secs):
     f = open("results/ch_results_{}.txt".format(file_suffix), "w")
-    f.write("queries {} in {} seconds".format(sent_query_amount, time_lapsed_in_secs))
-    f.write("QPH {}".format(3600.0 * sent_query_amount / time_lapsed_in_secs))
+    f.write("queries {} in {} seconds\n".format(sent_query_amount, time_lapsed_in_secs))
+    f.write("QPH {}\n".format(3600.0 * sent_query_amount / time_lapsed_in_secs))
     f.close()
 
 def get_curtime_in_seconds():
