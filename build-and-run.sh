@@ -35,16 +35,16 @@ psql -v "ON_ERROR_STOP=1" "${connection_string}" -f drop-tables.sql
 psql -v "ON_ERROR_STOP=1" "${connection_string}" -f ch-benchmark-tables.sql
 
 # distribute ch-benchmark tables
-psql -v "ON_ERROR_STOP=1" "${connection_string}" -f ch-benchmark-distribute.sql
+psql "${connection_string}" -f ch-benchmark-distribute.sql
 
 # build hammerdb related tables
 hammerdbcli auto build.tcl | tee -a ./results/build_${file_name}.log
 
 # distribute tpcc tables in cluster
-psql -h ${coordinator_ip_address} -f tpcc-distribute.sql
+psql "${connection_string}" -f tpcc-distribute.sql
 
 # distribute functions in cluster 
-psql -v "ON_ERROR_STOP=1" "${connection_string}" -f tpcc-distribute-funcs.sql
+psql "${connection_string}" -f tpcc-distribute-funcs.sql
 
 psql -v "ON_ERROR_STOP=1" "${connection_string}" -f vacuum-ch.sql
 psql -v "ON_ERROR_STOP=1" "${connection_string}" -f vacuum-tpcc.sql
