@@ -1,6 +1,6 @@
-# hammerdb
+# Running CH-benCHmark with HammerDB against Citus
 
-This repository contains utility scripts/files that are used to run hammerdb benchmarks.
+This repository contains utility scripts/files that are used to run the [CH-benCHmark](https://db.in.tum.de/research/projects/CHbenCHmark/) on Citus and regular PostgreSQL.
 
 Hammerdb is an open source standard benchmarking tool. https://github.com/TPC-Council/HammerDB
 
