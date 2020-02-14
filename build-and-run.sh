@@ -40,7 +40,7 @@ psql -v "ON_ERROR_STOP=1" -f sql/ch-benchmark-tables.sql
 psql -f sql/ch-benchmark-distribute.sql
 
 # build hammerdb related tables
-(cd $HOME/HammerDB-3.3 && time ./hammerdbcli auto $current_dir/build.tcl 2>&1 | tee -a $current_dir/results/build_${file_name}.log)
+(cd $HOME/HammerDB-3.3 && time ./hammerdbcli auto $current_dir/build.tcl 2>&1 | tee -a "$current_dir/results/build_${file_name}.log")
 
 # distribute tpcc tables in cluster
 psql -f sql/tpcc-distribute.sql
@@ -61,9 +61,9 @@ fi
 
 if [ $is_tpcc = true ] ; then
     # run hammerdb tpcc benchmark
-    (cd $HOME/HammerDB-3.3 && ./hammerdbcli auto $current_dir/run.tcl | tee -a $current_dir/results/run_${file_name}.log)
+    (cd $HOME/HammerDB-3.3 && ./hammerdbcli auto $current_dir/run.tcl | tee -a "$current_dir/results/run_${file_name}.log)"
     # filter and save the NOPM( new orders per minute) to a new file
-    grep -oP '[0-9]+(?= NOPM)' ./results/run_${file_name}.log >> ./results/${file_name}_NOPM.log
+    grep -oP '[0-9]+(?= NOPM)' "./results/run_${file_name}.log" >> "./results/${file_name}_NOPM.log"
 else
     sleep $DEFAULT_CH_RUNTIME_IN_SECS
 fi
@@ -73,4 +73,4 @@ if [ $is_ch = true ] ; then
     sleep 30
 fi
 
-psql "${connection_string}" -f sql/tables-total-size.sql >> ./results/table_total_size.out
+psql -f sql/tables-total-size.sql >> "./results/${file_name}_table_total_size.out"
