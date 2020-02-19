@@ -422,7 +422,7 @@ def send_query(query,cur_index):
 
     f = open("results/ch_queries_{}.txt".format(file_suffix), "a")
     f.write("{} finished in {} milliseconds\n".format(cur_index+1, end_time - start_time))
-    f.close
+    f.close()
 
     return return_code
 
