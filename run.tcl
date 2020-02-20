@@ -21,7 +21,6 @@ diset tpcc pg_count_ware 1000
 diset tpcc pg_driver timed
 diset tpcc pg_rampup 3
 diset tpcc pg_duration 60
-diset tpcc pg_allwarehouse true
 loadscript
 print dict
 vuset vu 250
