@@ -8,17 +8,28 @@ TPC-C benchmark contains transaction queries.
 TPC-H benchmark contains analytical queries.
 CH-benCHmark is a mixed workload, it sends analytical queries along with transactional queries. https://research.tableau.com/sites/default/files/a8-cole.pdf
 
-`build-and-run.sh` is the driver script. Example usage:
+`build-and-run.sh` is the driver script and can be run using:
 
 ```bash
-./build-and-run.sh <coordinator_ip> <is_tpcc> <is_ch> <username>
+./build-and-run.sh <prefix> <is_tpcc> <is_ch>
 ```
 
+* prefix indicates the prefix used in result files
 * if `is_tpcc` is `true`, then the transaction queries will be run.
 * if `is_ch` is `true`, then the analytical queries will be run.
 
+The script relies on libpq environment variables for connecting to the database.
+
+Example usage:
+```bash
+export PGHOST=203.0.113.4
+export PGUSER=citus
+export PGDATABASE=citus
+export PGPASSWORD=
+./build-and-run.sh tpcc-run true false
+```
+
 So if you want to run both tpcc and analytical queries concurrently, you should set both of them to true.
-**You can set your psql connection string in this file**.
 
 `build.tcl` is used to build hammerdb tables and `run.tcl` is used to run the test.
 You can change hammerdb configurations from those files.

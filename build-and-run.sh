@@ -7,21 +7,28 @@ set -e
 # echo commands
 set -x
 
-hostname=$1
-file_name=$2
-is_tpcc=$3
-is_ch=$4
-username=$5
+file_name=$1
+is_tpcc=$2
+is_ch=$3
 
 CH_THREAD_COUNT=1
 RAMPUP_TIME=3
 DEFAULT_CH_RUNTIME_IN_SECS=7200
 
-export PGHOST=${hostname}
-export PGUSER=${username}
-export PGDATABASE=${username}
+export PGHOST=${PGHOST:-localhost}
+export PGUSER=${PGUSER:-postgres}
+export PGDATABASE=${PGDATABASE:-$PGUSER}
+export PGPASSWORD=${PGPASSWORD}
 
 current_dir=$PWD
+
+sed -i -e "s/diset connection pg_host .*/diset connection pg_host $PGHOST/" build.tcl run.tcl
+sed -i -e "s/diset tpcc pg_dbase .*/diset tpcc pg_dbase $PGDATABASE/" build.tcl run.tcl
+sed -i -e "s/diset tpcc pg_defaultdbase .*/diset tpcc pg_defaultdbase $PGDATABASE/" build.tcl run.tcl
+sed -i -e "s/diset tpcc pg_user .*/diset tpcc pg_user $PGUSER/" build.tcl run.tcl
+sed -i -e "s/diset tpcc pg_superuser .*/diset tpcc pg_superuser $PGUSER/" build.tcl run.tcl
+sed -i -e "s/diset tpcc pg_pass .*/diset tpcc pg_pass $PGPASSWORD/" build.tcl run.tcl
+sed -i -e "s/diset tpcc pg_superuserpass .*/diset tpcc pg_superuserpass $PGPASSWORD/" build.tcl run.tcl
 
 mkdir -p results/
 
@@ -35,7 +42,7 @@ psql -v "ON_ERROR_STOP=1" -f sql/ch-benchmark-tables.sql
 psql -f sql/ch-benchmark-distribute.sql
 
 # build hammerdb related tables
-(cd $HOME/HammerDB-3.3 && time ./hammerdbcli auto $current_dir/build.tcl | tee "$current_dir/results/build_${file_name}.log")
+(cd HammerDB-3.3 && time ./hammerdbcli auto $current_dir/build.tcl | tee "$current_dir/results/hammerdb_build_${file_name}.log")
 
 # distribute tpcc tables in cluster
 psql -f sql/tpcc-distribute.sql
@@ -47,16 +54,16 @@ psql -f sql/vacuum-ch.sql
 psql -f sql/vacuum-tpcc.sql
 
 if [ $is_ch = true ] ; then
-    ./ch_benchmark.py ${CH_THREAD_COUNT} ${hostname} ${RAMPUP_TIME} ${file_name} >> results/ch_benchmarks.log &
+    ./ch_benchmark.py ${CH_THREAD_COUNT} ${hostname} ${RAMPUP_TIME} ${file_name} >> results/ch_benchmarks_${file_name}.log &
     ch_pid=$!
     echo ${ch_pid}
 fi
 
 if [ $is_tpcc = true ] ; then
     # run hammerdb tpcc benchmark
-    (cd $HOME/HammerDB-3.3 &&  time ./hammerdbcli auto $current_dir/run.tcl | tee "$current_dir/results/run_${file_name}.log" )
+    (cd HammerDB-3.3 &&  time ./hammerdbcli auto $current_dir/run.tcl | tee "$current_dir/results/hammerdb_run_${file_name}.log" )
     # filter and save the NOPM( new orders per minute) to a new file
-    grep -oP '[0-9]+(?= NOPM)' "./results/run_${file_name}.log" >> "./results/${file_name}_NOPM.log"
+    grep -oP '[0-9]+(?= NOPM)' "./results/run_${file_name}.log" >> "./results/hammerdb_nopm_${file_name}.log"
 else
     sleep $DEFAULT_CH_RUNTIME_IN_SECS
 fi
@@ -65,5 +72,3 @@ if [ $is_ch = true ] ; then
     kill ${ch_pid}
     sleep 30
 fi
-
-psql -f sql/tables-total-size.sql >> "./results/${file_name}_table_total_size.out"
