@@ -8,11 +8,11 @@ if {!$complete} { after 5000 wait_to_complete } else { exit }
 }
 dbset db pg
 loadscript
-diset connection pg_host localhost
-diset tpcc pg_dbase postgres
-diset tpcc pg_user marco
-diset tpcc pg_superuser marco
-diset tpcc pg_defaultdbase postgres
+diset connection pg_host replace_with_host
+diset tpcc pg_dbase citus
+diset tpcc pg_user citus
+diset tpcc pg_superuser citus
+diset tpcc pg_defaultdbase citus
 diset tpcc pg_pass 
 diset tpcc pg_superuserpass 
 # if you change this, make sure to change tpcc-distribute-funcs.sql
