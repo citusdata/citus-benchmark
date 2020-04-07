@@ -63,7 +63,7 @@ if [ $is_tpcc = true ] ; then
     # run hammerdb tpcc benchmark
     (cd HammerDB-3.3 &&  time ./hammerdbcli auto $current_dir/run.tcl | tee "$current_dir/results/hammerdb_run_${file_name}.log" )
     # filter and save the NOPM( new orders per minute) to a new file
-    grep -oP '[0-9]+(?= NOPM)' "./results/run_${file_name}.log" >> "./results/hammerdb_nopm_${file_name}.log"
+    grep -oP '[0-9]+(?= NOPM)' "./results/hammerdb_run_${file_name}.log" >> "./results/hammerdb_nopm_${file_name}.log"
 else
     sleep $DEFAULT_CH_RUNTIME_IN_SECS
 fi
