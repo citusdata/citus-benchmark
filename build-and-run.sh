@@ -54,7 +54,7 @@ psql -f sql/vacuum-ch.sql
 psql -f sql/vacuum-tpcc.sql
 
 if [ $is_ch = true ] ; then
-    ./ch_benchmark.py ${CH_THREAD_COUNT} ${hostname} ${RAMPUP_TIME} ${file_name} >> results/ch_benchmarks_${file_name}.log &
+    ./ch_benchmark.py ${CH_THREAD_COUNT} ${PGHOST} ${RAMPUP_TIME} ${file_name} >> results/ch_benchmarks_${file_name}.log &
     ch_pid=$!
     echo ${ch_pid}
 fi
