@@ -7,3 +7,4 @@ SELECT create_distributed_table('new_order', 'no_w_id');
 SELECT create_distributed_table('orders', 'o_w_id');
 SELECT create_distributed_table('order_line', 'ol_w_id');
 SELECT create_reference_table('item');
+ALTER ROLE current_user SET citus.enable_repartition_joins TO on;
