@@ -41,6 +41,9 @@ psql -v "ON_ERROR_STOP=1" -f sql/ch-benchmark-tables.sql
 # distribute ch-benchmark tables
 psql -f sql/ch-benchmark-distribute.sql
 
+# set shard count
+psql -c "ALTER ROLE current_user SET citus.shard_count TO 80" 2>/dev/null || true
+
 # build hammerdb related tables
 (cd HammerDB-3.3 && time ./hammerdbcli auto $current_dir/build.tcl | tee "$current_dir/results/hammerdb_build_${file_name}.log")
 
