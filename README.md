@@ -20,7 +20,7 @@ CH-benCHmark is a mixed workload, it sends analytical queries along with transac
 
 The script relies on libpq environment variables for connecting to the database.
 
-Make sure Citus is configured with the following `citus.replication_model` setting:
+Make sure Citus is configured with the following `citus.replication_model` setting before running the benchmark:
 ```sql
 postgres=# show citus.replication_model ;
 ┌─────────────────────────┐
