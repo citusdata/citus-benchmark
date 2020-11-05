@@ -1,4 +1,4 @@
-# Running CH-benCHmark with HammerDB against Citus
+# HammerDB benchmarking tool for Citus
 
 This repository contains utility scripts/files that are used to run the [CH-benCHmark](https://db.in.tum.de/research/projects/CHbenCHmark/) on Citus and regular PostgreSQL.
 
@@ -7,6 +7,20 @@ Hammerdb is an open source standard benchmarking tool. https://github.com/TPC-Co
 TPC-C benchmark contains transaction queries.
 TPC-H benchmark contains analytical queries.
 CH-benCHmark is a mixed workload, it sends analytical queries along with transactional queries. https://research.tableau.com/sites/default/files/a8-cole.pdf
+
+# Preparation
+
+If you are using CentOS on the driver node, you can use the following steps to prepare:
+
+```bash
+sudo yum install yum -y install https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+sudo yum update -y nss curl libcurl
+sudo yum install -y screen postgresql13
+git clone https://github.com/citusdata/ch-benchmark.git
+cd ch-benchmark
+```
+
+# Running HammerDB OSS-TPC-C with CH-benCHmark support
 
 `build-and-run.sh` is the driver script and can be run using:
 
