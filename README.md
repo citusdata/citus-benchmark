@@ -1,12 +1,8 @@
-# HammerDB benchmarking tool for Citus
+# HammerDB OSS-TPC-C and CH benchmarking tool
 
 This repository contains utility scripts/files that are used to run the [CH-benCHmark](https://db.in.tum.de/research/projects/CHbenCHmark/) on Citus and regular PostgreSQL.
 
-Hammerdb is an open source standard benchmarking tool. https://github.com/TPC-Council/HammerDB
-
-TPC-C benchmark contains transaction queries.
-TPC-H benchmark contains analytical queries.
-CH-benCHmark is a mixed workload, it sends analytical queries along with transactional queries. https://research.tableau.com/sites/default/files/a8-cole.pdf
+HammerDB is a standard open source benchmarking tool available from https://github.com/TPC-Council/HammerDB . It supports workloads derived from TPC-C and TPC-H. We use HammerDB for running the C part of the CH benchmark, but you can also use this tool to simply run the TPC-C-based workload.
 
 # Preparation
 
