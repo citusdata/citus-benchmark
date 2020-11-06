@@ -12,6 +12,7 @@ If you are using CentOS 8 on the driver node, you can use the following steps to
 sudo yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm
 sudo yum update -y nss curl libcurl
 sudo yum install -y screen postgresql13
+sudo yum groupinstall -y "Development tools"
 git clone https://github.com/citusdata/ch-benchmark.git
 cd ch-benchmark
 ```
