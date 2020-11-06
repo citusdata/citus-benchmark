@@ -6,7 +6,7 @@ HammerDB is a standard open source benchmarking tool available from https://gith
 
 # Preparation
 
-If you are using CentOS on the driver node, you can use the following steps to prepare:
+If you are using CentOS 8 on the driver node, you can use the following steps to prepare:
 
 ```bash
 sudo yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm
