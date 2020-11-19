@@ -58,9 +58,6 @@ You can change hammerdb configurations from those files.
 
 *pg_count_ware/pg_num_vu* should be at least 4. https://www.hammerdb.com/blog/uncategorized/how-many-warehouses-for-the-hammerdb-tpc-c-test/
 
-In order to make the build step faster, we have forked the hammerdb and add `distribute tables` at the beginning of the build.
-You should replace `pgoltp.tcl` with https://github.com/SaitTalhaNisanci/HammerDB/blob/citus/src/postgresql/pgoltp.tcl
-
 `ch_benchmark.py` is a utility script to send the extra 22 queries(analytical queries). By default one thread is used for sending the analytical queries. The start index for each thread is randomly chosen with a fixed seed so that it will be same across different platforms.
 
 Checklist for running benchmark:
