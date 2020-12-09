@@ -1,4 +1,4 @@
-# HammerDB OSS-TPC-C and CH benchmarking tool
+# HammerDB TPROC-C and CH benchmarking tool for Citus and PostgreSQL
 
 This repository contains utility scripts/files that are used to run the [CH-benCHmark](https://db.in.tum.de/research/projects/CHbenCHmark/) on Citus and regular PostgreSQL.
 
