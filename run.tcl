@@ -13,9 +13,8 @@ diset tpcc pg_dbase citus
 diset tpcc pg_user citus
 diset tpcc pg_superuser citus
 diset tpcc pg_defaultdbase citus
-diset tpcc pg_pass 
-diset tpcc pg_superuserpass 
-# if you change this, make sure to change tpcc-distribute-funcs.sql
+diset tpcc pg_pass
+diset tpcc pg_superuserpass
 diset tpcc pg_storedprocs true
 diset tpcc pg_count_ware 1000
 diset tpcc pg_driver timed
