@@ -1,7 +1,7 @@
 diff -wruN HammerDB-upstream/HammerDB-3.3/src/postgresql/pgoltp.tcl HammerDB-3.3/src/postgresql/pgoltp.tcl
 --- HammerDB-upstream/HammerDB-3.3/src/postgresql/pgoltp.tcl	2019-10-16 11:40:55.000000000 +0000
-+++ HammerDB-3.3/src/postgresql/pgoltp.tcl	2020-12-10 15:21:12.630000000 +0000
-@@ -451,7 +451,9 @@
++++ HammerDB-3.3/src/postgresql/pgoltp.tcl	2020-12-10 19:27:49.150000000 +0000
+@@ -451,9 +451,11 @@
  WHEN serialization_failure OR deadlock_detected OR no_data_found
  THEN ROLLBACK;
  END; }
@@ -10,9 +10,12 @@ diff -wruN HammerDB-upstream/HammerDB-3.3/src/postgresql/pgoltp.tcl HammerDB-3.3
 +set sql(8) "SELECT create_distributed_function(oid, '$1', colocate_with:='warehouse') FROM pg_catalog.pg_proc WHERE proname IN ('neword', 'delivery', 'payment', 'ostat', 'slev')"
 +for { set i 1 } { $i <= 8 } { incr i } {
  set result [ pg_exec $lda $sql($i) ]
- if {[pg_result $result -status] != "PGRES_COMMAND_OK"} {
+-if {[pg_result $result -status] != "PGRES_COMMAND_OK"} {
++if {[pg_result $result -status] ni {"PGRES_TUPLES_OK" "PGRES_COMMAND_OK"}} {
  error "[pg_result $result -error]"
-@@ -1306,7 +1308,9 @@
+ 	} else {
+ pg_result $result -clear
+@@ -1306,9 +1308,11 @@
  ' LANGUAGE 'plpgsql';
  	}
      }
@@ -21,8 +24,11 @@ diff -wruN HammerDB-upstream/HammerDB-3.3/src/postgresql/pgoltp.tcl HammerDB-3.3
 +set sql(8) "SELECT create_distributed_function(oid, '$1', colocate_with:='warehouse') FROM pg_catalog.pg_proc WHERE proname IN ('neword', 'delivery', 'payment', 'ostat', 'slev')"
 +for { set i 1 } { $i <= 8 } { incr i } {
  set result [ pg_exec $lda $sql($i) ]
- if {[pg_result $result -status] != "PGRES_COMMAND_OK"} {
+-if {[pg_result $result -status] != "PGRES_COMMAND_OK"} {
++if {[pg_result $result -status] ni {"PGRES_TUPLES_OK" "PGRES_COMMAND_OK"}} {
  error "[pg_result $result -error]"
+ 	} else {
+ pg_result $result -clear
 @@ -1389,9 +1393,19 @@
  set sql(8) "CREATE TABLE ORDERS (O_ID NUMERIC, O_W_ID NUMERIC, O_D_ID NUMERIC, O_C_ID NUMERIC, O_CARRIER_ID NUMERIC, O_OL_CNT NUMERIC, O_ALL_LOCAL NUMERIC, O_ENTRY_D TIMESTAMP) WITH (FILLFACTOR=50)"
  set sql(9) "CREATE TABLE ORDER_LINE (OL_W_ID NUMERIC, OL_D_ID NUMERIC, OL_O_ID NUMERIC, OL_NUMBER NUMERIC, OL_I_ID NUMERIC, OL_DELIVERY_D TIMESTAMP, OL_AMOUNT NUMERIC, OL_SUPPLY_W_ID NUMERIC, OL_QUANTITY NUMERIC, OL_DIST_INFO CHAR(24)) WITH (FILLFACTOR=50)"
@@ -41,7 +47,7 @@ diff -wruN HammerDB-upstream/HammerDB-3.3/src/postgresql/pgoltp.tcl HammerDB-3.3
  set result [ pg_exec $lda $sql($i) ]
 -if {[pg_result $result -status] != "PGRES_COMMAND_OK"} {
 +set result_status [pg_result $result -status]
-+if {$result_status != "PGRES_COMMAND_OK" && $result_status != "PGRES_TUPLES_OK" } {
++if {[pg_result $result -status] ni {"PGRES_TUPLES_OK" "PGRES_COMMAND_OK"}} {
  error "[pg_result $result -error]"
  	} else {
  pg_result $result -clear
