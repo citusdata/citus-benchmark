@@ -1,6 +1,6 @@
 diff -wruN HammerDB-upstream/HammerDB-3.3/src/postgresql/pgoltp.tcl HammerDB-3.3/src/postgresql/pgoltp.tcl
 --- HammerDB-upstream/HammerDB-3.3/src/postgresql/pgoltp.tcl	2019-10-16 11:40:55.000000000 +0000
-+++ HammerDB-3.3/src/postgresql/pgoltp.tcl	2020-12-10 14:26:52.490000000 +0000
++++ HammerDB-3.3/src/postgresql/pgoltp.tcl	2020-12-10 15:21:12.630000000 +0000
 @@ -451,7 +451,9 @@
  WHEN serialization_failure OR deadlock_detected OR no_data_found
  THEN ROLLBACK;
@@ -23,7 +23,7 @@ diff -wruN HammerDB-upstream/HammerDB-3.3/src/postgresql/pgoltp.tcl HammerDB-3.3
  set result [ pg_exec $lda $sql($i) ]
  if {[pg_result $result -status] != "PGRES_COMMAND_OK"} {
  error "[pg_result $result -error]"
-@@ -1389,7 +1393,16 @@
+@@ -1389,9 +1393,19 @@
  set sql(8) "CREATE TABLE ORDERS (O_ID NUMERIC, O_W_ID NUMERIC, O_D_ID NUMERIC, O_C_ID NUMERIC, O_CARRIER_ID NUMERIC, O_OL_CNT NUMERIC, O_ALL_LOCAL NUMERIC, O_ENTRY_D TIMESTAMP) WITH (FILLFACTOR=50)"
  set sql(9) "CREATE TABLE ORDER_LINE (OL_W_ID NUMERIC, OL_D_ID NUMERIC, OL_O_ID NUMERIC, OL_NUMBER NUMERIC, OL_I_ID NUMERIC, OL_DELIVERY_D TIMESTAMP, OL_AMOUNT NUMERIC, OL_SUPPLY_W_ID NUMERIC, OL_QUANTITY NUMERIC, OL_DIST_INFO CHAR(24)) WITH (FILLFACTOR=50)"
  	}
@@ -39,9 +39,13 @@ diff -wruN HammerDB-upstream/HammerDB-3.3/src/postgresql/pgoltp.tcl HammerDB-3.3
 +set sql(18) "SELECT create_reference_table('item')"
 +for { set i 1 } { $i <= 18 } { incr i } {
  set result [ pg_exec $lda $sql($i) ]
- if {[pg_result $result -status] != "PGRES_COMMAND_OK"} {
+-if {[pg_result $result -status] != "PGRES_COMMAND_OK"} {
++set result_status [pg_result $result -status]
++if {$result_status != "PGRES_COMMAND_OK" && $result_status != "PGRES_TUPLES_OK" } {
  error "[pg_result $result -error]"
-@@ -1816,7 +1829,7 @@
+ 	} else {
+ pg_result $result -clear
+@@ -1816,7 +1830,7 @@
  if { $lda eq "Failed" } {
  error "error, the database connection to $host could not be established"
   } else {
