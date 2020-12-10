@@ -1,12 +1,12 @@
 diff -wruN HammerDB-upstream/HammerDB-3.3/src/postgresql/pgoltp.tcl HammerDB-3.3/src/postgresql/pgoltp.tcl
 --- HammerDB-upstream/HammerDB-3.3/src/postgresql/pgoltp.tcl	2019-10-16 11:40:55.000000000 +0000
-+++ HammerDB-3.3/src/postgresql/pgoltp.tcl	2020-12-10 04:22:02.200000000 +0000
++++ HammerDB-3.3/src/postgresql/pgoltp.tcl	2020-12-10 14:26:52.490000000 +0000
 @@ -451,7 +451,9 @@
  WHEN serialization_failure OR deadlock_detected OR no_data_found
  THEN ROLLBACK;
  END; }
 -for { set i 1 } { $i <= 6 } { incr i } {
-+set sql(7) "SELECT create_distributed_function('dmbs_random(int,int)')"
++set sql(7) "SELECT create_distributed_function('dbms_random(int,int)')"
 +set sql(8) "SELECT create_distributed_function(oid, '$1', colocate_with:='warehouse') FROM pg_catalog.pg_proc WHERE proname IN ('neword', 'delivery', 'payment', 'ostat', 'slev')"
 +for { set i 1 } { $i <= 8 } { incr i } {
  set result [ pg_exec $lda $sql($i) ]
@@ -17,7 +17,7 @@ diff -wruN HammerDB-upstream/HammerDB-3.3/src/postgresql/pgoltp.tcl HammerDB-3.3
  	}
      }
 -for { set i 1 } { $i <= 6 } { incr i } {
-+set sql(7) "SELECT create_distributed_function('dmbs_random(int,int)')"
++set sql(7) "SELECT create_distributed_function('dbms_random(int,int)')"
 +set sql(8) "SELECT create_distributed_function(oid, '$1', colocate_with:='warehouse') FROM pg_catalog.pg_proc WHERE proname IN ('neword', 'delivery', 'payment', 'ostat', 'slev')"
 +for { set i 1 } { $i <= 8 } { incr i } {
  set result [ pg_exec $lda $sql($i) ]

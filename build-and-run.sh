@@ -21,14 +21,6 @@ export PGUSER=${PGUSER:-postgres}
 export PGDATABASE=${PGDATABASE:-$PGUSER}
 export PGPASSWORD=${PGPASSWORD}
 
-sed -i -e "s/diset connection pg_host .*/diset connection pg_host $PGHOST/" build.tcl run.tcl
-sed -i -e "s/diset tpcc pg_dbase .*/diset tpcc pg_dbase $PGDATABASE/" build.tcl run.tcl
-sed -i -e "s/diset tpcc pg_defaultdbase .*/diset tpcc pg_defaultdbase $PGDATABASE/" build.tcl run.tcl
-sed -i -e "s/diset tpcc pg_user .*/diset tpcc pg_user $PGUSER/" build.tcl run.tcl
-sed -i -e "s/diset tpcc pg_superuser .*/diset tpcc pg_superuser $PGUSER/" build.tcl run.tcl
-sed -i -e "s/diset tpcc pg_pass .*/diset tpcc pg_pass $PGPASSWORD/" build.tcl run.tcl
-sed -i -e "s/diset tpcc pg_superuserpass .*/diset tpcc pg_superuserpass $PGPASSWORD/" build.tcl run.tcl
-
 mkdir -p results/
 
 # drop tables if they exist since we might be running hammerdb multiple times with different configs
