@@ -1,13 +1,11 @@
 #!/usr/bin/python3
 
 import sys
-import os
 import random
 import atexit
 import signal
 import subprocess
 
-from os.path import expanduser
 from threading import Thread
 from time import sleep
 import time
@@ -385,15 +383,6 @@ file_suffix="0"
 
 RANDOM_SEED = 123
 
-
-def save_pid_to_file():
-    my_pid = str(os.getpid())
-    print(my_pid)
-    home = expanduser("~")
-
-    with open(os.path.join(home, "ch.pid"), 'w') as f_pid:
-        f_pid.write(my_pid)
-
 def start_ch_thread(start_index):
     global sent_query_amount
     global ch_queries
@@ -420,17 +409,15 @@ def send_query(query,cur_index):
     return_code = subprocess.call(pg)
     end_time = int(round(time.time() * 1000))
 
-    f = open("results/ch_queries_{}.txt".format(file_suffix), "a")
-    f.write("{} finished in {} milliseconds\n".format(cur_index+1, end_time - start_time))
-    f.close()
+    with open("results/ch_queries_{}.txt".format(file_suffix), "a") as f:
+        f.write("{} finished in {} milliseconds\n".format(cur_index+1, end_time - start_time))
 
     return return_code
 
 def give_stats(sent_query_amount, time_lapsed_in_secs):
-    f = open("results/ch_results_{}.txt".format(file_suffix), "w")
-    f.write("queries {} in {} seconds\n".format(sent_query_amount, time_lapsed_in_secs))
-    f.write("QPH {}\n".format(3600.0 * sent_query_amount / time_lapsed_in_secs))
-    f.close()
+    with open("results/ch_results_{}.txt".format(file_suffix), "w") as f:
+        f.write("queries {} in {} seconds\n".format(sent_query_amount, time_lapsed_in_secs))
+        f.write("QPH {}\n".format(3600.0 * sent_query_amount / time_lapsed_in_secs))
 
 def get_curtime_in_seconds():
     return int(round(time.time()))
@@ -471,7 +458,6 @@ if __name__ == "__main__":
     start_indexes = list(range(0, len(ch_queries)))
     random.shuffle(start_indexes)
 
-    save_pid_to_file()
     jobs = [
         Thread(target = start_ch_thread, args=(start_indexes[i % len(start_indexes)], ))
         for i in range(0, thread_count)]
