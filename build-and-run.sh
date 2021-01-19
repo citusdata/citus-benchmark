@@ -17,6 +17,7 @@ is_tpcc=$2
 is_ch=$3
 
 export PGHOST=${PGHOST:-localhost}
+export PGPORT=${PGPORT:-5432}
 export PGUSER=${PGUSER:-postgres}
 export PGDATABASE=${PGDATABASE:-$PGUSER}
 export PGPASSWORD=${PGPASSWORD}
