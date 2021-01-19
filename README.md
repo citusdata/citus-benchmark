@@ -19,10 +19,15 @@ cd ch-benchmark
 
 # Running HammerDB TPROC-C with CH-benCHmark support
 
+Generate a patched HammerDB version with:
+```bash
+./generate-hammerdb.sh 4.0
+```
+
 `build-and-run.sh` is the driver script and can be run using:
 
 ```bash
-./build-and-run.sh <prefix> <is_tpcc> <is_ch>
+./build-and-run.sh <version> <prefix> <is_tpcc> <is_ch>
 ```
 
 * prefix indicates the prefix used in result files

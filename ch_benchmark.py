@@ -1,16 +1,14 @@
 #!/usr/bin/python3
 
 import sys
-import os
 import random
 import atexit
 import signal
 import subprocess
 
-from os.path import expanduser
 from threading import Thread
 from time import sleep
-import time 
+import time
 
 ch_queries = [
     """
@@ -233,7 +231,7 @@ order by custdist desc, c_count desc LIMIT 10;
 -- Q14
 select    100.00 * sum(case when i_data like 'PR%' then ol_amount else 0 end) / (1+sum(ol_amount)) as promo_revenue
 from order_line, item
-where ol_i_id = i_id 
+where ol_i_id = i_id
     LIMIT 10;
 """,
 """
@@ -385,16 +383,6 @@ file_suffix="0"
 
 RANDOM_SEED = 123
 
-
-def save_pid_to_file():
-    my_pid = str(os.getpid())
-    print(my_pid)
-    home = expanduser("~")
-
-    f_pid = open(os.path.join(home, "ch.pid"), 'w')
-    f_pid.write(my_pid)
-    f_pid.close()
-
 def start_ch_thread(start_index):
     global sent_query_amount
     global ch_queries
@@ -404,12 +392,12 @@ def start_ch_thread(start_index):
 
     cur_index = start_index
     while not is_terminated:
-        return_code = send_query(ch_queries[cur_index],cur_index)
+        return_code = send_query(ch_queries[cur_index], cur_index)
         # if there was an error, we will retry the same query
         if return_code != 0:
              continue
         sent_query_amount += 1
-        
+
         cur_index += 1
         cur_index %= size
 
@@ -421,17 +409,15 @@ def send_query(query,cur_index):
     return_code = subprocess.call(pg)
     end_time = int(round(time.time() * 1000))
 
-    f = open("results/ch_queries_{}.txt".format(file_suffix), "a")
-    f.write("{} finished in {} milliseconds\n".format(cur_index+1, end_time - start_time))
-    f.close()
+    with open("results/ch_queries_{}.txt".format(file_suffix), "a") as f:
+        f.write("{} finished in {} milliseconds\n".format(cur_index+1, end_time - start_time))
 
     return return_code
 
 def give_stats(sent_query_amount, time_lapsed_in_secs):
-    f = open("results/ch_results_{}.txt".format(file_suffix), "w")
-    f.write("queries {} in {} seconds\n".format(sent_query_amount, time_lapsed_in_secs))
-    f.write("QPH {}\n".format(3600.0 * sent_query_amount / time_lapsed_in_secs))
-    f.close()
+    with open("results/ch_results_{}.txt".format(file_suffix), "w") as f:
+        f.write("queries {} in {} seconds\n".format(sent_query_amount, time_lapsed_in_secs))
+        f.write("QPH {}\n".format(3600.0 * sent_query_amount / time_lapsed_in_secs))
 
 def get_curtime_in_seconds():
     return int(round(time.time()))
@@ -441,7 +427,7 @@ def terminate():
     global is_terminated
     global sent_query_amount
     global start_time_in_secs
-    
+
     end_time_in_secs = get_curtime_in_seconds()
 
     give_stats(sent_query_amount, end_time_in_secs - start_time_in_secs)
@@ -449,16 +435,16 @@ def terminate():
     is_terminated = True
 
 class GracefulKiller:
-  kill_now = False
-  def __init__(self):
-    signal.signal(signal.SIGINT, self.exit_gracefully)
-    signal.signal(signal.SIGTERM, self.exit_gracefully)
+    kill_now = False
+    def __init__(self):
+        signal.signal(signal.SIGINT, self.exit_gracefully)
+        signal.signal(signal.SIGTERM, self.exit_gracefully)
 
-  def exit_gracefully(self,signum, frame):
-    global is_terminated
-    self.kill_now = True
-    print("got a kill signal")
-    terminate()
+    def exit_gracefully(self,signum, frame):
+        global is_terminated
+        self.kill_now = True
+        print("got a kill signal")
+        terminate()
 
 if __name__ == "__main__":
 
@@ -466,25 +452,22 @@ if __name__ == "__main__":
     coord_ip = sys.argv[2]
     initial_sleep_in_mins=int(sys.argv[3])
     file_suffix=sys.argv[4]
-    
+
     random.seed(RANDOM_SEED)
 
-    all_start_indexes = [i for i in range(0, len(ch_queries))]
-    random.shuffle(all_start_indexes) 
-    start_indexes = all_start_indexes[:thread_count]
-    
-    save_pid_to_file()
-    jobs = []
-    for i in range(0, thread_count):
-        thread = Thread(target = start_ch_thread, args=(start_indexes[i], ))
-        jobs.append(thread)
+    start_indexes = list(range(0, len(ch_queries)))
+    random.shuffle(start_indexes)
+
+    jobs = [
+        Thread(target = start_ch_thread, args=(start_indexes[i % len(start_indexes)], ))
+        for i in range(0, thread_count)]
 
     sleep(initial_sleep_in_mins * 60)
 
     start_time_in_secs = get_curtime_in_seconds()
     for j in jobs:
         j.start()
-        
+
     killer = GracefulKiller()
     while not killer.kill_now:
         time.sleep(10)

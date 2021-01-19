@@ -1,0 +1,62 @@
+diff -wruN HammerDB-upstream/HammerDB-3.3/src/postgresql/pgoltp.tcl HammerDB-3.3/src/postgresql/pgoltp.tcl
+--- HammerDB-upstream/HammerDB-3.3/src/postgresql/pgoltp.tcl	2019-10-16 11:40:55.000000000 +0000
++++ HammerDB-3.3/src/postgresql/pgoltp.tcl	2020-12-11 22:52:16.970000000 +0000
+@@ -451,9 +451,11 @@
+ WHEN serialization_failure OR deadlock_detected OR no_data_found
+ THEN ROLLBACK;
+ END; }
+-for { set i 1 } { $i <= 6 } { incr i } {
++set sql(7) { SELECT create_distributed_function('dbms_random(int,int)') }
++set sql(8) { SELECT create_distributed_function(oid, '$1', colocate_with:='warehouse') FROM pg_catalog.pg_proc WHERE proname IN ('neword', 'delivery', 'payment', 'ostat', 'slev') }
++for { set i 1 } { $i <= 8 } { incr i } {
+ set result [ pg_exec $lda $sql($i) ]
+-if {[pg_result $result -status] != "PGRES_COMMAND_OK"} {
++if {[pg_result $result -status] ni {"PGRES_TUPLES_OK" "PGRES_COMMAND_OK"}} {
+ error "[pg_result $result -error]"
+ 	} else {
+ pg_result $result -clear
+@@ -1306,9 +1308,11 @@
+ ' LANGUAGE 'plpgsql';
+ 	}
+     }
+-for { set i 1 } { $i <= 6 } { incr i } {
++set sql(7) { SELECT create_distributed_function('dbms_random(int,int)') }
++set sql(8) { SELECT create_distributed_function(oid, '$1', colocate_with:='warehouse') FROM pg_catalog.pg_proc WHERE proname IN ('neword', 'delivery', 'payment', 'ostat', 'slev') }
++for { set i 1 } { $i <= 8 } { incr i } {
+ set result [ pg_exec $lda $sql($i) ]
+-if {[pg_result $result -status] != "PGRES_COMMAND_OK"} {
++if {[pg_result $result -status] ni {"PGRES_TUPLES_OK" "PGRES_COMMAND_OK"}} {
+ error "[pg_result $result -error]"
+ 	} else {
+ pg_result $result -clear
+@@ -1389,9 +1393,19 @@
+ set sql(8) "CREATE TABLE ORDERS (O_ID NUMERIC, O_W_ID NUMERIC, O_D_ID NUMERIC, O_C_ID NUMERIC, O_CARRIER_ID NUMERIC, O_OL_CNT NUMERIC, O_ALL_LOCAL NUMERIC, O_ENTRY_D TIMESTAMP) WITH (FILLFACTOR=50)"
+ set sql(9) "CREATE TABLE ORDER_LINE (OL_W_ID NUMERIC, OL_D_ID NUMERIC, OL_O_ID NUMERIC, OL_NUMBER NUMERIC, OL_I_ID NUMERIC, OL_DELIVERY_D TIMESTAMP, OL_AMOUNT NUMERIC, OL_SUPPLY_W_ID NUMERIC, OL_QUANTITY NUMERIC, OL_DIST_INFO CHAR(24)) WITH (FILLFACTOR=50)"
+ 	}
+-for { set i 1 } { $i <= 9 } { incr i } {
++set sql(10) "SELECT create_distributed_table('customer', 'c_w_id')"
++set sql(11) "SELECT create_distributed_table('district', 'd_w_id')"
++set sql(12) "SELECT create_distributed_table('history', 'h_w_id')"
++set sql(13) "SELECT create_distributed_table('warehouse', 'w_id')"
++set sql(14) "SELECT create_distributed_table('stock', 's_w_id')"
++set sql(15) "SELECT create_distributed_table('new_order', 'no_w_id')"
++set sql(16) "SELECT create_distributed_table('orders', 'o_w_id')"
++set sql(17) "SELECT create_distributed_table('order_line', 'ol_w_id')"
++set sql(18) "SELECT create_reference_table('item')"
++for { set i 1 } { $i <= 18 } { incr i } {
+ set result [ pg_exec $lda $sql($i) ]
+-if {[pg_result $result -status] != "PGRES_COMMAND_OK"} {
++set result_status [pg_result $result -status]
++if {[pg_result $result -status] ni {"PGRES_TUPLES_OK" "PGRES_COMMAND_OK"}} {
+ error "[pg_result $result -error]"
+ 	} else {
+ pg_result $result -clear
+@@ -1816,7 +1830,7 @@
+ if { $lda eq "Failed" } {
+ error "error, the database connection to $host could not be established"
+  } else {
+-CreateUserDatabase $lda $db $superuser $user $password
++#CreateUserDatabase $lda $db $superuser $user $password
+ set result [ pg_exec $lda "commit" ]
+ pg_result $result -clear
+ pg_disconnect $lda
