@@ -1,0 +1,11 @@
+transaction type: pg-1pc.sql
+scaling factor: 1
+query mode: simple
+number of clients: 256
+number of threads: 32
+duration: 900 s
+number of transactions actually processed: 913273
+latency average = 251.905 ms
+latency stddev = 178.423 ms
+tps = 1014.428684 (including connections establishing)
+tps = 1014.446730 (excluding connections establishing)

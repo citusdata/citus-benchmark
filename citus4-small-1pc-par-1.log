@@ -1,0 +1,11 @@
+transaction type: citus4-small-1pc.sql
+scaling factor: 1
+query mode: simple
+number of clients: 256
+number of threads: 32
+duration: 300 s
+number of transactions actually processed: 3629566
+latency average = 19.359 ms
+latency stddev = 6.287 ms
+tps = 12083.649979 (including connections establishing)
+tps = 12084.515277 (excluding connections establishing)
