@@ -1,12 +1,12 @@
 # HammerDB TPROC-C and CH benchmarking tool for Citus and PostgreSQL
 
-This repository contains utility scripts/files that are used to run the [CH-benCHmark](https://db.in.tum.de/research/projects/CHbenCHmark/) on Citus and regular PostgreSQL.
-
-HammerDB is a standard open source benchmarking tool available from https://github.com/TPC-Council/HammerDB . We use HammerDB for running the C part of the CH benchmark, but you can also use this tool to run the TPROC-C workload by itself.
+This repository contains utility scripts/files to run [HammerDB](https://github.com/TPC-Council/HammerDB) and the [CH-benCHmark](https://db.in.tum.de/research/projects/CHbenCHmark/) on Citus and regular PostgreSQL.
 
 # Preparation
 
-If you are using CentOS 8 on the driver node, you can use the following steps to prepare:
+To run the benchmarks, you need to have psql installed.
+
+If you are using CentOS 8 on the driver node, you can use the following steps:
 
 ```bash
 sudo yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm epel-release
@@ -39,7 +39,7 @@ Generate a patched HammerDB version with:
 `build-and-run.sh` is the driver script and can be run using:
 
 ```bash
-./build-and-run.sh <version> <prefix> <is_tpcc> <is_ch>
+./build-and-run.sh <version 3.3 or 4.0> <prefix> <is_tpcc> <is_ch>
 ```
 
 * prefix indicates the prefix used in result files
