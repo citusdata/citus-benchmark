@@ -17,6 +17,16 @@ git clone https://github.com/citusdata/ch-benchmark.git
 cd ch-benchmark
 ```
 
+If you are using Ubuntu / Debian on the driver node:
+
+```bash
+sudo apt -y install vim bash-completion wget
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" |sudo tee  /etc/apt/sources.list.d/pgdg.list
+sudo apt update -y
+sudo apt install -y postgresql-client-13
+```
+
 # Running HammerDB TPROC-C with CH-benCHmark support
 
 Generate a patched HammerDB version with:
