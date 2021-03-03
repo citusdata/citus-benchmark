@@ -48,17 +48,6 @@ Generate a patched HammerDB version with:
 
 The script relies on libpq environment variables for connecting to the database.
 
-Make sure Citus is configured with the following `citus.replication_model` setting before running the benchmark:
-```sql
-postgres=# show citus.replication_model ;
-┌─────────────────────────┐
-│ citus.replication_model │
-├─────────────────────────┤
-│ streaming               │
-└─────────────────────────┘
-(1 row)
-```
-
 Example usage:
 ```bash
 export PGHOST=203.0.113.4
