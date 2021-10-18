@@ -18,6 +18,7 @@ diset tpcc pg_pass $env(PGPASSWORD)
 diset tpcc pg_superuserpass $env(PGPASSWORD)
 diset tpcc pg_storedprocs true
 diset tpcc pg_count_ware 1000
+diset tpcc pg_allwarehouse false
 diset tpcc pg_driver timed
 diset tpcc pg_rampup 3
 diset tpcc pg_duration 60
