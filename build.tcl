@@ -19,6 +19,7 @@ diset tpcc pg_superuserpass $env(PGPASSWORD)
 diset tpcc pg_storedprocs true
 diset tpcc pg_num_vu 100
 diset tpcc pg_count_ware 1000
+diset tpcc pg_partition false
 loadscript
 print dict
 buildschema

@@ -1,7 +1,12 @@
 #!/bin/bash
 set -e
 
-if [ "$1" == 4.0 ]
+if [ "$1" == 4.3 ]
+then
+    SHA1=5bb232c45c2d3a063df09bb3dedd44d3fe5a3edf
+    OUTPUT=HammerDB-4.3-Linux.tar.gz
+    URL=https://github.com/TPC-Council/HammerDB/releases/download/v4.3/$OUTPUT
+elif [ "$1" == 4.0 ]
 then
     SHA1=a6a35c234d324077c7819ca4ae4aa8eabaff4c15
     OUTPUT=HammerDB-4.0-Linux.tar.gz
@@ -12,7 +17,7 @@ then
     OUTPUT=HammerDB-3.3-Linux.tar.gz
     URL=https://github.com/TPC-Council/HammerDB/releases/download/v3.3/$OUTPUT
 else
-    echo 'Expects version parameter. Supported versions: 3.3 4.0' 1>&2
+    echo 'Expects version parameter. Supported versions: 3.3 4.0 4.3' 1>&2
     exit 1
 fi
 
