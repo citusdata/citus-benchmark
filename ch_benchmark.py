@@ -395,7 +395,7 @@ def start_ch_thread(start_index):
         return_code = send_query(ch_queries[cur_index], cur_index)
         # if there was an error, we will retry the same query
         if return_code != 0:
-             continue
+            continue
         sent_query_amount += 1
 
         cur_index += 1
