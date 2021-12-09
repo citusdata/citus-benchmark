@@ -18,12 +18,14 @@ fi
 
 if test -f "$OUTPUT"
 then
+    CHECK_OUTPUT=${OUTPUT}
     echo "$OUTPUT exists, skipping download" 1>&2
 else
-    curl -LJO "$URL" 1>&2
+    CHECK_OUTPUT=${OUTPUT}.tmp
+    curl --location --output "$CHECK_OUTPUT" "$URL" 1>&2
 fi
 
-GZSHA1_ARRAY=($(sha1sum "$OUTPUT"))
+GZSHA1_ARRAY=($(sha1sum "$CHECK_OUTPUT"))
 GZSHA1=${GZSHA1_ARRAY[0]}
 
 if [ "$GZSHA1" != "$SHA1" ]
@@ -31,6 +33,11 @@ then
     echo "Unexpected checksum $GZSHA1" 1>&2
     echo "Expected $SHA1" 1>&2
     exit 1
+fi
+
+if ! test -f "$OUTPUT"
+then
+    mv "$CHECK_OUTPUT" "$OUTPUT"
 fi
 
 echo -n "$OUTPUT"
