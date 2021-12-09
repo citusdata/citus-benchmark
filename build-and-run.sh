@@ -10,7 +10,7 @@ set -x
 if [ $# -eq 4 ] ; then
     version=$1
     shift
-else version="4.0"
+else version="4.3"
 fi
 file_name=$1
 is_tpcc=${2:-true}
