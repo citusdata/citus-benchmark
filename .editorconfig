@@ -1,8 +1,17 @@
 root = true
 
-[*.py]
+[*]
 end_of_line = lf
 insert_final_newline = true
 charset = utf-8
 indent_style = space
 indent_size = 4
+trim_trailing_whitespace = true
+
+[/HammerDB-*/**]
+end_of_line = unset
+insert_final_newline = unset
+charset = unset
+indent_style = unset
+indent_size = unset
+trim_trailing_whitespace = unset

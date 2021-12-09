@@ -10190,4 +10190,3 @@ ALTER TABLE ONLY public.supplier
 --
 -- PostgreSQL database dump complete
 --
-
