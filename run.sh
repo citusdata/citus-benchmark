@@ -11,6 +11,8 @@ set -u
 set -e
 # echo commands
 set -x
+# fail if a command that is piped fails
+set -o pipefail
 
 CH_THREAD_COUNT=1
 RAMPUP_TIME=3
