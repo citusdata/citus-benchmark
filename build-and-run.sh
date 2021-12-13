@@ -13,7 +13,7 @@ if [ $# -eq 4 ] ; then
 else version="4.3"
 fi
 file_name=$1
-is_tpcc=${2:-true}
+# is_tpcc=${2:-true} # unused in this script, but its passed onto run.sh
 is_ch=${3:-false}
 
 export PGHOST=${PGHOST:-localhost}
@@ -27,7 +27,7 @@ mkdir -p results/
 # drop tables if they exist since we might be running hammerdb multiple times with different configs
 psql -v "ON_ERROR_STOP=1" -f sql/drop-tables.sql
 
-if [ $is_ch = true ] ; then
+if [ "$is_ch" = true ] ; then
   # create ch-benchmark tables in cluster
   psql -v "ON_ERROR_STOP=1" -f sql/ch-benchmark-tables.sql
 
@@ -44,4 +44,4 @@ psql -c "ALTER ROLE current_user SET citus.enable_repartition_joins to on" 2>/de
 test -d "HammerDB-$version" || ./generate-hammerdb.sh "$version"
 (cd HammerDB-$version && time ./hammerdbcli auto ../build.tcl | tee "../results/hammerdb_build_${file_name}.log")
 
-exec ./run.sh "$version" "$@"
+exec ./run.sh "$@"
