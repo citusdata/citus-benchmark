@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Usage:
+# ./run.sh [HammerDB version] {file_name} {is_tpcc} {is_tpch}
+# Example:
+# ./run.sh 4.3 myfirstbenchmark true false
+
 # fail if trying to reference a variable that is not set.
 set -u
 # exit immediately if a command fails
