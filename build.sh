@@ -11,6 +11,8 @@ set -u
 set -e
 # echo commands
 set -x
+# fail if a command that is piped fails
+set -o pipefail
 
 if [ $# -eq 4 ] ; then
     version=$1
