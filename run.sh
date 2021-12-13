@@ -10,10 +10,20 @@ set -x
 CH_THREAD_COUNT=1
 RAMPUP_TIME=3
 
-version=$1
-file_name=$2
-is_tpcc=$3
-is_ch=$4
+if [ $# -eq 4 ] ; then
+    version=$1
+    shift
+else version="4.3"
+fi
+file_name=$1
+is_tpcc=$2
+is_ch=$3
+
+export PGHOST=${PGHOST:-localhost}
+export PGPORT=${PGPORT:-5432}
+export PGUSER=${PGUSER:-postgres}
+export PGDATABASE=${PGDATABASE:-$PGUSER}
+export PGPASSWORD=${PGPASSWORD}
 
 psql -f sql/vacuum-ch.sql
 psql -f sql/vacuum-tpcc.sql
