@@ -20,6 +20,7 @@ diset tpcc pg_storedprocs true
 diset tpcc pg_num_vu 100
 diset tpcc pg_count_ware 1000
 diset tpcc pg_partition false
+diset tpcc pg_cituscompat true
 loadscript
 print dict
 buildschema
