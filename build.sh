@@ -43,7 +43,6 @@ if [ "$is_ch" = true ] ; then
 fi
 
 # set Citus configurations
-psql -c "ALTER ROLE current_user SET citus.replication_model TO 'streaming'" 2>/dev/null || true
 psql -c "ALTER ROLE current_user SET citus.shard_count TO 40" 2>/dev/null || true
 psql -c "ALTER ROLE current_user SET citus.enable_repartition_joins to on" 2>/dev/null || true
 
