@@ -1,9 +1,7 @@
 #!/bin/bash
 
 # Usage:
-# ./run.sh [HammerDB version] {file_name} {is_tpcc} {is_tpch}
-# Example:
-# ./run.sh 4.3 myfirstbenchmark true false
+# ./run.sh [--hammerdb-version[=]<version>] [--ch|--ch-queries-only] [--no-citus] [--name[=]name]
 
 # fail if trying to reference a variable that is not set.
 set -u
@@ -14,43 +12,33 @@ set -x
 # fail if a command that is piped fails
 set -o pipefail
 
-CH_THREAD_COUNT=1
-RAMPUP_TIME=3
+CH_THREAD_COUNT=${CH_THREAD_COUNT:-1}
+RAMPUP_TIME=${RAMPUP_TIME:-3}
+DEFAULT_CH_RUNTIME_IN_SECS=${DEFAULT_CH_RUNTIME_IN_SECS:-7200}
 
-if [ $# -eq 4 ] ; then
-    version=$1
-    shift
-else version="4.3"
-fi
-file_name=$1
-is_tpcc=$2
-is_ch=$3
-
-export PGHOST=${PGHOST:-localhost}
-export PGPORT=${PGPORT:-5432}
-export PGUSER=${PGUSER:-postgres}
-export PGDATABASE=${PGDATABASE:-$PGUSER}
-export PGPASSWORD=${PGPASSWORD}
+source parse-arguments.sh
+mkdir -p results/
 
 psql -f sql/vacuum-ch.sql
 psql -f sql/vacuum-tpcc.sql
 
-if [ "$is_ch" = true ] ; then
-    ./ch_benchmark.py ${CH_THREAD_COUNT} "${PGHOST}" ${RAMPUP_TIME} "${file_name}" >> results/"ch_benchmarks_${file_name}.log" &
+if [ "$IS_CH" = true ] ; then
+    ./ch_benchmark.py "${CH_THREAD_COUNT}" "${PGHOST}" "${RAMPUP_TIME}" "${BENCHNAME}" >> results/"ch_benchmarks_${BENCHNAME}.log" &
     ch_pid=$!
     echo ${ch_pid}
 fi
 
-if [ "$is_tpcc" = true ] ; then
+if [ "$IS_TPCC" = true ] ; then
     # run hammerdb tpcc benchmark
-    (cd "HammerDB-$version" && time ./hammerdbcli auto ../run.tcl | tee "../results/hammerdb_run_${file_name}.log")
+    test -d "HammerDB-$HAMMERDB_VERSION" || ./generate-hammerdb.sh "$HAMMERDB_VERSION"
+    (cd "HammerDB-$HAMMERDB_VERSION" && time ./hammerdbcli auto ../run.tcl | tee "../results/hammerdb_run_${BENCHNAME}.log")
     # filter and save the NOPM (new orders per minute) to a new file
-    grep -oP '[0-9]+(?= NOPM)' "./results/hammerdb_run_${file_name}.log" >> "./results/hammerdb_nopm_${file_name}.log"
-elif [ "$is_ch" = true ] ; then
-    sleep "${DEFAULT_CH_RUNTIME_IN_SECS:-7200}"
+    grep -oP '[0-9]+(?= NOPM)' "./results/hammerdb_run_${BENCHNAME}.log" >> "./results/hammerdb_nopm_${BENCHNAME}.log"
+elif [ "$IS_CH" = true ] ; then
+    sleep "$DEFAULT_CH_RUNTIME_IN_SECS"
 fi
 
-if [ "$is_ch" = true ] ; then
+if [ "$IS_CH" = true ] ; then
     kill ${ch_pid}
     sleep 30
 fi
