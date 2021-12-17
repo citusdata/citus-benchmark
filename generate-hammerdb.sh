@@ -10,5 +10,4 @@ if [ "$1" = "4.3-custom" ]; then
 else
     OUTPUT=$(./download-hammerdb.sh "$1")
     tar -xf "$OUTPUT"
-    patch -p0 < "HammerDB-patch/$1.patch"
 fi
