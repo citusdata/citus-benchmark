@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Usage:
-# ./run.sh [--hammerdb-version[=]<version>] [--ch|--ch-queries-only] [--no-citus] [--name[=]name]
+# ./run.sh [--hammerdb-version[=]<version>] [--ch|--ch-queries-only] [--no-citus] [--name[=]name] [--shard-count[=]<shard_count>]
 
 # fail if trying to reference a variable that is not set.
 set -u
