@@ -1,6 +1,7 @@
 # HammerDB TPROC-C and CH benchmarking tool for Citus and PostgreSQL
 
-This repository contains utility scripts/files to run [HammerDB](https://github.com/TPC-Council/HammerDB) and the [CH-benCHmark](https://db.in.tum.de/research/projects/CHbenCHmark/) on Citus and regular PostgreSQL.
+This repository contains utility scripts/files to run [HammerDB][hammerdb] and
+the [CH-benCHmark][ch] on Citus and regular PostgreSQL.
 
 # Preparation
 
@@ -31,43 +32,62 @@ cd ch-benchmark
 
 # Running HammerDB TPROC-C with CH-benCHmark support
 
-Generate a patched HammerDB version with:
-```bash
-./generate-hammerdb.sh 4.0
-```
-
 `build-and-run.sh` is the driver script and can be run using:
 
 ```bash
-./build-and-run.sh <version 3.3 or 4.0> <prefix> <is_tpcc> <is_ch>
+./build-and-run.sh [--hammerdb-version[=]<version>] [--ch|--ch-queries-only] [--no-citus] [--name[=]name] [--shard-count[=]<shard_count>]
 ```
 
-* prefix indicates the prefix used in result files
-* if `is_tpcc` is `true`, then the transaction queries will be run.
-* if `is_ch` is `true`, then the analytical queries will be run.
+For details on the flags run:
+```
+./build-and-run.sh --help
+```
 
 The script relies on libpq environment variables for connecting to the database.
 
-Example usage:
+Example usage that runs only HammerDB TPROC-C without CH-benCHmark queries:
 ```bash
 export PGHOST=203.0.113.4
 export PGUSER=citus
 export PGDATABASE=citus
 export PGPASSWORD=
-./build-and-run.sh tpcc-run true false
+./build-and-run.sh
 ```
 
-So if you want to run both tpcc and analytical queries concurrently, you should set both of them to true.
+## Running CH-bencCHmark queries
+
+When running `build-and-run.sh` with the default flags, only HammerDB TPROC-C
+will be ran. If you want to run the CH-benCHmark analytical queries you can
+specify the `--ch` flag to run the benchmark with both TPROC-C and CH-benCHmark
+queries at the same time. Or if you only want to run the CH analytical queries
+without TPROC-C you can specify the `--ch-queries-only` flag.
+
+## Changing HammerDB configurations
 
 `build.tcl` is used to build hammerdb tables and `run.tcl` is used to run the test.
 You can change hammerdb configurations from those files.
 
 *pg_count_ware/pg_num_vu* should be at least 4. https://www.hammerdb.com/blog/uncategorized/how-many-warehouses-for-the-hammerdb-tpc-c-test/
 
-`ch_benchmark.py` is a utility script to send the extra 22 queries(analytical queries). By default one thread is used for sending the analytical queries. The start index for each thread is randomly chosen with a fixed seed so that it will be same across different platforms.
+## Running against standard Postgres (without Citus)
 
-Checklist for running benchmark:
+You can also use this repo to run these benchmarks against standard Postgres if
+you want. If you pass the `--no-citus` flag to `build-and-run.sh` it will not
+distribute any of the tables.
 
-* Make sure that node count is a divisor of shard count, otherwise some nodes will have more shards and the load will not be distribuded evenly.
-* Make sure that max_connections is high enough based on #vuuser. max_connections should be at least 150 more than #vuuser.
-* Make sure that you do a checkpoint before starting the test, the `build-and-run.sh` already does this. Otherwise the timing of checkpoint can affect the results for short tests.
+# Checklist for running the benchmark
+- [ ] Make sure that worker node count is a divisor of the value of
+  `--shard-count`, otherwise some nodes will have more shards and the load will
+  not be distributed evenly.
+- [ ] Make sure that `max_connections` is high enough based on `vuset vu` in
+  `run.tcl`. `max_connections` should be at least 150 more than the value given
+  to `vuset vu`.
+
+# Implementation details Details
+`ch_benchmark.py` is a utility script to send the extra 22 queries(analytical
+queries). By default one thread is used for sending the analytical queries. The
+start index for each thread is randomly chosen with a fixed seed so that it will
+be same across different platforms.
+
+[hammerdb]: https://github.com/TPC-Council/HammerDB
+[ch]: https://db.in.tum.de/research/projects/CHbenCHmark/
