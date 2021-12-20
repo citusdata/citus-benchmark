@@ -21,6 +21,7 @@ mkdir -p results/
 
 psql -f sql/vacuum-ch.sql
 psql -f sql/vacuum-tpcc.sql
+psql -f sql/do-checkpoint.sql
 
 if [ "$IS_CH" = true ] ; then
     ./ch_benchmark.py "${CH_THREAD_COUNT}" "${PGHOST}" "${RAMPUP_TIME}" "${BENCHNAME}" >> results/"ch_benchmarks_${BENCHNAME}.log" &
