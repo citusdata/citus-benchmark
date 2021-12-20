@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Usage:
-# ./build.sh [--hammerdb-version[=]<version>] [--ch|--ch-queries-only] [--no-citus] [--name[=]name]
+# ./build.sh [--hammerdb-version[=]<version>] [--ch|--ch-queries-only] [--no-citus] [--name[=]name] [--shard-count[=]<shard_count>]
 
 source parse-arguments.sh
 mkdir -p results/
@@ -10,7 +10,7 @@ mkdir -p results/
 psql -v "ON_ERROR_STOP=1" -f sql/drop-tables.sql
 
 # set Citus configurations
-psql -c "ALTER ROLE current_user SET citus.shard_count TO 40" 2>/dev/null || true
+psql -c "ALTER ROLE current_user SET citus.shard_count TO $SHARD_COUNT" 2>/dev/null || true
 psql -c "ALTER ROLE current_user SET citus.enable_repartition_joins to on" 2>/dev/null || true
 
 sed -i.sedbak -e "s/pg_cituscompat .*/pg_cituscompat $IS_CITUS/" build.tcl
