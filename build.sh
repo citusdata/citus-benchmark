@@ -17,7 +17,7 @@ sed -i.sedbak -e "s/pg_cituscompat .*/pg_cituscompat $IS_CITUS/" build.tcl
 rm build.tcl.sedbak
 
 # build hammerdb related tables
-test -d "HammerDB-$HAMMERDB_VERSION" || ./generate-hammerdb.sh "$HAMMERDB_VERSION"
+./download-hammerdb.sh "$HAMMERDB_VERSION"
 (cd "HammerDB-$HAMMERDB_VERSION" && time ./hammerdbcli auto ../build.tcl | tee "../results/hammerdb_build_${BENCHNAME}.log")
 
 # Needs to be done after building TPC tables, otherwise HammerDB complains that

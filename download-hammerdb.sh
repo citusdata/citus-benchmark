@@ -1,5 +1,22 @@
 #!/bin/bash
-set -e
+set -euo pipefail
+
+cd "$(dirname "$0")"
+
+
+# no-op if the directory already exists
+if test -d "HammerDB-$HAMMERDB_VERSION"; then
+    echo "HammerDB-$HAMMERDB_VERSION exists, skipping download" 1>&2
+    exit
+fi
+
+# no-op if the directory already exists
+if [ "$1" = "4.3-custom" ]; then
+    ./download-hammerdb.sh 4.3
+    git clone https://github.com/citusdata/HammerDB --branch custom-4.3 HammerDB-4.3-custom
+    cp -R HammerDB-4.3/{lib,include,bin} HammerDB-4.3-custom
+    exit
+fi
 
 if [ "$1" == 4.3 ]
 then
@@ -45,4 +62,4 @@ then
     mv "$CHECK_OUTPUT" "$OUTPUT"
 fi
 
-echo -n "$OUTPUT"
+tar -xf "$OUTPUT"
