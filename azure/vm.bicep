@@ -62,15 +62,7 @@ resource ip 'Microsoft.Network/publicIpAddresses@2019-02-01' = {
 
 output publicIp string = reference(resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', ipName)).ipAddress
 
-var bootTemplate = '''
-#!/bin/bash
-set -euxo pipefail
-sudo su {0} << '__admin_user_EOF__'
-set -euxo pipefail
-whoami
-cd /home/{0}
-
-cat > .tmux.conf << '__EOF__'
+var tmuxConf = '''
 set -g default-terminal "screen-256color"
 
 # https://stackoverflow.com/a/40902312/2570866
@@ -113,7 +105,19 @@ bind h select-layout even-vertical
 set-window-option -g xterm-keys on
 
 set -ga terminal-overrides ',*:sitm@,ritm@'
-__EOF__
+'''
+
+var bootTemplate = '''
+#!/bin/bash
+set -euxo pipefail
+sudo su {0} << '__admin_user_EOF__'
+set -euxo pipefail
+whoami
+cd /home/{0}
+
+cat > .tmux.conf << '__tmux_conf_EOF__'
+{1}
+__tmux_conf_EOF__
 
 sudo apt -y install wget
 wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
@@ -124,10 +128,10 @@ while ! sudo apt-get upgrade -y; do
 done
 sudo apt-get install -y git tmux vim bash-completion net-tools
 
-{1}
+{2}
 __admin_user_EOF__
 '''
-var driverBootScript = format(bootTemplate, adminUsername, bootScript)
+var driverBootScript = format(bootTemplate, adminUsername, tmuxConf, bootScript)
 
 resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
   name: vmName
