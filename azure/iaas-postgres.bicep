@@ -65,6 +65,9 @@ module vnet 'vnet.bicep' = {
 var pgBootTemplate = '''
 sudo su << '__root_user_EOF__'
 set -euxo pipefail
+apt-get install -y postgresql-{0}
+systemctl stop postgresql@{0}-main || true
+
 # disk formatting/mounting commands inspired by:
 # https://docs.microsoft.com/en-us/azure/virtual-machines/linux/attach-disk-portal
 # removed partitioning of disk and used the following trick to
@@ -73,9 +76,6 @@ set -euxo pipefail
 mkfs.xfs /dev/disk/azure/scsi1/lun0
 mkdir /datadrive
 mount /dev/disk/azure/scsi1/lun0 /datadrive
-
-apt-get install -y postgresql-{0}
-systemctl stop postgresql@{0}-main || true
 
 mv /var/lib/postgresql/14/main/ /datadrive/pgdata
 
