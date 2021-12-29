@@ -18,7 +18,16 @@ rm build.tcl.sedbak
 
 # build hammerdb related tables
 ./download-hammerdb.sh "$HAMMERDB_VERSION"
+start_time=$(date +%s)
 (cd "HammerDB-$HAMMERDB_VERSION" && time ./hammerdbcli auto ../build.tcl | tee "../results/hammerdb_build_${BENCHNAME}.log")
+end_time=$(date +%s)
+
+# Do three-decimal fixed arithmetic using only bash to calculate the number of
+# minutes the build took. (floating point arithmetic does not exist in bash)
+# Inspired by: https://stackoverflow.com/a/35402635/2570866
+thousands_of_minutes_spent=$(printf "%04d" $(( (end_time - start_time) * 1000 / 60)))
+minutes_spent="${thousands_of_minutes_spent:0:-3}.${thousands_of_minutes_spent: -3}"
+echo "$minutes_spent" | tee "results/hammerdb_minutesbuild_${BENCHNAME}.log"
 
 # Needs to be done after building TPC tables, otherwise HammerDB complains that
 # tables already exist in the database.
