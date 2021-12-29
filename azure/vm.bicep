@@ -70,12 +70,6 @@ set -euxo pipefail
 whoami
 cd /home/{0}
 
-sudo apt -y install wget
-wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" |sudo tee  /etc/apt/sources.list.d/pgdg.list
-sudo apt-get update -y
-sudo apt-get install -y git tmux vim bash-completion net-tools
-
 cat > .tmux.conf << '__EOF__'
 set -g default-terminal "screen-256color"
 
@@ -120,6 +114,15 @@ set-window-option -g xterm-keys on
 
 set -ga terminal-overrides ',*:sitm@,ritm@'
 __EOF__
+
+sudo apt -y install wget
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" |sudo tee  /etc/apt/sources.list.d/pgdg.list
+sudo apt-get update -y
+while ! sudo apt-get upgrade -y; do
+    sleep 5
+done
+sudo apt-get install -y git tmux vim bash-completion net-tools
 
 {1}
 __admin_user_EOF__
