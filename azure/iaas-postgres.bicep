@@ -22,6 +22,7 @@ param timeprofile bool = true
 param pgVersion string = '14'
 param pgSize string  = 'Standard_D8s_v3'
 param pgStorageSizeGB int = 512
+param pgConfigOptions string = ''
 
 
 // Configuration of the VM that runs the benchmark (the driver)
@@ -79,20 +80,22 @@ mount /dev/disk/azure/scsi1/lun0 /datadrive
 
 mv /var/lib/postgresql/14/main/ /datadrive/pgdata
 
-echo "data_directory = '/datadrive/pgdata'" >> /etc/postgresql/{0}/main/postgresql.conf
-echo "listen_addresses = '*'" >> /etc/postgresql/{0}/main/postgresql.conf
-echo "max_connections = 500" >> /etc/postgresql/{0}/main/postgresql.conf
-
+cat >> /etc/postgresql/{0}/main/postgresql.conf << '__postgres_conf_EOF__'
+{1}
+data_directory = '/datadrive/pgdata'
+listen_addresses = '*'
+max_connections = 500
+__postgres_conf_EOF__
 
 echo "host  all  all  0.0.0.0/0  scram-sha-256" >> /etc/postgresql/{0}/main/pg_hba.conf
 echo "host  all  all  ::/0       scram-sha-256" >> /etc/postgresql/{0}/main/pg_hba.conf
 
 systemctl start postgresql@{0}-main
-sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD '{1}'"
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD '{2}'"
 __root_user_EOF__
 '''
 
-var pgBootScript = format(pgBootTemplate, pgVersion, pgAdminPassword)
+var pgBootScript = format(pgBootTemplate, pgVersion, pgConfigOptions, pgAdminPassword)
 
 module pgVm 'vm.bicep' = {
   name: pgVmName
