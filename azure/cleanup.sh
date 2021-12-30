@@ -1,3 +1,6 @@
 #!/bin/bash
 set -euxo pipefail
-az group delete -y --name "$1"
+cd "$(dirname "$0")"
+
+RESOURCE_GROUP=$1
+az group delete -y --name "$RESOURCE_GROUP" --no-wait > /dev/null
