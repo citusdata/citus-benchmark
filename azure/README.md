@@ -3,6 +3,14 @@
 This directory contains useful helper scripts and ARM templates to run
 HammerDB and CH-benCHmark against Azure infrastructure.
 
+## Prerequisites
+
+Set a default Azure subscription and location:
+```
+az account set --subscription <subscription-id>
+az config set defaults.location=eastus # feel free to choose another one
+```
+
 ## Running benchmarks against Azure Database for PostgreSQL Hyperscale (Citus)
 
 To run a benchmark against Citus on the managed service, use the following
