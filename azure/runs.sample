@@ -1,0 +1,7 @@
+2,iaas-postgres,buildAndRunFlags=--name 'VM with regular Postgres' --no-citus,runVirtualUsers=400
+2,hyperscale,buildAndRunFlags=--name 'Hyperscale with regular Postgres' --no-citus,workers=0,runVirtualUsers=400
+2,hyperscale,buildAndRunFlags=--name 'Hyperscale with single node Citus',workers=0,runVirtualUsers=400
+2,hyperscale,buildAndRunFlags=--name 'Hyperscale with 2 workers',workers=2,runVirtualUsers=400
+2,hyperscale,buildAndRunFlags=--name 'Hyperscale with 4 workers',workers=4,runVirtualUsers=400
+2,hyperscale,buildAndRunFlags=--name 'Hyperscale with 6 workers',workers=6,runVirtualUsers=400
+2,hyperscale,buildAndRunFlags=--name 'Hyperscale with 8 workers',workers=8,runVirtualUsers=400

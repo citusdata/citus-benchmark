@@ -142,7 +142,7 @@ module driverVm 'driver-vm.bicep' = {
     pgUser: 'postgres'
     pgPassword: pgAdminPassword
     pgVersion: pgVersion
-    buildAndRunFlags: buildAndRunFlags
+    buildAndRunFlags: '--name "${namePrefix}" ${buildAndRunFlags}'
     buildWarehouses: buildWarehouses
     runWarehouses: runWarehouses
     buildVirtualUsers: buildVirtualUsers
