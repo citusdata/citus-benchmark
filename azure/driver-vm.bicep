@@ -80,7 +80,7 @@ cd ch-benchmark
 while ! psql -c 'select 1'; do  echo failed; sleep 1; done
 tmux new-session -d -t main -s cloud-init \; send-keys './build-and-run.sh {6}' Enter
 '''
-var driverBootScript = format(driverBootTemplate, pgHost, pgUser, pgPassword, bashrcTmuxAutoAttach, pgVersion, sedCommands, buildAndRunFlags)
+var driverBootScript = format(driverBootTemplate, pgHost, pgUser, pgPassword, bashrcTmuxAutoAttach, pgVersion, sedCommands, replace(buildAndRunFlags, '\'', '\'\\\'\''))
 
 module vm 'vm.bicep' = {
   name: '${vmName}-driver-module'
