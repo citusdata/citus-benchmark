@@ -94,7 +94,7 @@ set -g status-left '#S | '
 setw -g window-status-format "#I #W |"
 setw -g window-status-current-format "#[fg=green] #I #W #[fg=white]|"
 
-set -g history-limit 3000
+set -g history-limit 50000
 
 # Turn on vim awesomeness
 set-window-option -g mode-keys vi
