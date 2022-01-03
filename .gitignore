@@ -3,3 +3,4 @@
 HammerDB-*.*/
 HammerDB-upstream/
 results/
+/azure/.ssh-controlmasters
