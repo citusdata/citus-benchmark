@@ -11,10 +11,10 @@ if test -d "HammerDB-$HAMMERDB_VERSION"; then
 fi
 
 # no-op if the directory already exists
-if [ "$1" = "4.3-custom" ]; then
+if [ "$1" = "master" ]; then
     ./download-hammerdb.sh 4.3
-    git clone https://github.com/citusdata/HammerDB --branch custom-4.3 HammerDB-4.3-custom
-    cp -R HammerDB-4.3/{lib,include,bin} HammerDB-4.3-custom
+    git clone https://github.com/TPC-Council/HammerDB --branch master HammerDB-master
+    cp -R HammerDB-4.3/{lib,include,bin} HammerDB-master
     exit
 fi
 
