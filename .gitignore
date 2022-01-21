@@ -2,5 +2,6 @@
 *.tar.gz.tmp
 HammerDB-*.*/
 HammerDB-upstream/
+HammerDB-master/
 results/
 /azure/.ssh-controlmasters
