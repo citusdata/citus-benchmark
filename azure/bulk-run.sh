@@ -7,20 +7,17 @@ RUNS_FILE=$1
 
 declare -a name_array=()
 
-cleanup_all() {
+clean_exit() {
+    exit_code=$?
+    # kill all child processes.
+    kill $(jobs -p)
     set -ux
     # cleanup all resource groups
     for name in "${name_array[@]}"; do
         ./cleanup.sh "$name" &
     done
     wait
-}
-
-clean_exit() {
-    trap "cleanup_all" TERM
-    # kill all processes in the current process group, this is uncluding
-    # ourselves. That's why we set another trap right before.
-    kill 0
+    exit $exit_code
 }
 
 trap "exit" INT TERM

@@ -20,7 +20,7 @@ cd "$(dirname "$0")" || exit 1
 clean_exit() {
     exit_code=$?
     # kill all child processes.
-    kill $$
+    kill $(jobs -p)
     exit $exit_code
 }
 
