@@ -23,6 +23,7 @@ diset tpcc pg_driver timed
 diset tpcc pg_rampup 3
 diset tpcc pg_duration 60
 diset tpcc pg_timeprofile true
+diset tpcc pg_raiseerror true
 loadscript
 print dict
 vuset vu 250
