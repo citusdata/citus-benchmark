@@ -72,8 +72,8 @@ cat >> .bashrc << '__ssh_connection_bashrc__'
 __ssh_connection_bashrc__
 
 sudo apt-get install -y postgresql-client-{4}
-git clone https://github.com/citusdata/ch-benchmark.git
-cd ch-benchmark
+git clone https://github.com/citusdata/citus-benchmark.git
+cd citus-benchmark
 
 {5}
 
