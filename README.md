@@ -14,8 +14,8 @@ sudo yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-
 sudo yum update -y nss curl libcurl
 sudo yum install -y screen postgresql13
 sudo yum groupinstall -y "Development tools"
-git clone https://github.com/citusdata/ch-benchmark.git
-cd ch-benchmark
+git clone https://github.com/citusdata/citus-benchmark.git
+cd citus-benchmark
 ```
 
 If you are using Ubuntu / Debian on the driver node:
@@ -26,8 +26,8 @@ wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-
 echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" |sudo tee  /etc/apt/sources.list.d/pgdg.list
 sudo apt update -y
 sudo apt install -y postgresql-client-13
-git clone https://github.com/citusdata/ch-benchmark.git
-cd ch-benchmark
+git clone https://github.com/citusdata/citus-benchmark.git
+cd citus-benchmark
 ```
 
 # Running HammerDB TPROC-C with CH-benCHmark support

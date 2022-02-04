@@ -11,4 +11,4 @@ ssh -o "UserKnownHostsFile=/dev/null" \
     -o "ControlPath=.ssh-controlmasters/%r@%h:%p" \
     -o "ControlPersist=24h" \
     "$ip" \
-    "ch-benchmark/create-csv-result-lines.sh"
+    "citus-benchmark/create-csv-result-lines.sh"
