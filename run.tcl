@@ -23,6 +23,7 @@ diset tpcc pg_driver timed
 diset tpcc pg_rampup 3
 diset tpcc pg_duration 60
 diset tpcc pg_timeprofile true
+diset tpcc pg_raiseerror true
 loadscript
 print dict
 vuset vu 250
@@ -30,7 +31,7 @@ vuset timestamps 1
 vuset logtotemp 1
 vuset showoutput 0
 vuset unique 1
-vuset delay 100
+vuset delay 20
 vuset repeat 1
 vurun
 wait_to_complete
