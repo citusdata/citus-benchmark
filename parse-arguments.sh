@@ -46,10 +46,9 @@ IS_CH_AND_TPCC=${IS_CH_AND_TPCC:-false}
 IS_TPCC=${IS_TPCC:-true}
 IS_CH=${IS_CH:-false}
 IS_CITUS=${IS_CITUS:-true}
-SHARD_COUNT=${SHARD_COUNT:-48}
+HAMMERDB_VERSION=${HAMMERDB_VERSION:-master}
 isodate=$(date +"%Y-%m-%dT%H:%M:%S")
 BENCHNAME=${BENCHNAME:-${isodate}}
-HAMMERDB_VERSION=${HAMMERDB_VERSION:-master}
 SHARD_COUNT=${SHARD_COUNT:-48}
 
 # inspired by: https://stackoverflow.com/a/7680682/2570866
@@ -80,7 +79,7 @@ while getopts "$optspec" optchar; do
                 name=*)
                     BENCHNAME=${OPTARG#*=}
                     ;;
-                name)
+                shard-count)
                     if [ -z ${!OPTIND+x} ]; then
                         echo "error: --shard-count requires argument" >&2
                         exit 2
@@ -88,8 +87,8 @@ while getopts "$optspec" optchar; do
                     SHARD_COUNT="${!OPTIND}"
                     OPTIND=$(( OPTIND + 1 ))
                     ;;
-                name=*)
-                    BENCHNAME=${OPTARG#*=}
+                shard-count=*)
+                    SHARD_COUNT=${OPTARG#*=}
                     ;;
                 no-citus)
                     IS_CITUS=false
