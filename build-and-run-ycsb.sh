@@ -5,7 +5,7 @@
 
 source parse-arguments.sh
 
-BENCHMARK_NAME=${1:-standard}
+BENCHMARK_NAME=fixed
 export HOMEDIR=$PWD
 export BENCHMARK_NAME=${BENCHMARK_NAME}-output
 
@@ -13,4 +13,4 @@ mkdir -p $BENCHMARK_NAME
 
 source parse-arguments.sh
 
-./install-and-run-ycsb.sh
+./install-and-run-ycsb.sh $BENCHMARK_NAME
