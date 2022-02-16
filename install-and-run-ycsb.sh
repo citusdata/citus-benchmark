@@ -2,7 +2,7 @@
 
 export BENCHMARK_NAME=${1:-fixed}
 
-sudo apt install -y default-jre python postgresql-client-common postgresql-client-12
+# sudo apt install -y default-jre python postgresql-client-common postgresql-client-12
 
 wget https://github.com/brianfrankcooper/YCSB/releases/download/0.17.0/ycsb-0.17.0.tar.gz
 
