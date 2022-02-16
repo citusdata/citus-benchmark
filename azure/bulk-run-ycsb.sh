@@ -42,7 +42,7 @@ while read -r line; do
     IFS=',' read -r -a split_line <<< "$line"
 
     for i in $(seq "${split_line[0]}"); do
-        name=$USER-hammerdb-$(openssl rand -hex 12)-$i
+        name=$USER-hammerdb-$(openssl rand -hex 2)-$i
         name_array+=("$name")
 
         # If one of these fails, continue with the rest
