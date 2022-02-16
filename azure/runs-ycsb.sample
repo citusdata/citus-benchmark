@@ -3,4 +3,4 @@
 1,hyperscale,buildAndRunFlags=--name 'Hyperscale with 4 workers',workers=4,runVirtualUsers=400
 1,hyperscale,buildAndRunFlags=--name 'Hyperscale with 6 workers',workers=6,runVirtualUsers=400
 1,hyperscale,buildAndRunFlags=--name 'Hyperscale with 8 workers',workers=8,runVirtualUsers=400
-1,hyperscale,buildAndRunFlags=--name 'Hyperscale with 10 workers',workers=12,runVirtualUsers=400
+1,hyperscale,buildAndRunFlags=--name 'Hyperscale with 10 workers',workers=10,runVirtualUsers=400
