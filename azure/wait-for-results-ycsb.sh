@@ -5,6 +5,6 @@ cd "$(dirname "$0")"
 
 RESOURCE_GROUP=$1
 
-while ! ./create-csv-ycsb.sh "$RESOURCE_GROUP"; do
+while ! ./get-results-ycsb.sh "$RESOURCE_GROUP"; do
     sleep 10
 done
