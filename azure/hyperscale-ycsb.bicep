@@ -21,8 +21,8 @@ param timeprofile bool = true
 // Configuration of the postgres server group
 param pgVersion string = '14'
 // param pgVersion string = '12'
-param coordinatorVcores int = 8
-param coordinatorStorageSizeMB int = 524288 // 512GB
+param coordinatorVcores int = 16
+param coordinatorStorageSizeMB int = 2097152 // 2TB
 param workers int = 2
 param workerVcores int = 16
 param workerStorageSizeMB int = 2097152 // 2TB
