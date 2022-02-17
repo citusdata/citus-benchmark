@@ -65,7 +65,7 @@ resource serverGroup 'Microsoft.DBforPostgreSQL/serverGroupsv2@2020-10-05-privat
         vCores: coordinatorVcores
         storageQuotaInMb: coordinatorStorageSizeMB
         enableHa: enableHa
-        enablePublicIpAccess : enablePublicIpAccess
+        // enablePublicIpAccess : enablePublicIpAccess
       }
       {
         role: 'Worker'
