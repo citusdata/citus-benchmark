@@ -3,7 +3,7 @@
 set -euxo pipefail
 cd "$(dirname "$0")"
 
-RESOURCE_GROUP=$1
+export RESOURCE_GROUP=$1
 
 ./start-benchmark-ycsb.sh "$@"
 ./wait-for-results-ycsb.sh "$RESOURCE_GROUP" 2> /dev/null
