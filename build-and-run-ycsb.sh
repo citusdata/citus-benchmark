@@ -22,4 +22,4 @@ export PGDATABASE=citus
 
 mkdir -p $BENCHMARK_NAME
 
-sh -ex ./install-and-run-ycsb.sh $BENCHMARK_NAME
+./install-and-run-ycsb.sh $BENCHMARK_NAME
