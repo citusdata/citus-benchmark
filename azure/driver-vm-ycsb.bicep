@@ -61,10 +61,14 @@ cat >> .bashrc << '__ssh_connection_bashrc__'
 {3}
 __ssh_connection_bashrc__
 
-sudo apt install -y default-jre python postgresql-client-common postgresql-client-12
+# sudo apt-get install -y postgresql-client-{4}
+
+sudo apt install -y default-jre python postgresql-client-common postgresql-client-{4}
 git clone https://github.com/citusdata/citus-benchmark.git --branch ycsb-benchmarks
 cd citus-benchmark
 
+// export CLUSTER_NAME={0}
+// export YCSB_ARGUMENTS={5}
 
 while ! psql -c 'select 1'; do  echo failed; sleep 1; done
 tmux new-session -d -t main -s cloud-init \; send-keys './build-and-run-ycsb.sh {5}' Enter
