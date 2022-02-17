@@ -6,7 +6,7 @@ dir=${1:-$BENCHMARK_NAME}
 result=output-results.csv
 rm -f result
 
-echo "$RESOURCE_GROUP" >> $result
+echo "$HOSTNAME" >> $result
 
 for outputfile in $dir/*.log
 do
