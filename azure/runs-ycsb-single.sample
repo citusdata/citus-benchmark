@@ -1,1 +1,1 @@
-1,hyperscale,buildAndRunFlags=--name 'Hyperscale with 2 workers',workers=2,runVirtualUsers=400
+1,hyperscale,buildAndRunFlags=--name 'Hyperscale with 0 workers',workers=0,runVirtualUsers=400
