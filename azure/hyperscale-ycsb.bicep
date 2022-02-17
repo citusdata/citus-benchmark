@@ -19,14 +19,15 @@ param timeprofile bool = true
 
 
 // Configuration of the postgres server group
-// param pgVersion string = '14'
-param pgVersion string = '12'
+param pgVersion string = '14'
+// param pgVersion string = '12'
 param coordinatorVcores int = 8
 param coordinatorStorageSizeMB int = 524288 // 512GB
 param workers int = 2
-param workerVcores int = 8
-param workerStorageSizeMB int = 524288 // 512GB
+param workerVcores int = 16
+param workerStorageSizeMB int = 2097152 // 2TB
 param enableHa bool = false
+param enablePublicIpAccess bool = true
 
 // Configuration of the VM that runs the benchmark (the driver)
 // This VM should be pretty big, to make sure it does not become the bottleneck
@@ -64,6 +65,7 @@ resource serverGroup 'Microsoft.DBforPostgreSQL/serverGroupsv2@2020-10-05-privat
         vCores: coordinatorVcores
         storageQuotaInMb: coordinatorStorageSizeMB
         enableHa: enableHa
+        enablePublicIpAccess : enablePublicIpAccess
       }
       {
         role: 'Worker'
@@ -72,6 +74,7 @@ resource serverGroup 'Microsoft.DBforPostgreSQL/serverGroupsv2@2020-10-05-privat
         vCores: workerVcores
         storageQuotaInMb: workerStorageSizeMB
         enableHa: enableHa
+        enablePublicIpAccess : enablePublicIpAccess
       }
     ]
   }
