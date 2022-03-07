@@ -67,6 +67,9 @@ export PGHOST='{0}'
 export PGUSER={1}
 export PGPASSWORD='{2}'
 
+# Make sure we can open enough connections
+echo 'ulimit -n "$(ulimit -Hn)"' >> .bashrc
+
 cat >> .bashrc << '__ssh_connection_bashrc__'
 {3}
 __ssh_connection_bashrc__
