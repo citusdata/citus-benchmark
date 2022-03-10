@@ -1,9 +1,12 @@
 #!/bin/bash
 
+RUNS_FILE=$1
+# Get the full path of the file before changing directory
+RUNS_FILE=$(realpath "$RUNS_FILE")
+
 cd "$(dirname "$0")" || exit 1
 
 set -ue
-RUNS_FILE=$1
 
 declare -a name_array=()
 
