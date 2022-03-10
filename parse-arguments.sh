@@ -19,10 +19,10 @@ environment variables:
 Arguments:
   --hammerdb-version    What version of HammerDB to use to run the benchmark.
                         To be able to run use this script to run Citus
-                        benchmarks it is required to use 'master' here. All
-                        other versions only work for standard postgres
+                        benchmarks it is required to use '4.4' here. All
+                        other versions only work for standard Postgres
                         benchmarks.
-                        (default: master)
+                        (default: 4.4)
   --ch                  Run both HammerDB TPROC-C and CH-benCHmark queries at
                         the same time.
   --ch-queries-only     Run only CH-benCHmark queries (so don't run HammerDB
@@ -46,7 +46,7 @@ IS_CH_AND_TPCC=${IS_CH_AND_TPCC:-false}
 IS_TPCC=${IS_TPCC:-true}
 IS_CH=${IS_CH:-false}
 IS_CITUS=${IS_CITUS:-true}
-HAMMERDB_VERSION=${HAMMERDB_VERSION:-master}
+HAMMERDB_VERSION=${HAMMERDB_VERSION:-4.4}
 isodate=$(date +"%Y-%m-%dT%H:%M:%S")
 BENCHNAME=${BENCHNAME:-${isodate}}
 SHARD_COUNT=${SHARD_COUNT:-48}
