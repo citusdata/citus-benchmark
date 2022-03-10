@@ -45,7 +45,8 @@ while read -r line; do
     IFS=',' read -r -a split_line <<< "$line"
 
     for i in $(seq "${split_line[0]}"); do
-        name=$USER-hammerdb-$(openssl rand -hex 12)-$i
+        random_string=$(< /dev/urandom tr -dc 'a-z0-9' | fold -w 8 | head -n 1)
+        name=$USER-hammerdb-$random_string-$i
         name_array+=("$name")
 
         # If one of these fails, continue with the rest
