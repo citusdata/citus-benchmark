@@ -5,11 +5,22 @@ HammerDB and CH-benCHmark against Azure infrastructure.
 
 ## Prerequisites
 
-Set a default Azure subscription and location:
+1. [Install the azure
+   cli](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli).
+2. Login to Azure with the CLI:
+```bash
+az login
+```
+3. Set a default Azure subscription and location:
 ```bash
 az account set --subscription <subscription-id>
 az config set defaults.location=eastus # feel free to choose another one
 ```
+4. Install the Bicep CLI:
+```bash
+az bicep install
+```
+5. Make sure that the file `~/.ssh/id_rsa.pub` contains your SSH public key.
 
 ## Running benchmarks against Azure Database for PostgreSQL Hyperscale (Citus)
 
