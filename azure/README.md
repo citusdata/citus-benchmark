@@ -68,6 +68,20 @@ The important bit is the second argument being `iaas-postgres`. All the other
 things are the same as described in the section above, e.g. the CSV line output,
 `connect.sh` and `cleanup.sh`.
 
+## Running benchmarks against an already existing Citus cluster
+
+To run a benchmark against an already existing Citus cluster you can use the
+following command. The first argument is the name of the resource group that you
+want to use.
+```bash
+./run-benchmark.sh "$USER-hammerdb-hyperscale-pre-created" hyperscale-pre-created pgHost=postgres.myhostname.com pgAdminPassword=myPostgresUserPassword
+```
+
+The important bit is the second argument being `hyperscale-pre-created`, and the
+provided hostname and password of the cluster that you want to use for the
+benchmark. All the other things are the same as described in the section above,
+e.g. the CSV line output, `connect.sh` and `cleanup.sh`.
+
 ## Running with custom settings
 
 You can run the benchmark with non default settings very easily, by passing
