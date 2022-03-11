@@ -1,9 +1,12 @@
 #!/bin/bash
 
+RUNS_FILE=$1
+# Get the full path of the file before changing directory
+RUNS_FILE=$(realpath "$RUNS_FILE")
+
 cd "$(dirname "$0")" || exit 1
 
 set -ue
-RUNS_FILE=$1
 
 declare -a name_array=()
 
@@ -42,7 +45,8 @@ while read -r line; do
     IFS=',' read -r -a split_line <<< "$line"
 
     for i in $(seq "${split_line[0]}"); do
-        name=$USER-hammerdb-$(openssl rand -hex 12)-$i
+        random_string=$(< /dev/urandom tr -dc 'a-z0-9' | fold -w 8 | head -n 1)
+        name=$USER-hammerdb-$random_string-$i
         name_array+=("$name")
 
         # If one of these fails, continue with the rest

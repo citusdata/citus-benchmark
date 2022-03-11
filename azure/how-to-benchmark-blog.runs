@@ -1,0 +1,4 @@
+1,hyperscale,buildAndRunFlags=--name 'c8+2w8 (24 vCores total)',workers=2,warehouses=1000,runVirtualUsers=250
+1,hyperscale,buildAndRunFlags=--name 'c8+4w8 (40 vCores total)',workers=4,warehouses=1000,runVirtualUsers=250
+1,hyperscale,buildAndRunFlags=--name 'c8+6w8 (56 vCores total)',workers=6,warehouses=1000,runVirtualUsers=250
+1,hyperscale,buildAndRunFlags=--name 'c8+8w8 (72 vCores total)',workers=8,warehouses=1000,runVirtualUsers=250

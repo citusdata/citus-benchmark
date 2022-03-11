@@ -40,7 +40,7 @@ param subnetPrefix string = '10.13.0.0/24'
 // names for all resources, based on resourcegroup name by default
 // usually should not need to be changed
 param namePrefix string = resourceGroup().name
-param pgServerGroupName string = '${namePrefix}-pg-hyperscale'
+param pgServerGroupName string = '${namePrefix}-citus'
 param driverVmName string = '${namePrefix}-driver'
 param driverNicName string = '${driverVmName}-nic'
 param driverIpName string = '${driverVmName}-ip'
