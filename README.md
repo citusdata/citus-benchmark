@@ -1,7 +1,14 @@
 # HammerDB TPROC-C and CH benchmarking tool for Citus and PostgreSQL
 
-This repository contains utility scripts/files to run [HammerDB][hammerdb] and
-the [CH-benCHmark][ch] on Citus and regular PostgreSQL.
+This repository contains two main sections:
+1. Scripts and files to run [HammerDB][hammerdb] and the [CH-benCHmark][ch] on Citus
+   and regular PostgreSQL. These are located in the root directory and the
+   `README` that you're reading now explains how to use them.
+2. Scripts and files to run those same benchmarks on Azure in a completely
+   automated fashion. With these scrips you can start multiple Citus benchmarks
+   on Azure with just a single command. These scripts and the README that
+   explains how to use them can be found in the [`azure`
+   directory](https://github.com/citusdata/citus-benchmark)
 
 # Preparation
 
