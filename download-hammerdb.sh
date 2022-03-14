@@ -10,14 +10,6 @@ if test -d "HammerDB-$1"; then
     exit
 fi
 
-# no-op if the directory already exists
-if [ "$1" = "master" ]; then
-    ./download-hammerdb.sh 4.4
-    git clone https://github.com/TPC-Council/HammerDB --branch master HammerDB-master
-    cp -R HammerDB-4.4/{lib,include,bin} HammerDB-master
-    exit
-fi
-
 if [ "$1" == 4.4 ]
 then
     SHA1=5347e06baad690336afa6d354330cd59d98343cc
@@ -39,7 +31,7 @@ then
     OUTPUT=HammerDB-3.3-Linux.tar.gz
     URL=https://github.com/TPC-Council/HammerDB/releases/download/v3.3/$OUTPUT
 else
-    echo 'Expects version parameter. Supported versions: 3.3 4.0 4.3' 1>&2
+    echo 'Expects version parameter. Supported versions: 3.3 4.0 4.3 4.4' 1>&2
     exit 1
 fi
 
