@@ -5,8 +5,8 @@ cd "$(dirname "$0")"
 
 
 # no-op if the directory already exists
-if test -d "HammerDB-$HAMMERDB_VERSION"; then
-    echo "HammerDB-$HAMMERDB_VERSION exists, skipping download" 1>&2
+if test -d "HammerDB-$1"; then
+    echo "HammerDB-$1 exists, skipping download" 1>&2
     exit
 fi
 
