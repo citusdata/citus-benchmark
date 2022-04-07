@@ -4,9 +4,10 @@ param pgAdminPassword string
 param vmAdminPublicKey string
 param vmAdminUsername string = 'azureuser'
 param pgHost string
-
+param pgPort int = 5432
 
 param location string = resourceGroup().location
+param zone string = '1'
 
 param buildAndRunFlags string = ''
 param warehouses int = 1000
@@ -18,6 +19,7 @@ param allWarehouses bool = true
 param duration int = 60
 param rampup int = 5
 param timeprofile bool = true
+param delay int = 20
 
 
 // Configuration of the postgres server group
@@ -61,7 +63,9 @@ module driverVm 'driver-vm.bicep' = {
   params: {
     adminPublicKey: vmAdminPublicKey
     adminUsername: vmAdminUsername
+    pgPort: pgPort
     location: location
+    zone: zone
     size: driverSize
     vmName: driverVmName
     nicName: driverNicName
@@ -81,6 +85,7 @@ module driverVm 'driver-vm.bicep' = {
     allWarehouses: allWarehouses
     duration: duration
     rampup: rampup
+    delay: delay
     timeprofile: timeprofile
   }
 }

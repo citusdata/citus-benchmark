@@ -4,9 +4,11 @@ param adminUsername string
 param pgHost string
 param pgUser string
 param pgPassword string
+param pgPort int
 param pgVersion string
 
 param location string
+param zone string
 param size string
 
 param vmName string
@@ -25,6 +27,7 @@ param runVirtualUsers int
 param allWarehouses bool
 param duration int
 param rampup int
+param delay int
 param timeprofile bool
 
 // Interpolating booleans directly will result in capitalized words, i.e. True/False
@@ -50,40 +53,42 @@ sed -i -e "s/vuset vu .*/vuset vu {3}/" run.tcl
 sed -i -e "s/diset tpcc pg_allwarehouse .*/diset tpcc pg_allwarehouse {4}/" run.tcl
 sed -i -e "s/diset tpcc pg_duration .*/diset tpcc pg_duration {5}/" run.tcl
 sed -i -e "s/diset tpcc pg_rampup .*/diset tpcc pg_rampup {6}/" run.tcl
-sed -i -e "s/diset tpcc pg_timeprofile .*/diset tpcc pg_timeprofile {7}/" run.tcl
+sed -i -e "s/vuset delay .*/vuset delay {7}/" run.tcl
+sed -i -e "s/diset tpcc pg_timeprofile .*/diset tpcc pg_timeprofile {8}/" run.tcl
 '''
 
-var sedCommands = format(sedCommandsTemplate, buildWarehouses, runWarehouses, buildVirtualUsers, runVirtualUsers, allWarehousesString, duration, rampup, timeprofileString)
-
+var sedCommands = format(sedCommandsTemplate, buildWarehouses, runWarehouses, buildVirtualUsers, runVirtualUsers, allWarehousesString, duration, rampup, delay, timeprofileString)
 
 var driverBootTemplate = '''
 echo export PGHOST='{0}' >> .bashrc
 echo export PGUSER={1} >> .bashrc
 echo export PGPASSWORD='{2}' >> .bashrc
+echo export PGPORT={3} >> .bashrc
 
 # Use the same environment variables right now, sourcing bashrc doesn't work
 # since we are not in an interactive shell
 export PGHOST='{0}'
 export PGUSER={1}
 export PGPASSWORD='{2}'
+export PGPORT={3}
 
 # Make sure we can open enough connections
 echo 'ulimit -n "$(ulimit -Hn)"' >> .bashrc
 
 cat >> .bashrc << '__ssh_connection_bashrc__'
-{3}
+{4}
 __ssh_connection_bashrc__
 
-sudo apt-get install -y postgresql-client-{4}
+sudo apt-get install -y postgresql-client-{5}
 git clone https://github.com/citusdata/citus-benchmark.git
 cd citus-benchmark
 
-{5}
+{6}
 
 while ! psql -c 'select 1'; do  echo failed; sleep 1; done
-tmux new-session -d -t main -s cloud-init \; send-keys './build-and-run.sh {6}' Enter
+tmux new-session -d -t main -s cloud-init \; send-keys './build-and-run.sh {7}' Enter
 '''
-var driverBootScript = format(driverBootTemplate, pgHost, pgUser, pgPassword, bashrcTmuxAutoAttach, pgVersion, sedCommands, replace(buildAndRunFlags, '\'', '\'\\\'\''))
+var driverBootScript = format(driverBootTemplate, pgHost, pgUser, pgPassword, pgPort, bashrcTmuxAutoAttach, pgVersion, sedCommands, replace(buildAndRunFlags, '\'', '\'\\\'\''))
 
 module vm 'vm.bicep' = {
   name: '${vmName}-driver-module'
@@ -91,6 +96,7 @@ module vm 'vm.bicep' = {
     adminPublicKey: adminPublicKey
     adminUsername: adminUsername
     location: location
+    zone: zone
     size: size
     vmName: vmName
     nicName: nicName
