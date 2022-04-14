@@ -10,8 +10,6 @@ param pgPort int = 5432
 param location string = resourceGroup().location
 param zone string = '1'
 
-param buildAndRunFlags string = ''
-
 // Configuration of the postgres server group
 param pgVersion string = '14'
 
@@ -67,7 +65,6 @@ module driverVm 'driver-vm-ycsb.bicep' = {
     pgUser: 'citus'
     pgPassword: pgAdminPassword
     pgVersion: pgVersion
-    buildAndRunFlags: '--name "${namePrefix}" ${buildAndRunFlags}'
   }
 }
 
