@@ -2,6 +2,7 @@ param adminPublicKey string
 param adminUsername string
 
 param location string
+param zone string
 param size string
 
 param vmName string
@@ -50,6 +51,7 @@ resource nic 'Microsoft.Network/networkInterfaces@2021-03-01' = {
 
 resource ip 'Microsoft.Network/publicIpAddresses@2019-02-01' = {
   name: ipName
+  zones: array( zone )
   location: location
   properties: {
     publicIPAllocationMethod: 'Static'
@@ -136,6 +138,7 @@ var driverBootScript = format(bootTemplate, adminUsername, tmuxConf, bootScript)
 resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
   name: vmName
   location: location
+  zones: array( zone )
   properties: {
     hardwareProfile: {
       vmSize: size
