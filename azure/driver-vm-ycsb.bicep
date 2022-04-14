@@ -19,8 +19,6 @@ param nsgName string
 param vnetName string
 param subnetName string
 
-param buildAndRunFlags string
-
 var bashrcTmuxAutoAttach = '''
 if [[ -n "${PS1:-}" ]] && [[ -z "${TMUX:-}" ]] && [[ -n "${SSH_CONNECTION:-}" ]] ; then
   if { tmux list-sessions | grep '(group main)' ; } > /dev/null 2>&1; then
@@ -52,15 +50,16 @@ cat >> .bashrc << '__ssh_connection_bashrc__'
 {4}
 __ssh_connection_bashrc__
 
-sudo apt install -y default-jre python postgresql-client-common postgresql-client-{5}
-
+mkdir testfolder
 git clone https://github.com/citusdata/citus-benchmark.git --branch ycsb-benchmarks
 cd citus-benchmark
+sudo apt install -y default-jre python postgresql-client-common postgresql-client-{5}
 
 while ! psql -c 'select 1'; do  echo failed; sleep 1; done
-tmux new-session -d -t main -s cloud-init \; send-keys './build-and-run-ycsb.sh {6}' Enter
+tmux new-session -d -t main -s cloud-init \; send-keys './build-and-run-ycsb.sh' Enter
 '''
-var driverBootScript = format(driverBootTemplate, pgHost, pgUser, pgPassword, pgPort, bashrcTmuxAutoAttach, pgVersion, replace(buildAndRunFlags, '\'', '\'\\\'\''))
+
+var driverBootScript = format(driverBootTemplate, pgHost, pgUser, pgPassword, pgPort, bashrcTmuxAutoAttach, pgVersion)
 
 module vm 'vm.bicep' = {
   name: '${vmName}-driver-module'
