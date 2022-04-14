@@ -57,7 +57,7 @@ resource ip 'Microsoft.Network/publicIpAddresses@2019-02-01' = {
     publicIPAllocationMethod: 'Static'
   }
   sku: {
-    name: 'Basic'
+    name: 'Standard'
   }
 }
 
