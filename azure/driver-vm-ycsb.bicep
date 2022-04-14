@@ -53,10 +53,6 @@ cat >> .bashrc << '__ssh_connection_bashrc__'
 __ssh_connection_bashrc__
 
 sudo apt install -y default-jre python postgresql-client-common postgresql-client-{5}
-sudo apt-get install python3-pip -y
-pip3 install fire
-sudo apt-get install python3-pandas -y
-sudo apt-get install python -y
 
 git clone https://github.com/citusdata/citus-benchmark.git --branch ycsb-benchmarks
 cd citus-benchmark
