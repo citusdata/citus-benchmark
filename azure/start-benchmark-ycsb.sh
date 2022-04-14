@@ -20,7 +20,7 @@ az deployment group create \
     --only-show-errors \
     --resource-group "$RESOURCE_GROUP" \
     --name "$RESOURCE_GROUP" \
-    --template-file "$DEPLOYMENT-ycsb.bicep" \
+    --template-file "$DEPLOYMENT.bicep" \
     --parameters "vmAdminUsername=$USER" \
     --parameters "vmAdminPublicKey=$PUBKEY" \
     --parameters "pgAdminPassword=$PGPASSWORD" \
