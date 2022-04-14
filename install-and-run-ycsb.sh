@@ -33,16 +33,16 @@ SELECT create_distributed_function('dummy(varchar(255))', '\$1', colocate_with :
 
 EOF
 
-export record_count=2000000
-export operation_count=20000000
+export record_count=20000
+export operation_count=200000
 
-for thread_count in 248 600 1000 2000
+for thread_count in 600
 do
 
 	export thread_count
 	echo "THREAD_COUNT: $thread_count, RECORD_COUNT: $record_count, OPERATION_COUNT: $operation_count"
 
-	export CITUS_HOST=`psql -tAX -c "select string_agg(substring(nodename from 9),',') from pg_dist_node or (select count(*) from pg_dist_node) = 1"`
+	export CITUS_HOST=`psql -tAX -c "select string_agg(substring(nodename from 9),',') from pg_dist_node where groupid > 0 or (select count(*) from pg_dist_node) = 1"`
 	psql -c "truncate usertable"
 	bin/ycsb load jdbc -P workloads/workloada -p db.driver=org.postgresql.Driver -p recordcount=$record_count -p threadcount=$thread_count -cp ./postgresql-42.2.14.jar -p db.user=$PGUSER -p db.passwd=$PGPASSWORD -p db.url="jdbc:postgresql://$CITUS_HOST/$PGDATABASE?loadBalanceHosts=true" | tee $HOMEDIR/$BENCHMARK_NAME/load_${thread_count}_${record_count}_${operation_count}.log
 
