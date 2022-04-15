@@ -34,7 +34,7 @@ SELECT create_distributed_function('dummy(varchar(255))', '\$1', colocate_with :
 EOF
 
 export record_count=2000000
-export operation_count=2000000
+export operation_count=20000000
 
 for thread_count in 600 800 1000
 do
