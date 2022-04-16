@@ -36,7 +36,7 @@ EOF
 export record_count=10000000
 export operation_count=100000000
 
-for thread_count in 600 800 1000 2000 4000
+for thread_count in 600 800 900 1000 2000 3000 3200 4000
 do
 
 	export thread_count
