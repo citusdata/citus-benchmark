@@ -23,7 +23,7 @@ CREATE TABLE usertable (
         FIELD6 TEXT, FIELD7 TEXT,
         FIELD8 TEXT, FIELD9 TEXT
 );
-SELECT create_distributed_table('usertable', 'ycsb_key', colocate_with := 'none', shard_count := 64);
+SELECT create_distributed_table('usertable', 'ycsb_key', colocate_with := 'none', shard_count := 96);
 CREATE OR REPLACE FUNCTION dummy(key varchar)
 RETURNS void AS \$\$
 BEGIN
@@ -36,7 +36,7 @@ EOF
 export record_count=10000000
 export operation_count=100000000
 
-for thread_count in 600 800 900 1000 2000 3000 3200 4000 6000
+for thread_count in 600 800 1000 2000 3000
 do
 
 	export thread_count
