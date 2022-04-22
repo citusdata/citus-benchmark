@@ -33,10 +33,10 @@ SELECT create_distributed_function('dummy(varchar(255))', '\$1', colocate_with :
 
 EOF
 
-export record_count=10000000
+export record_count=100000000
 export operation_count=100000000
 
-for thread_count in 600 800 1000 2000 3000 3200 6400
+for thread_count in 800 1000 2000 3000 3200 4200 6400
 do
 
 	export thread_count
