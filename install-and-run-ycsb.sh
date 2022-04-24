@@ -23,7 +23,7 @@ CREATE TABLE usertable (
         FIELD6 TEXT, FIELD7 TEXT,
         FIELD8 TEXT, FIELD9 TEXT
 );
-SELECT create_distributed_table('usertable', 'ycsb_key', colocate_with := 'none', shard_count := 32);
+SELECT create_distributed_table('usertable', 'ycsb_key', colocate_with := 'none', shard_count := 64);
 CREATE OR REPLACE FUNCTION dummy(key varchar)
 RETURNS void AS \$\$
 BEGIN
