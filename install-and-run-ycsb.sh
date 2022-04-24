@@ -36,7 +36,8 @@ EOF
 export record_count=100000000
 export operation_count=100000000
 
-for thread_count in 800 2000 3200
+for thread_count in 800 1600 3200
+do
 
 	export thread_count
 	echo "THREAD_COUNT: $thread_count, RECORD_COUNT: $record_count, OPERATION_COUNT: $operation_count"
