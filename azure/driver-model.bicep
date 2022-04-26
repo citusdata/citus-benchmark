@@ -10,8 +10,8 @@ param pgVersion string
 param zone string
 param location string
 param size string
-param records int
-param operations int
+param records string
+param operations string
 
 param vmName string
 param nicName string
