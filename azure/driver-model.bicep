@@ -48,11 +48,6 @@ sudo apt install -y default-jre python postgresql-client-common postgresql-clien
 
 mkdir dowhatever
 
-sudo apt-get install python3-pip
-pip3 install fire
-pip3 install pandas
-pip3 install matplotlib
-
 echo "succeeded"
 
 
@@ -60,7 +55,7 @@ echo "succeeded"
 
 var AnalysisDriverBootScript = format(AnalysisDriverBootTemplate, pgHost, pgUser, pgPassword, pgPort, pgVersion)
 
-module vm 'vm.bicep' = {
+module vmAnalysis 'vm.bicep' = {
   name: '${vmName}-driver-module'
   params: {
     adminPublicKey: adminPublicKey
@@ -78,4 +73,4 @@ module vm 'vm.bicep' = {
   }
 }
 
-output publicIp string = vm.outputs.publicIp
+output AnalysisPublicIp string = vmAnalysis.outputs.publicIp

@@ -105,4 +105,4 @@ module AnalysisDriverVm 'driver-model.bicep' = {
 }
 
 output driverPublicIp string = driverVm.outputs.publicIp
-output AnalysisDriverPublicIp string = AnalysisDriverVm.outputs.publicIp
+output AnalysisDriverPublicIp string = AnalysisDriverVm.outputs.AnalysisPublicIp
