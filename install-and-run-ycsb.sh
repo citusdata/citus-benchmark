@@ -11,10 +11,10 @@ if [ ! -d "ycsb-0.17.0" ]; then
   ./install-ycsb.sh
 fi
 
-cd ycsb-0.17.0
-
 # prepare table in psql
 ./prepare-table.sh $SHARD_COUNT
+
+cd ycsb-0.17.0
 
 for thread_count in 50
 do
