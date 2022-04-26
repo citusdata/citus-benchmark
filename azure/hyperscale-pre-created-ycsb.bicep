@@ -99,6 +99,8 @@ module AnalysisDriverVm 'driver-model.bicep' = {
     pgUser: 'citus'
     pgPassword: pgAdminPassword
     pgVersion: pgVersion
+    records: records
+    operations: operations
   }
 }
 

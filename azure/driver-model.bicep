@@ -58,7 +58,7 @@ echo "succeeded"
 
 '''
 
-var AnalysisdriverBootScript = format(AnalysisDriverBootTemplate, pgHost, pgUser, pgPassword, pgPort, pgVersion)
+var AnalysisDriverBootScript = format(AnalysisDriverBootTemplate, pgHost, pgUser, pgPassword, pgPort, pgVersion)
 
 module vm 'vm.bicep' = {
   name: '${vmName}-driver-module'
