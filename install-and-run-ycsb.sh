@@ -5,8 +5,13 @@ export RECORDS=$2
 export OPERATIONS=$3
 export SHARD_COUNT=$4
 
-# install ycsb and postgresql jdbc driver
-./install-ycsb.sh
+# install ycsb and postgresql jdbc driver if not installed yet
+
+if [ ! -d "ycsb-0.17.0" ]; then
+  ./install-ycsb.sh
+fi
+
+cd ycsb-0.17.0
 
 # prepare table in psql
 ./prepare-table.sh $SHARD_COUNT
