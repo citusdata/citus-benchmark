@@ -40,7 +40,7 @@ param subnetName string = 'default'
 param AnalysisDriverVmName string = '${namePrefix}-driver-analysis'
 param AnalysisDriverNicName string = '${AnalysisDriverVmName}-nic'
 param AnalysisDriverIpName string = '${AnalysisDriverVmName}-ip'
-param AnalysisNsgName string = '${AnalysisDriverVmName}-nsg'
+// param AnalysisNsgName string = '${AnalysisDriverVmName}-nsg'
 
 module vnet 'vnet.bicep' = {
   name: vnetName
@@ -92,7 +92,7 @@ module AnalysisDriverVm 'driver-model.bicep' = {
     vmName: AnalysisDriverVmName
     nicName: AnalysisDriverNicName
     ipName: AnalysisDriverIpName
-    nsgName: AnalysisNsgName
+    nsgName: nsgName
     vnetName: vnetName
     subnetName: subnetName
     pgHost: pgHost
