@@ -9,7 +9,7 @@ export SHARD_COUNT=$4
 ./install-ycsb.sh
 
 # prepare table in psql
-./prepare table.sh $SHARD_COUNT
+./prepare-table.sh $SHARD_COUNT
 
 for thread_count in 50
 do
