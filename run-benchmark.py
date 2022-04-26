@@ -118,8 +118,8 @@ class Benchmark(object):
         self.CURRENT_THREAD = self.THREADS[0]
         self.ITERATIONS = iterations
         self.HOST = "localhost"
-        self.AUTOCREATE = autocreate
-        self.PREPARED_THREADCOUNTS = 
+        self.SHARD_COUNT = shard_count
+
 
 
         # Set environment variables
@@ -129,15 +129,19 @@ class Benchmark(object):
         os.environ['PORT'] = str(self.PORT) 
         os.environ['HOMEDIR'] = self.HOMEDIR
 
-        # start pgadapter
-        self.start_pgadapter()
+    def install_ycsb(self):
 
+        # TODO: check if ycsb folder exists
 
-    def delete_instance(self):
+        """ install YCSB and PostgreSQL driver """
+        
+        # get ycsb and unpack
+        run(['wget', 'https://github.com/brianfrankcooper/YCSB/releases/download/0.17.0/ycsb-0.17.0.tar.gz'], shell = False])
+        run(['tar', 'xfvz', 'ycsb-0.17.0.tar.gz'], shell = False])
 
-        """ Deletes a Spanner instance """
-
-        run(['gcloud', 'spanner', 'instances', 'delete', self.INSTANCE], shell = False)
+        # cd to ycsb folder and install jdbc postgresql driver
+        run(['cd', 'ycsb-0.17.0'], shell = False])
+        run(['wget', 'https://jdbc.postgresql.org/download/postgresql-42.2.14.jar'], shell = False])
 
 
     def get_workload(self, wtype, workload):
@@ -165,20 +169,41 @@ class Benchmark(object):
         """
         Executes bash script that enters psql, truncates usertable if exists and creates 
         a new empty usertable
-        note: Spanner has no support yet for DROP TABLE if EXISTS usertable;
         """
-        
-        # DROP usertable, if usertable does not exists psql will throw an error or do nothing
-        try:
-            self.psql("DROP TABLE usertable")
-        except:
-            print("No table to be dropped")
-            pass
 
-        # Prepares schema for ycsb benchmarks
-        run(['./psql-usertable-spanner.sh', self.PORT, self.HOST], shell = False)
+        psql_query = [
+            f"""
+            DROP TABLE if EXISTS usertable;
 
-        print("New usertable created in database")
+            CREATE TABLE usertable (
+                    YCSB_KEY VARCHAR(255) PRIMARY KEY,
+                    FIELD0 TEXT, FIELD1 TEXT,
+                    FIELD2 TEXT, FIELD3 TEXT,
+                    FIELD4 TEXT, FIELD5 TEXT,
+                    FIELD6 TEXT, FIELD7 TEXT,
+                    FIELD8 TEXT, FIELD9 TEXT
+            );
+            SELECT create_distributed_table('usertable', 'ycsb_key', colocate_with := 'none', shard_count := {self.SHARD_COUNT});
+            CREATE OR REPLACE FUNCTION dummy(key varchar)
+            RETURNS void AS \$\$
+            BEGIN
+            END;
+            \$\$ LANGUAGE plpgsql;
+            SELECT create_distributed_function('dummy(varchar(255))', '\$1', colocate_with :='usertable');
+            """]
+
+        self.psql(psql_query[0])
+
+        print("Schema and distributed tables prepared")
+
+
+    def truncate_usertable(self):
+
+        """
+        truncates usertable"
+        """
+
+        self.psql("truncate usertable;")
     
 
     def single_workload(self):
