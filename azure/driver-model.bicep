@@ -10,9 +10,8 @@ param pgVersion string
 param zone string
 param location string
 param size string
-param records string
-param operations string
-param shard_count string
+param records int
+param operations int
 
 param vmName string
 param nicName string
@@ -22,17 +21,7 @@ param nsgName string
 param vnetName string
 param subnetName string
 
-var bashrcTmuxAutoAttach = '''
-if [[ -n "${PS1:-}" ]] && [[ -z "${TMUX:-}" ]] && [[ -n "${SSH_CONNECTION:-}" ]] ; then
-  if { tmux list-sessions | grep '(group main)' ; } > /dev/null 2>&1; then
-    tmux attach-session -t ssh 2> /dev/null || tmux new-session -t main -s ssh
-  else
-    echo "WARNING: Benchmark isn't running yet, try connecting again in a few minutes"
-  fi
-fi
-'''
-
-var driverBootTemplate = '''
+var AnalysisDriverBootTemplate = '''
 echo export PGHOST='{0}' >> .bashrc
 echo export PGUSER={1} >> .bashrc
 echo export PGPASSWORD='{2}' >> .bashrc
@@ -55,13 +44,21 @@ __ssh_connection_bashrc__
 
 git clone https://github.com/citusdata/citus-benchmark.git --branch ycsb-model
 cd citus-benchmark
-sudo apt install -y default-jre python postgresql-client-common postgresql-client-{5}
+sudo apt install -y default-jre python postgresql-client-common postgresql-client-{4}
 
-while ! psql -c 'select 1'; do  echo failed; sleep 1; done
-tmux new-session -d -t main -s cloud-init \; send-keys './build-and-run-ycsb.sh {6} {7} {8}' Enter
+mkdir dowhatever
+
+sudo apt-get install python3-pip
+pip3 install fire
+pip3 install pandas
+pip3 install matplotlib
+
+echo "succeeded"
+
+
 '''
 
-var driverBootScript = format(driverBootTemplate, pgHost, pgUser, pgPassword, pgPort, bashrcTmuxAutoAttach, pgVersion, records, operations, shard_count)
+var AnalysisdriverBootScript = format(AnalysisDriverBootTemplate, pgHost, pgUser, pgPassword, pgPort, pgVersion)
 
 module vm 'vm.bicep' = {
   name: '${vmName}-driver-module'
@@ -77,7 +74,7 @@ module vm 'vm.bicep' = {
     nsgName: nsgName
     vnetName: vnetName
     subnetName: subnetName
-    bootScript: driverBootScript
+    bootScript: AnalysisDriverBootScript
   }
 }
 

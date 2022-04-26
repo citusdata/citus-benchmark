@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Usage:
-# ./build-and-run.sh [--hammerdb-version[=]<version>] [--ch|--ch-queries-only] [--no-citus] [--name[=]name] [--shard-count[=]<shard_count>]
-
 export HOMEDIR=$PWD
-export BENCHMARK_NAME=output
+export OUTPUT_FOLDER=output
 export PGDATABASE=citus
+export RECORDS=$1
+export OPERATIONS=$2
+export SHARD_COUNT=$3
 
-mkdir -p $BENCHMARK_NAME
+mkdir -p $OUTPUT_FOLDER
 
-./install-and-run-ycsb.sh $BENCHMARK_NAME
+./install-and-run-ycsb.sh $OUTPUT_FOLDER $RECORDS $OPERATIONS $SHARD_COUNT

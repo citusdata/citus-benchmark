@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-export BENCHMARK_NAME=${1:-fixed}
+export BENCHMARK_NAME=${1:-output}
+export RECORDS=$2
+export OPERATIONS=$3
+export SHARD_COUNT=$4
 
 # sudo apt install -y default-jre python postgresql-client-common postgresql-client-12
 
@@ -23,7 +26,7 @@ CREATE TABLE usertable (
         FIELD6 TEXT, FIELD7 TEXT,
         FIELD8 TEXT, FIELD9 TEXT
 );
-SELECT create_distributed_table('usertable', 'ycsb_key', colocate_with := 'none', shard_count := 64);
+SELECT create_distributed_table('usertable', 'ycsb_key', colocate_with := 'none', shard_count := "$SHARD_COUNT");
 CREATE OR REPLACE FUNCTION dummy(key varchar)
 RETURNS void AS \$\$
 BEGIN
@@ -33,25 +36,21 @@ SELECT create_distributed_function('dummy(varchar(255))', '\$1', colocate_with :
 
 EOF
 
-export record_count=100000000
-export operation_count=100000000
-
-for thread_count in 800 1600 3200
+for thread_count in 800
 do
 
 	export thread_count
-	echo "THREAD_COUNT: $thread_count, RECORD_COUNT: $record_count, OPERATION_COUNT: $operation_count"
+	echo "THREAD_COUNT: $thread_count, RECORD_COUNT: $RECORDS, OPERATIONS: $OPERATIONS"
 
 	export CITUS_HOST=`psql -tAX -c "select string_agg(substring(nodename from 9),',') from pg_dist_node where groupid > 0 or (select count(*) from pg_dist_node) = 1"`
-	#export CITUS_HOST=`psql -tAX -c "select string_agg(substring(nodename from 9),',') from pg_dist_node"`
     psql -c "truncate usertable"
-	bin/ycsb load jdbc -P workloads/workloada -p db.driver=org.postgresql.Driver -p recordcount=$record_count -p threadcount=$thread_count -cp ./postgresql-42.2.14.jar -p db.user=$PGUSER -p db.passwd=$PGPASSWORD -p db.url="jdbc:postgresql://$CITUS_HOST/$PGDATABASE?loadBalanceHosts=true" | tee $HOMEDIR/$BENCHMARK_NAME/load_${thread_count}_${record_count}_${operation_count}.log
 
-	grep Throughput $HOMEDIR/$BENCHMARK_NAME/load_${thread_count}_${record_count}_${operation_count}.log | awk '{print $3}'
+	# load workloada
+	bin/ycsb load jdbc -P workloads/workloada -p db.driver=org.postgresql.Driver -p recordcount=$RECORDS -p threadcount=$thread_count -cp ./postgresql-42.2.14.jar -p db.user=$PGUSER -p db.passwd=$PGPASSWORD -p db.url="jdbc:postgresql://$CITUS_HOST/$PGDATABASE?loadBalanceHosts=true" | tee $HOMEDIR/$BENCHMARK_NAME/load_${thread_count}_${RECORDS}_${OPERATIONS}.log
+	
+	# run workloadc
+	bin/ycsb run jdbc -P workloads/workloadc -p db.driver=org.postgresql.Driver -p operationcount=$OPERATIONS -p recordcount=$RECORDS -p threadcount=$thread_count -cp ./postgresql-42.2.14.jar -p db.user=$PGUSER -p db.passwd=$PGPASSWORD -p db.url="jdbc:postgresql://$CITUS_HOST/$PGDATABASE?loadBalanceHosts=true" | tee $HOMEDIR/$BENCHMARK_NAME/run_${thread_count}_${RECORDS}_${OPERATIONS}.log
 
-	bin/ycsb run jdbc -P workloads/workloadc -p db.driver=org.postgresql.Driver -p operationcount=$operation_count -p recordcount=$record_count -p threadcount=$thread_count -cp ./postgresql-42.2.14.jar -p db.user=$PGUSER -p db.passwd=$PGPASSWORD -p db.url="jdbc:postgresql://$CITUS_HOST/$PGDATABASE?loadBalanceHosts=true" | tee $HOMEDIR/$BENCHMARK_NAME/run_${thread_count}_${record_count}_${operation_count}.log
-
-	grep Throughput $HOMEDIR/$BENCHMARK_NAME/run_${thread_count}_${record_count}_${operation_count}.log | awk '{print $3}'
 done
 
 echo "Executed succesfully"
@@ -59,5 +58,5 @@ echo "Executed succesfully"
 cd "$HOMEDIR"
 
 echo "Generating CSV..."
-./get-csv-ycsb.sh $BENCHMARK_NAME
+./get-csv-ycsb.sh $OUTPUT_FOLDER
 echo "Done"
