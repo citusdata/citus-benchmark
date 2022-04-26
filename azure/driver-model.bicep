@@ -46,10 +46,12 @@ git clone https://github.com/citusdata/citus-benchmark.git --branch ycsb-model
 cd citus-benchmark
 sudo apt install -y default-jre python postgresql-client-common postgresql-client-{4}
 
-mkdir dowhatever
+sudo apt-get install python3-pip -y
+pip3 install fire
+pip3 install pandas
+pip3 install matplotlib
 
-echo "succeeded"
-
+mkdir success
 
 '''
 
