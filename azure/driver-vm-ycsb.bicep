@@ -89,7 +89,6 @@ module vm 'vm.bicep' = {
     vnetName: vnetName
     subnetName: subnetName
     bootScript: driverBootScript
-    thread_counts: thread_counts
   }
 }
 

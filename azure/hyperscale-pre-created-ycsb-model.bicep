@@ -102,7 +102,6 @@ module AnalysisDriverVm 'driver-model.bicep' = {
     pgUser: 'citus'
     pgPassword: pgAdminPassword
     pgVersion: pgVersion
-    thread_counts: thread_counts
   }
 }
 

@@ -10,7 +10,6 @@ param pgVersion string
 param zone string
 param location string
 param size string
-param thread_counts string
 
 param vmName string
 param nicName string
@@ -50,8 +49,6 @@ pip3 install fire
 pip3 install pandas
 pip3 install matplotlib
 
-mkdir success
-
 '''
 
 var AnalysisDriverBootScript = format(AnalysisDriverBootTemplate, pgHost, pgUser, pgPassword, pgPort, pgVersion)
@@ -71,7 +68,6 @@ module vmAnalysis 'vm.bicep' = {
     vnetName: vnetName
     subnetName: subnetName
     bootScript: AnalysisDriverBootScript
-    thread_counts: thread_counts
   }
 }
 
