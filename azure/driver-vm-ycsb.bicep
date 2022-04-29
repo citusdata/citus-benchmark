@@ -6,6 +6,7 @@ param pgUser string
 param pgPassword string
 param pgPort int
 param pgVersion string
+param pre_created int
 
 param zone string
 param location string
@@ -13,6 +14,7 @@ param size string
 param records string
 param operations string
 param shard_count string
+param thread_counts string
 
 param vmName string
 param nicName string
@@ -45,6 +47,10 @@ export PGHOST='{0}'
 export PGUSER={1}
 export PGPASSWORD='{2}'
 export PGPORT={3}
+export ALL_THREADS={9}
+export PRE_CREATED={10}
+
+echo $ALL_THREADS
 
 # Make sure we can open enough connections
 echo 'ulimit -n "$(ulimit -Hn)"' >> .bashrc
@@ -57,11 +63,16 @@ git clone https://github.com/citusdata/citus-benchmark.git --branch ycsb-model
 cd citus-benchmark
 sudo apt install -y default-jre python postgresql-client-common postgresql-client-{5}
 
+sudo apt-get install python3-pip -y
+pip3 install fire
+pip3 install pandas
+pip3 install matplotlib
+
 while ! psql -c 'select 1'; do  echo failed; sleep 1; done
 tmux new-session -d -t main -s cloud-init \; send-keys './build-and-run-ycsb.sh {6} {7} {8}' Enter
 '''
 
-var driverBootScript = format(driverBootTemplate, pgHost, pgUser, pgPassword, pgPort, bashrcTmuxAutoAttach, pgVersion, records, operations, shard_count)
+var driverBootScript = format(driverBootTemplate, pgHost, pgUser, pgPassword, pgPort, bashrcTmuxAutoAttach, pgVersion, records, operations, shard_count, thread_counts, pre_created)
 
 module vm 'vm.bicep' = {
   name: '${vmName}-driver-module'
@@ -78,6 +89,7 @@ module vm 'vm.bicep' = {
     vnetName: vnetName
     subnetName: subnetName
     bootScript: driverBootScript
+    thread_counts: thread_counts
   }
 }
 

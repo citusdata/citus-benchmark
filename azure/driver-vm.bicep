@@ -8,6 +8,9 @@ param pgVersion string
 
 param location string
 param size string
+param thread_counts string
+param zone string
+
 
 param vmName string
 param nicName string
@@ -96,6 +99,7 @@ module vm 'vm.bicep' = {
     vnetName: vnetName
     subnetName: subnetName
     bootScript: driverBootScript
+    zone: zone
   }
 }
 

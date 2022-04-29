@@ -5,17 +5,14 @@ param vmAdminPublicKey string
 param vmAdminUsername string = 'azureuser'
 
 param location string = resourceGroup().location
+param zone string = '1'
+param records string = '10000'
+param operations string = '10000'
+param shard_count string = '64'
+param thread_counts string = '[100]'
+param pgPort int = 5432
+param pre_created int = 0
 
-param buildAndRunFlags string = ''
-param warehouses int = 1000
-param buildWarehouses int = warehouses
-param runWarehouses int = warehouses
-param buildVirtualUsers int = 100
-param runVirtualUsers int = 250
-param allWarehouses bool = true
-param duration int = 60
-param rampup int = 3
-param timeprofile bool = true
 
 
 // Configuration of the postgres server group
@@ -121,15 +118,13 @@ module driverVm 'driver-vm-ycsb.bicep' = {
     pgUser: 'citus'
     pgPassword: pgAdminPassword
     pgVersion: pgVersion
-    buildAndRunFlags: '--name "${namePrefix}" ${buildAndRunFlags}'
-    buildWarehouses: buildWarehouses
-    runWarehouses: runWarehouses
-    buildVirtualUsers: buildVirtualUsers
-    runVirtualUsers: runVirtualUsers
-    allWarehouses: allWarehouses
-    duration: duration
-    rampup: rampup
-    timeprofile: timeprofile
+    records: records
+    operations: operations
+    shard_count: shard_count
+    thread_counts: thread_counts
+    zone: zone
+    pgPort: pgPort
+    pre_created: pre_created
   }
 }
 

@@ -12,6 +12,8 @@ param zone string = '1'
 param records string = '10000'
 param operations string = '10000'
 param shard_count string = '64'
+param thread_counts string = '[100]'
+param pre_created int = 1
 
 // Configuration of the postgres server group
 param pgVersion string = '14'
@@ -40,7 +42,6 @@ param subnetName string = 'default'
 param AnalysisDriverVmName string = '${namePrefix}-driver-analysis'
 param AnalysisDriverNicName string = '${AnalysisDriverVmName}-nic'
 param AnalysisDriverIpName string = '${AnalysisDriverVmName}-ip'
-// param AnalysisNsgName string = '${AnalysisDriverVmName}-nsg'
 
 module vnet 'vnet.bicep' = {
   name: vnetName
@@ -77,6 +78,8 @@ module driverVm 'driver-vm-ycsb.bicep' = {
     records: records
     operations: operations
     shard_count: shard_count
+    thread_counts: thread_counts
+    pre_created: pre_created
   }
 }
 
@@ -99,8 +102,7 @@ module AnalysisDriverVm 'driver-model.bicep' = {
     pgUser: 'citus'
     pgPassword: pgAdminPassword
     pgVersion: pgVersion
-    records: records
-    operations: operations
+    thread_counts: thread_counts
   }
 }
 

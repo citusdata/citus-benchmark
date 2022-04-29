@@ -10,8 +10,7 @@ param pgVersion string
 param zone string
 param location string
 param size string
-param records string
-param operations string
+param thread_counts string
 
 param vmName string
 param nicName string
@@ -72,6 +71,7 @@ module vmAnalysis 'vm.bicep' = {
     vnetName: vnetName
     subnetName: subnetName
     bootScript: AnalysisDriverBootScript
+    thread_counts: thread_counts
   }
 }
 
