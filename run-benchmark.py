@@ -137,15 +137,6 @@ class Benchmark(object):
         os.chdir(self.HOMEDIR)
 
 
-    def get_citus_host(self):
-
-        """ Gets citus workers hosts and stores it in CITUS_HOST"""
-
-        run(["./get-citus-host.sh"], shell = False)
-        
-        return os.getenv("CITUS_HOST")
-
-
     def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", database = "citus",
     outdir = "output", workloadtype = "load", workloads="workloada", iterations = 1, outputfile = "results.csv", citus = True, shard_count = 64):
 
@@ -172,9 +163,6 @@ class Benchmark(object):
         os.environ['OPERATIONS'] = str(self.OPERATIONS)
         os.environ['PORT'] = str(self.PORT) 
         os.environ['HOMEDIR'] = self.HOMEDIR
-
-        if citus:
-            self.HOST = self.get_citus_host()
 
         # Install YCSB and JDBC PostgreSQL driver
         self.install_ycsb()
