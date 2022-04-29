@@ -103,6 +103,9 @@ class Benchmark(object):
         Parses string of threadcounts in list format
         """
 
+        if type(thread_counts) == int:
+            return [thread_counts]
+
         return [self.check_if_int(thread) for thread in thread_counts]
 
 
@@ -123,14 +126,15 @@ class Benchmark(object):
 
         """ install jdbc postgresql driver """
 
-        # cd to ycsb folder and install jdbc postgresql driver
-        os.chdir("ycsb-0.17.0")
-
         # Check if postgresql jdbv driver exists
-        if os.path.isfile('postgresql-42.2.14.jar'):
+        if os.path.isfile('ycsb-0.17.0/postgresql-42.2.14.jar'):
             return
 
+        os.chdir("ycsb-0.17.0")
+
         run(['wget', 'https://jdbc.postgresql.org/download/postgresql-42.2.14.jar'], shell = False)
+
+        os.chdir(self.HOMEDIR)
 
 
     def get_citus_host(self):
@@ -142,11 +146,9 @@ class Benchmark(object):
         return os.getenv("CITUS_HOST")
 
 
-    def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", self.DATABASE = "citus",
+    def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", database = "citus",
     outdir = "output", workloadtype = "load", workloads="workloada", iterations = 1, outputfile = "results.csv", citus = True, shard_count = 64):
 
-        self.NODES = nodes
-        self.REGION = region
         self.HOMEDIR = os.getcwd()
         self.THREADS = self.parse_threadcounts_list(threads)
         self.YCSB_WORKLOADS = ["workloada", "workloadb", "workloadc", "workloadf", "workloadd", "workloade"]
@@ -162,6 +164,7 @@ class Benchmark(object):
         self.CURRENT_THREAD = self.THREADS[0]
         self.ITERATIONS = iterations
         self.HOST = "localhost"
+        self.DATABASE = database
 
         # Set environment variables
         os.environ['DATABASE'] = self.DATABASE
@@ -205,7 +208,7 @@ class Benchmark(object):
         a new empty usertable
         """
 
-        run(["./prepare-table.sh", self.SHARD_COUNT] shell = False)
+        run(["./prepare-table.sh", str(self.SHARD_COUNT)], shell = False)
 
         print("Schema and distributed tables prepared")
 
