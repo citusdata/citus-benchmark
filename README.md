@@ -38,5 +38,5 @@ This script loads with workloada the amount of records specified behind the reco
 For details on the flags run:
 
 ```
-./run-benchmark.py --help
+python3 ./run-benchmark.py --help
 ```
