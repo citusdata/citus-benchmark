@@ -9,7 +9,7 @@ param zone string = '1'
 param records string = '10000'
 param operations string = '10000'
 param shard_count string = '64'
-param thread_counts string = '[100]'
+param thread_counts string = '100,300'
 param pgPort int = 5432
 param pre_created int = 0
 

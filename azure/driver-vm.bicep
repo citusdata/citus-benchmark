@@ -8,7 +8,6 @@ param pgVersion string
 
 param location string
 param size string
-param thread_counts string
 param zone string
 
 
