@@ -123,17 +123,26 @@ class Benchmark(object):
 
         """ install jdbc postgresql driver """
 
+        # cd to ycsb folder and install jdbc postgresql driver
+        run(['cd', 'ycsb-0.17.0'], shell = False])
+
         # Check if postgresql jdbv driver exists
         if os.path.isfile('postgresql-42.2.14.jar'):
             return
 
-        # cd to ycsb folder and install jdbc postgresql driver
-        run(['cd', 'ycsb-0.17.0'], shell = False])
         run(['wget', 'https://jdbc.postgresql.org/download/postgresql-42.2.14.jar'], shell = False])
 
+    def get_citus_host(self):
 
-    def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432",
-    outdir = "output", workloadtype = "load", workloads="workloada", iterations = 1, outputfile = "results.csv"):
+        """ Gets citus workers hosts and stores it in HOST"""
+
+        run(["export", "CITUS_HOST=`psql -tAX -c "select string_agg(substring(nodename from 9),',') from pg_dist_node where groupid > 0 or (select count(*) from pg_dist_node) = 1"`], shell = False)
+        
+        return os.getenv(["CITUS_HOST"])
+
+
+    def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", self.DATABASE = "citus"
+    outdir = "output", workloadtype = "load", workloads="workloada", iterations = 1, outputfile = "results.csv", citus = "True", shard_count = 64):
 
         self.NODES = nodes
         self.REGION = region
@@ -159,6 +168,9 @@ class Benchmark(object):
         os.environ['OPERATIONS'] = str(self.OPERATIONS)
         os.environ['PORT'] = str(self.PORT) 
         os.environ['HOMEDIR'] = self.HOMEDIR
+
+        if citus:
+            self.HOST = self.get_citus_host()
 
         # Install YCSB and JDBC PostgreSQL driver
         self.install_ycsb()
