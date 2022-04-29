@@ -135,7 +135,7 @@ class Benchmark(object):
 
     def get_citus_host(self):
 
-        """ Gets citus workers hosts and stores it in HOST"""
+        """ Gets citus workers hosts and stores it in CITUS_HOST"""
 
         run(["./get-citus-host.sh"], shell = False)
         
@@ -205,28 +205,7 @@ class Benchmark(object):
         a new empty usertable
         """
 
-        psql_query = [
-            f"""
-            DROP TABLE if EXISTS usertable;
-
-            CREATE TABLE usertable (
-                    YCSB_KEY VARCHAR(255) PRIMARY KEY,
-                    FIELD0 TEXT, FIELD1 TEXT,
-                    FIELD2 TEXT, FIELD3 TEXT,
-                    FIELD4 TEXT, FIELD5 TEXT,
-                    FIELD6 TEXT, FIELD7 TEXT,
-                    FIELD8 TEXT, FIELD9 TEXT
-            );
-            SELECT create_distributed_table('usertable', 'ycsb_key', colocate_with := 'none', shard_count := {self.SHARD_COUNT});
-            CREATE OR REPLACE FUNCTION dummy(key varchar)
-            RETURNS void AS \$\$
-            BEGIN
-            END;
-            \$\$ LANGUAGE plpgsql;
-            SELECT create_distributed_function('dummy(varchar(255))', '\$1', colocate_with :='usertable');
-            """]
-
-        self.psql(psql_query[0])
+        run(["./prepare-table.sh", self.SHARD_COUNT] shell = False)
 
         print("Schema and distributed tables prepared")
 
