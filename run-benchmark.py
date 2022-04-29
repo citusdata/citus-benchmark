@@ -103,7 +103,7 @@ class Benchmark(object):
         Parses string of threadcounts in list format
         """
 
-        return [self.check_if_int(thread) for thread in thread_counts[1:-1].split(', ')]
+        return [self.check_if_int(thread) for thread in thread_counts.split(',')]
 
 
     def install_ycsb(self):
