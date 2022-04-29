@@ -138,11 +138,11 @@ class Benchmark(object):
 
         run(["export", "CITUS_HOST=`psql -tAX -c "select string_agg(substring(nodename from 9),',') from pg_dist_node where groupid > 0 or (select count(*) from pg_dist_node) = 1"`], shell = False)
         
-        return os.getenv(["CITUS_HOST"])
+        return os.getenv("CITUS_HOST")
 
 
     def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", self.DATABASE = "citus"
-    outdir = "output", workloadtype = "load", workloads="workloada", iterations = 1, outputfile = "results.csv", citus = "True", shard_count = 64):
+    outdir = "output", workloadtype = "load", workloads="workloada", iterations = 1, outputfile = "results.csv", citus = True, shard_count = 64):
 
         self.NODES = nodes
         self.REGION = region
@@ -194,7 +194,7 @@ class Benchmark(object):
 
         """ run commands in psql """
 
-        run(['psql', '-p', self.PORT, '-h', self.HOST, '-c', command], shell = False)
+        run(['psql', '-c', command], shell = False)
 
 
     def prepare_postgresql_table(self):
