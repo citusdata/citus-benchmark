@@ -72,7 +72,7 @@ class Benchmark(object):
         try:
                 int(threads)
         except:
-                raise ValueError('Error: Invalid input for threads, please enter integers in format "300" or "300;400" if multiple threadcounts')
+                raise ValueError('Error: Invalid input, please enter integers in format "300" or "300;400" if multiple threadcounts')
 
         return int(threads)
 
@@ -97,30 +97,61 @@ class Benchmark(object):
         return [self.check_if_int(thread) for thread in thread_counts.split(';')]
 
 
-    def __init__(self, instance, database = "ycsbdb", workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5002",
-    outdir = "output", workloadtype = "load", workloads="workloada", iterations = 1, nodes = 1, region = "regional-us-east1", autocreate = False):
+    def parse_threadcounts_list(self, thread_counts):
 
-        self.INSTANCE = instance
-        self.DATABASE = database
+        """
+        Parses string of threadcounts in list format
+        """
+
+        return [self.check_if_int(thread) for thread in thread_counts[1:-1].split(', ')]
+
+
+    def install_ycsb(self):
+
+        """ install YCSB """
+
+        # Check if ycsb directory exists
+        if os.path.isdir('ycsb-0.17.0'):
+            return
+        
+        # get ycsb and unpack
+        run(['wget', 'https://github.com/brianfrankcooper/YCSB/releases/download/0.17.0/ycsb-0.17.0.tar.gz'], shell = False])
+        run(['tar', 'xfvz', 'ycsb-0.17.0.tar.gz'], shell = False])
+
+
+    def install_jdbc(self):
+
+        """ install jdbc postgresql driver """
+
+        # Check if postgresql jdbv driver exists
+        if os.path.isfile('postgresql-42.2.14.jar'):
+            return
+
+        # cd to ycsb folder and install jdbc postgresql driver
+        run(['cd', 'ycsb-0.17.0'], shell = False])
+        run(['wget', 'https://jdbc.postgresql.org/download/postgresql-42.2.14.jar'], shell = False])
+
+
+    def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432",
+    outdir = "output", workloadtype = "load", workloads="workloada", iterations = 1, outputfile = "results.csv"):
+
         self.NODES = nodes
         self.REGION = region
         self.HOMEDIR = os.getcwd()
-        self.THREADS = self.parse_threadcounts(threads)
-        self.YCSB_WORKLOADS = ["workloada", "workloadb", "workloadc", "workloadf", "workloadd"]
+        self.THREADS = self.parse_threadcounts_list(threads)
+        self.YCSB_WORKLOADS = ["workloada", "workloadb", "workloadc", "workloadf", "workloadd", "workloade"]
         self.RECORDS = records
         self.OPERATIONS = operations
+        self.SHARD_COUNT = shard_count
         self.PORT = str(port)
         self.WORKLOAD_LIST = self.parse_workloads(workloads)
         self.WORKLOAD_NAME = self.check_workloadname(workloadname)
         self.WORKLOAD_TYPE = workloadtype
         self.OUTDIR = outdir
-        self.OUTPUTFILE = self.INSTANCE + "-output.csv"
+        self.OUTPUTFILE = outputfile
         self.CURRENT_THREAD = self.THREADS[0]
         self.ITERATIONS = iterations
         self.HOST = "localhost"
-        self.SHARD_COUNT = shard_count
-
-
 
         # Set environment variables
         os.environ['DATABASE'] = self.DATABASE
@@ -129,19 +160,9 @@ class Benchmark(object):
         os.environ['PORT'] = str(self.PORT) 
         os.environ['HOMEDIR'] = self.HOMEDIR
 
-    def install_ycsb(self):
-
-        # TODO: check if ycsb folder exists
-
-        """ install YCSB and PostgreSQL driver """
-        
-        # get ycsb and unpack
-        run(['wget', 'https://github.com/brianfrankcooper/YCSB/releases/download/0.17.0/ycsb-0.17.0.tar.gz'], shell = False])
-        run(['tar', 'xfvz', 'ycsb-0.17.0.tar.gz'], shell = False])
-
-        # cd to ycsb folder and install jdbc postgresql driver
-        run(['cd', 'ycsb-0.17.0'], shell = False])
-        run(['wget', 'https://jdbc.postgresql.org/download/postgresql-42.2.14.jar'], shell = False])
+        # Install YCSB and JDBC PostgreSQL driver
+        self.install_ycsb()
+        self.install_jdbc()
 
 
     def get_workload(self, wtype, workload):
@@ -252,6 +273,20 @@ class Benchmark(object):
         self.single_workload()
 
         self.WORKLOAD_TYPE = "run"
+    
+    
+    def run_workloadc(self):
+
+        """
+        runs workload e (loading and running)
+        """
+
+        self.load_workloada()
+
+        self.WORKLOAD_NAME = "workloadc"
+        self.WORKLOAD_TYPE = "run"
+
+        self.single_workload()
 
 
     def run_workloade(self):
@@ -268,23 +303,33 @@ class Benchmark(object):
         self.WORKLOAD_TYPE = "run"
         self.single_workload()
 
-
-    def sort_workloads(self):
+    
+    def citus_workload(self):
 
         """
-        Sorts workloads as described in the order of Core-Workloads
-        returns sorted workloads
-        code from: 
-        https://stackoverflow.com/questions/30504317/sort-a-subset-of-a-python-list-to-have-the-same-relative-order-as-in-other-list
-        maak een dict met index en dan sorten op index ofzo?
+        Executes loading with workloada, running with workloadc
+        Multiple iterations are supported
         """
 
-        workloads_dict = {x: i for i, x in enumerate(self.YCSB_WORKLOADS)}
+        for i in range(self.ITERATIONS):
 
-        # sort on key and get the values
-        self.WORKLOADS = self.WORKLOADS.sort(key  = workloads_dict.get).values()
+            # Set environment var for outputdirectory
+            outputdir = self.OUTDIR + f"-{i+1}"
 
-        print(self.WORKLOADS)
+            # Create output folder if it does not exist yet en set env variable
+            run(['mkdir', '-p', outputdir], shell = False)
+            os.environ['OUTDIR'] = outputdir
+
+            for thread in self.THREADS:
+                self.CURRENT_THREAD = thread
+                self.load_workloada()
+                self.run_workloadc()
+
+            print(f"Done running workloadc for iteration {i}")
+            print("Generating CSV")
+
+            # gather csv with all results
+            run(['python3', 'generate-csv.py', outputdir, f"{outputdir}.csv"], shell = False)
 
 
     def run_multiple_workloads(self, workloads):
@@ -356,18 +401,12 @@ class Benchmark(object):
             # gather csv with all results
             run(['python3', 'generate-csv.py', outputdir, f"{outputdir}.csv"], shell = False)
 
-            # kill pgadapter process in background
-            run(['tmux', 'kill-session', '-t', 'runpg'], shell = False)
-
-            # Delete Spanner instance
-            if self.AUTOCREATE:
-                self.delete_instance()
-
 
 
 if __name__ == '__main__':
 
   fire.Fire(Benchmark)
+
 
 
 
