@@ -43,6 +43,6 @@ python3 ./run-benchmark.py --help
 #### An example run
 
 ```
-python3 run-benchmark.py --outdir=results --records=100000 --operations=1000000 --shard_count=64 --threads=100,200,300 citus_workload
+python3 run-benchmark.py --records=100000 --operations=1000000 --shard_count=64 --threads=100,200,300 citus_workload
 ```
 
