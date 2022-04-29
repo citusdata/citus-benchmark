@@ -34,9 +34,15 @@ python3 run-benchmark.py [--outdir[=]<output_directory>] [--records[=]records] [
 
 This script loads with workloada the amount of records specified behind the records flag and runs workloadc (100% reads) by performing the specified amount of operations. A CSV with some statistics from the benchmark is automatically generated afterwards.
 
-
 For details on the flags run:
 
 ```
 python3 ./run-benchmark.py --help
 ```
+
+#### An example run
+
+```
+python3 run-benchmark.py --outdir=results --records=100000 --operations=1000000 --shard_count=64 --threads=100,200,300 citus_workload
+```
+
