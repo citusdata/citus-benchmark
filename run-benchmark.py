@@ -103,7 +103,7 @@ class Benchmark(object):
         Parses string of threadcounts in list format
         """
 
-        return [self.check_if_int(thread) for thread in thread_counts.split(',')]
+        return [self.check_if_int(thread) for thread in thread_counts]
 
 
     def install_ycsb(self):
@@ -115,8 +115,8 @@ class Benchmark(object):
             return
         
         # get ycsb and unpack
-        run(['wget', 'https://github.com/brianfrankcooper/YCSB/releases/download/0.17.0/ycsb-0.17.0.tar.gz'], shell = False])
-        run(['tar', 'xfvz', 'ycsb-0.17.0.tar.gz'], shell = False])
+        run(['wget', 'https://github.com/brianfrankcooper/YCSB/releases/download/0.17.0/ycsb-0.17.0.tar.gz'], shell = False)
+        run(['tar', 'xfvz', 'ycsb-0.17.0.tar.gz'], shell = False)
 
 
     def install_jdbc(self):
@@ -124,24 +124,25 @@ class Benchmark(object):
         """ install jdbc postgresql driver """
 
         # cd to ycsb folder and install jdbc postgresql driver
-        run(['cd', 'ycsb-0.17.0'], shell = False])
+        os.chdir("ycsb-0.17.0")
 
         # Check if postgresql jdbv driver exists
         if os.path.isfile('postgresql-42.2.14.jar'):
             return
 
-        run(['wget', 'https://jdbc.postgresql.org/download/postgresql-42.2.14.jar'], shell = False])
+        run(['wget', 'https://jdbc.postgresql.org/download/postgresql-42.2.14.jar'], shell = False)
+
 
     def get_citus_host(self):
 
         """ Gets citus workers hosts and stores it in HOST"""
 
-        run(["export", "CITUS_HOST=`psql -tAX -c "select string_agg(substring(nodename from 9),',') from pg_dist_node where groupid > 0 or (select count(*) from pg_dist_node) = 1"`], shell = False)
+        run(["./get-citus-host.sh"], shell = False)
         
         return os.getenv("CITUS_HOST")
 
 
-    def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", self.DATABASE = "citus"
+    def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", self.DATABASE = "citus",
     outdir = "output", workloadtype = "load", workloads="workloada", iterations = 1, outputfile = "results.csv", citus = True, shard_count = 64):
 
         self.NODES = nodes
