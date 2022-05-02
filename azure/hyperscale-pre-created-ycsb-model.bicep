@@ -20,7 +20,7 @@ param pgVersion string = '14'
 
 // Configuration of the VM that runs the benchmark (the driver)
 // This VM's should be pretty big, to make sure it does not become the bottleneck
-param driverSize string  = 'Standard_D64s_v5'
+param driverSize string  = 'Standard_D64s_v3'
 param AnalysisDriverSize string = 'Standard_D8s_v3'
 
 param sshAllowIpPrefix string = '*'
