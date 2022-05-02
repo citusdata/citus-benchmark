@@ -45,7 +45,7 @@ class Benchmark(object):
         returns list of workloads
         """
 
-        if type(thread_counts) == int:
+        if type(workloads) == str:
             return [self.check_workloadname(workloads)]
 
         # Raise error if there are any workloads that do not exist
