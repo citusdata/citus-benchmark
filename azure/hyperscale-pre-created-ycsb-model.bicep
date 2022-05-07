@@ -13,6 +13,7 @@ param records string = '10000'
 param operations string = '10000'
 param shard_count string = '64'
 param thread_counts string = '100,300'
+param iterations int = 1
 param pre_created int = 1
 
 // Configuration of the postgres server group
@@ -80,6 +81,7 @@ module driverVm 'driver-vm-ycsb.bicep' = {
     shard_count: shard_count
     thread_counts: thread_counts
     pre_created: pre_created
+    iterations: iterations
   }
 }
 

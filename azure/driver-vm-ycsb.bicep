@@ -15,6 +15,7 @@ param records string
 param operations string
 param shard_count string
 param thread_counts string
+param iterations int
 
 param vmName string
 param nicName string
