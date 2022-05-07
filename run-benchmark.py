@@ -109,7 +109,7 @@ class Benchmark(object):
 
 
     def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", database = "citus",
-    outdir = "output", workloadtype = "load", workloads="workloada", iterations = 1, outputfile = "results.csv", shard_count = 16):
+    outdir = "output", workloadtype = "load", workloads="workloada", iterations = 1, outputfile = "results.csv", shard_count = 16, run_threads=100, load_threads=900):
 
         self.HOMEDIR = os.getcwd()
         self.THREADS = self.parse_threadcounts(threads)
@@ -127,6 +127,8 @@ class Benchmark(object):
         self.ITERATIONS = iterations
         self.HOST = "localhost"
         self.DATABASE = database
+        self.LOAD_THREADS = load_threads
+        self.RUN_THREADS = run_threads
 
         # Set environment variables
         os.environ['DATABASE'] = self.DATABASE
@@ -158,6 +160,14 @@ class Benchmark(object):
         """ run commands in psql """
 
         run(['psql', '-c', command], shell = False)
+
+    def set_iterations(self):
+            # Set environment var for outputdirectory
+            outputdir = self.OUTDIR + f"-{i+1}"
+
+            # Create output folder if it does not exist yet en set env variable
+            run(['mkdir', '-p', outputdir], shell = False)
+            os.environ['OUTDIR'] = outputdir
 
 
     def prepare_postgresql_table(self):
@@ -204,28 +214,36 @@ class Benchmark(object):
         run(self.get_workload(self.WORKLOAD_TYPE, self.WORKLOAD_NAME), shell = False)
 
 
-    def single_workload_multiple_threads(self):
-
-        """
-        Runs a single ycsb workload with multiple threadcounts
-        """
-
-        for thread in self.THREADS:
-            self.CURRENT_THREAD = thread
-            self.single_workload()
-
-
     def run_workload(self, workloadname, workloadtype):
 
         """
         runs a workload and set params accordingly
         """
-
+    	
         self.WORKLOAD_NAME = workloadname
         self.WORKLOAD_TYPE = workloadtype
         self.single_workload()
 
-    
+
+    def single_workload_multiple_threads(self):
+
+        """
+        Runs a single ycsb workload with multiple threadcounts
+        """
+        for i in range(self.ITERATIONS):
+            self.set_iterations()
+
+            for thread in self.THREADS:
+                self.CURRENT_THREAD = thread
+                self.run_workload(self.WORKLOAD_NAME, self.WORKLOAD_TYPE)
+
+            print(f"Done running workloadc for iteration {i}")
+            print("Generating CSV")
+
+            # gather csv with all results
+            run(['python3', 'generate-csv.py', outputdir, f"{outputdir}.csv"], shell = False)
+
+
     def citus_workload(self):
 
         """
@@ -235,12 +253,7 @@ class Benchmark(object):
 
         for i in range(self.ITERATIONS):
 
-            # Set environment var for outputdirectory
-            outputdir = self.OUTDIR + f"-{i+1}"
-
-            # Create output folder if it does not exist yet en set env variable
-            run(['mkdir', '-p', outputdir], shell = False)
-            os.environ['OUTDIR'] = outputdir
+            self.set_iterations()
 
             for thread in self.THREADS:
                 self.CURRENT_THREAD = thread
