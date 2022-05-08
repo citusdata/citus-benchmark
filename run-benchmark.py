@@ -144,7 +144,7 @@ class Benchmark(object):
         run(['psql', '-c', command], shell = False)
 
 
-    def set_iterations(self, i
+    def set_iterations(self, i):
 
         self.ITERATION = i
 
@@ -218,6 +218,7 @@ class Benchmark(object):
         """
         for i in range(self.ITERATIONS):
             self.set_iterations()
+            outputdir = self.OUTDIR + f"-{i+1}"
 
             for thread in self.THREADS:
                 self.CURRENT_THREAD = thread
@@ -240,6 +241,8 @@ class Benchmark(object):
         for i in range(self.ITERATIONS):
 
             self.set_iterations(i)
+
+            outputdir = self.OUTDIR + f"-{i+1}"
 
             for thread in self.THREADS:
                 self.CURRENT_THREAD = thread
