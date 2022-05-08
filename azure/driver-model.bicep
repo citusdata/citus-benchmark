@@ -11,6 +11,7 @@ param zone string
 param location string
 param size string
 param records string
+param operations string
 param workers int
 param rg string
 
@@ -62,14 +63,14 @@ pip3 install fire
 pip3 install pandas
 pip3 install matplotlib
 
-while ! psql -c 'select 1'; do  echo failed; sleep 1; done
-tmux new-session -d -t main -s cloud-init \; send-keys './monitor-ycsb.sh {6} {7} {8} {9} {10}' Enter
+// while ! psql -c 'select 1'; do  echo failed; sleep 1; done
+// tmux new-session -d -t main -s cloud-init \; send-keys './monitor-ycsb.sh {6} {7} {8} {9}' Enter
 
-### MAAK AF
+// MAAK AF
 
 '''
 
-var AnalysisDriverBootScript = format(AnalysisDriverBootTemplate, pgHost, pgUser, pgPassword, pgPort, bashrcTmuxAutoAttach, pgVersion, records, workers, rg)
+var AnalysisDriverBootScript = format(AnalysisDriverBootTemplate, pgHost, pgUser, pgPassword, pgPort, bashrcTmuxAutoAttach, pgVersion, records, operations, workers, rg)
 
 module vmAnalysis 'vm.bicep' = {
   name: '${vmName}-driver-module'

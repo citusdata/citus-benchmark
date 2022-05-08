@@ -108,6 +108,7 @@ module AnalysisDriverVm 'driver-model.bicep' = {
     records: records
     workers: workers
     rg: namePrefix
+    operations: operations
   }
 }
 
