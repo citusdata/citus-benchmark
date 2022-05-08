@@ -7,6 +7,7 @@ export RECORDS=$4
 export THREADS=$5
 export OPERATIONS=$6
 export ITERATION=$7
+export RESOURCE=$8
 
 cd ycsb-0.17.0
 
