@@ -4,27 +4,7 @@ import fire
 import sys
 import pandas as pd
 import time
-
-def eprint(*args, **kwargs):
-
-    """
-    eprint prints to stderr
-    """
-
-    print(*args, file=sys.stderr, **kwargs)
-
-
-def run(command, *args, shell=True, **kwargs):
-
-    """
-    run runs the given command and prints it to stderr
-    """
-    
-    eprint(f"+ {command} ")
-    result = subprocess.run(command, *args, check=True, shell=shell, **kwargs)
-
-    return result
-
+from helper import *
 
 class Benchmark(object):
 
@@ -109,7 +89,8 @@ class Benchmark(object):
 
 
     def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", database = "citus",
-    outdir = "output", workloadtype = "load", workloads="workloada", iterations = 1, outputfile = "results.csv", shard_count = 16, run_threads=100, load_threads=900):
+    outdir = "output", workloadtype = "load", workloads="workloada", iterations = 1, outputfile = "results.csv", shard_count = 16,
+    workers = "2", resource = "custom"):
 
         self.HOMEDIR = os.getcwd()
         self.THREADS = self.parse_threadcounts(threads)
@@ -127,8 +108,9 @@ class Benchmark(object):
         self.ITERATIONS = iterations
         self.HOST = "localhost"
         self.DATABASE = database
-        self.LOAD_THREADS = load_threads
-        self.RUN_THREADS = run_threads
+        self.ITERATION = 1
+        self.WORKERS = workers
+        self.RG = resource
 
         # Set environment variables
         os.environ['DATABASE'] = self.DATABASE
@@ -148,11 +130,11 @@ class Benchmark(object):
 
         if wtype == "load":
 
-            return ['./ycsb-load.sh', workload, self.PORT, self.DATABASE, str(self.RECORDS), str(self.CURRENT_THREAD)]
+            return ['./ycsb-load.sh', workload, self.PORT, self.DATABASE, str(self.RECORDS), str(self.CURRENT_THREAD), str(self.ITERATION), str(self.WORKERS), str(self.RG)]
         
         else:
             
-            return ['./ycsb-run.sh', workload, self.PORT, self.DATABASE, str(self.RECORDS), str(self.CURRENT_THREAD), str(self.OPERATIONS)]
+            return ['./ycsb-run.sh', workload, self.PORT, self.DATABASE, str(self.RECORDS), str(self.CURRENT_THREAD), str(self.OPERATIONS), str(self.WORKERS), str(self.RG)]
         
 
     def psql(self, command):
@@ -161,13 +143,17 @@ class Benchmark(object):
 
         run(['psql', '-c', command], shell = False)
 
-    def set_iterations(self):
-            # Set environment var for outputdirectory
-            outputdir = self.OUTDIR + f"-{i+1}"
 
-            # Create output folder if it does not exist yet en set env variable
-            run(['mkdir', '-p', outputdir], shell = False)
-            os.environ['OUTDIR'] = outputdir
+    def set_iterations(self, i
+
+        self.ITERATION = i
+
+        # Set environment var for outputdirectory
+        outputdir = self.OUTDIR + f"-{i+1}"
+
+        # Create output folder if it does not exist yet en set env variable
+        run(['mkdir', '-p', outputdir], shell = False)
+        os.environ['OUTDIR'] = outputdir
 
 
     def prepare_postgresql_table(self):
@@ -253,7 +239,7 @@ class Benchmark(object):
 
         for i in range(self.ITERATIONS):
 
-            self.set_iterations()
+            self.set_iterations(i)
 
             for thread in self.THREADS:
                 self.CURRENT_THREAD = thread
