@@ -39,6 +39,8 @@ class Logging(object):
 
     def connect_to_worker(self, worker, workerName, script, outputdir = "output"):
 
+        """ Connects to a worker via ssh, and runs a script """
+
         run(["ssh", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{worker}", script], shell = False)
 
         # copy file from remote to local
@@ -58,7 +60,7 @@ class Logging(object):
 
         # run(["ssh", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{worker}", "'(iostat -xmt 1 > cpu.log) &'"], shell = False)
 
-    def get_csv(self, outdir = "benchmarks"):
+    def get_csv(self, outdir = "results"):
 
         # make directory to store logging files
         run(['mkdir', '-p', outdir], shell = False)
@@ -76,12 +78,14 @@ class Logging(object):
 
     def connect(self):
 
+        """ runs script in all workers from citus cluster """
+
         # script = "iostat > cpu.log; cat cpu.log"
-        script = "mkdir results; iostat > results/cpu.log; cat cpu.log; ps aux > results/processes.log"
-        
+        script = "mkdir results; iostat > results/cpu.log; cat results/cpu.log; ps aux > results/processes.log"
 
         for i, worker in enumerate(self.get_worker_adresses()):
             self.connect_to_worker(worker, i, script)
+
 
     def alter_permissions(self):
 
@@ -89,7 +93,13 @@ class Logging(object):
         
         run(f"./alter-user.sh {self.HOST} {self.PORT} {self.PASSWORD} {self.USER} {self.DATABASE}".split(' '))
 
+
     def set_permissions(self):
+
+        """ this doesn't work yet as it is a shell in a shell """
+
+        # maybe add script first to coord
+        # then sudo su postgres; script.sh 
 
         # sudo su postgres
         # psql -d citus
