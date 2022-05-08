@@ -108,11 +108,11 @@ def return_csv(outfolder = "output", csvname="output.csv"):
         if values[0] == "load":
 
             # workers, iteration, workloadtype, workloadname, threads, records, operations, throughput, runtime
-            row = [values[-1].split('.')[0], values[-2], values[-3], values[0], values[1], values[2], values[3].split('.')[0], 0, get_throughput(output_file), get_runtime(output_file)]
+            row = [values[-1].split('.')[0], values[-2], values[-3], values[0], values[1], values[2], values[3], 0, get_throughput(output_file), get_runtime(output_file)]
             results.append(row)
             continue
 
-        row = [values[-1].split('.')[0], values[-2], values[-3], values[0], values[1], values[2], values[3], values[4].split('.')[0], get_throughput(output_file), get_runtime(output_file)]
+        row = [values[-1].split('.')[0], values[-2], values[-3], values[0], values[1], values[2], values[3], values[4], get_throughput(output_file), get_runtime(output_file)]
         results.append(row)
 
     # write results to csv file

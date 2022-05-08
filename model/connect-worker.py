@@ -64,8 +64,9 @@ class Logging(object):
 
         # make directory to store logging files
         run(['mkdir', '-p', outdir], shell = False)
+        run(['mkdir', '-p', outdir + "/YCSB"], shell = False)
 
-        run(["./get-csv-from-driver.sh", self.RESOURCE, outdir], shell = False)
+        run(["./get-csv-from-driver.sh", self.RESOURCE, outdir + "/YCSB"], shell = False)
    
 
     def print_workers(self):
@@ -97,6 +98,9 @@ class Logging(object):
     def set_permissions(self):
 
         """ this doesn't work yet as it is a shell in a shell """
+
+        # past alter-role script in citus coordinator
+        run(["scp", "-r", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{worker}:.", f"{outputdir}"], shell = False)
 
         # maybe add script first to coord
         # then sudo su postgres; script.sh 
