@@ -14,7 +14,7 @@ param operations string = '10000'
 param shard_count string = '64'
 param thread_counts string = '100,300'
 param iterations int = 1
-param pre_created int = 1
+param workers int = 1
 
 // Configuration of the postgres server group
 param pgVersion string = '14'
@@ -80,8 +80,9 @@ module driverVm 'driver-vm-ycsb.bicep' = {
     operations: operations
     shard_count: shard_count
     thread_counts: thread_counts
-    pre_created: pre_created
     iterations: iterations
+    workers: workers
+    rg: namePrefix
   }
 }
 
@@ -101,9 +102,12 @@ module AnalysisDriverVm 'driver-model.bicep' = {
     vnetName: vnetName
     subnetName: subnetName
     pgHost: pgHost
-    pgUser: 'citus'
-    pgPassword: pgAdminPassword
+    pgUser: 'monitor'
+    pgPassword: 'monitorpassword'
     pgVersion: pgVersion
+    records: records
+    workers: workers
+    rg: namePrefix
   }
 }
 
