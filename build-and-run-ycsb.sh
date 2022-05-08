@@ -9,7 +9,7 @@ export SHARD_COUNT=$3
 export THREAD_COUNT=$4
 export ITERATIONS=$5
 export WORKERS=$6
-export RESOURCE_GROUP=$5
+export RESOURCE_GROUP=$7
 
 mkdir -p $OUTPUT_FOLDER
 
