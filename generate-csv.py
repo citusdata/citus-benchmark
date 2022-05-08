@@ -93,13 +93,12 @@ def return_csv(outfolder = "output", csvname="output.csv"):
 
     """
     generates a csv with format:
-    workloadtype, workloadname, threads, records, operations, throughput, runtime
+    id, workers, iteration, workloadtype, workloadname, threads, records, operations, throughput, runtime
     """
-
 
     os.chdir(outfolder)
 
-    results = [["workloadtype", "workloadname", "threads", "records", "operations", "throughput", "runtime (s)"]]
+    results = [["id", "workers", "iteration", "workloadtype", "workloadname", "threads", "records", "operations", "throughput", "runtime (s)"]]
 
     for output_file in os.listdir('.'):
 
@@ -108,22 +107,21 @@ def return_csv(outfolder = "output", csvname="output.csv"):
 
         if values[0] == "load":
 
-            # workloadtype, workloadname, threads, records, operations, throughput, runtime
-            row = [values[0], values[1], values[2], values[-1].split('.')[0], 0, get_throughput(output_file), get_runtime(output_file)]
+            # workers, iteration, workloadtype, workloadname, threads, records, operations, throughput, runtime
+            row = [values[-1], values[-2], values[-3], values[0], values[1], values[2], values[3].split('.')[0], 0, get_throughput(output_file), get_runtime(output_file)]
             results.append(row)
             continue
 
-        row = [values[0], values[1], values[2], values[3], values[-1].split('.')[0], get_throughput(output_file), get_runtime(output_file)]
+        row = [values[-1], values[-2], values[-3], values[0], values[1], values[2], values[3], values[4].split('.')[0], get_throughput(output_file), get_runtime(output_file)]
         results.append(row)
 
+    # write results to csv file
     f = open(homedir + "/" + csvname, 'w')
     writer = csv.writer(f)
 
     for row in results:
-
         writer.writerow(row)
 
-    # close the file
     f.close()
 
 
