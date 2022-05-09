@@ -60,11 +60,20 @@ class Logging(object):
 
         # run(["ssh", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{worker}", "'(iostat -xmt 1 > cpu.log) &'"], shell = False)
 
-    def get_csv(self, outdir = "results"):
+    def create_output_directories(self):
 
-        # make directory to store logging files
+        """ create output directories if not there yet """
+
         run(['mkdir', '-p', outdir], shell = False)
         run(['mkdir', '-p', outdir + "/YCSB"], shell = False)
+        run(['mkdir', '-p', outdir + "/pglogging"], shell = False)
+        run(['mkdir', '-p', outdir + "/general"], shell = False)
+
+
+    def get_csv(self, outdir = "results"):
+
+        # make directories to store logging files
+        self.create_output_directories()
 
         run(["./get-csv-from-driver.sh", self.RESOURCE, outdir + "/YCSB"], shell = False)
    
