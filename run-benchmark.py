@@ -90,7 +90,7 @@ class Benchmark(object):
 
     def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", database = "citus",
     outdir = "output", workloadtype = "load", workloads="workloada", iterations = 1, outputfile = "results.csv", shard_count = 16,
-    workers = "2", resource = "custom"):
+    workers = "2", resource = "custom", host = "localhost"):
 
         self.HOMEDIR = os.getcwd()
         self.THREADS = self.parse_threadcounts(threads)
@@ -106,7 +106,7 @@ class Benchmark(object):
         self.OUTPUTFILE = outputfile
         self.CURRENT_THREAD = self.THREADS[0]
         self.ITERATIONS = iterations
-        self.HOST = "localhost"
+        self.HOST = host
         self.DATABASE = database
         self.ITERATION = 1
         self.WORKERS = workers
@@ -124,6 +124,15 @@ class Benchmark(object):
         self.install_jdbc()
 
 
+    def copy_csv_to_local(self):
+
+        # todo insert host
+        # scp to right folder locally
+
+        run(['python3', 'model/connect-worker.py', '--prefix=marlin', f'--resource={self.RG}', f'--password{os.getenv["PGPASSWORD"]}',
+        '--host={self.HOST}' get_csv])
+
+
     def get_workload(self, wtype, workload):
 
         """ returns list with commands to run workload """
@@ -134,7 +143,7 @@ class Benchmark(object):
         
         else:
             
-            return ['./ycsb-run.sh', workload, self.PORT, self.DATABASE, str(self.RECORDS), str(self.CURRENT_THREAD), str(self.OPERATIONS), str(self.WORKERS), str(self.RG)]
+            return ['./ycsb-run.sh', workload, self.PORT, self.DATABASE, str(self.RECORDS), str(self.CURRENT_THREAD), str(self.OPERATIONS),  str(self.ITERATION), str(self.WORKERS), str(self.RG)]
         
 
     def psql(self, command):
