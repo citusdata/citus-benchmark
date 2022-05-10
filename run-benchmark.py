@@ -130,7 +130,7 @@ class Benchmark(object):
         # scp to right folder locally
 
         run(['python3', 'model/connect-worker.py', '--prefix=marlin', f'--resource={self.RG}', f'--password{os.getenv["PGPASSWORD"]}',
-        '--host={self.HOST}' get_csv])
+        '--host={self.HOST}', get_csv])
 
 
     def get_workload(self, wtype, workload):
