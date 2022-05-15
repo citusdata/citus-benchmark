@@ -1,8 +1,12 @@
 # YCSB benchmarks for Citus
 
-This repository contains utility scripts/files to run [YCSB][https://github.com/brianfrankcooper/YCSB?msclkid=6b10912cc7b911ec94793005301b742d] on Citus.
+This repository contains utility scripts/files to run [YCSB](https://github.com/brianfrankcooper/YCSB?msclkid=6b10912cc7b911ec94793005301b742d) on Citus.
 
-# Preparation
+## YCSB Model Architecture
+
+<p align="center"><img src="ycsb-model.png" width=75%></p>
+
+## Preparation
 
 To run the benchmarks, you need to have psql installed.
 
@@ -24,7 +28,7 @@ pip3 install pandas
 pip3 install matplotlib
 ```
 
-# Running YCSB
+## Running YCSB
 
 `run-benchmark.py` is the driver script and can be run using e.g.:
 
