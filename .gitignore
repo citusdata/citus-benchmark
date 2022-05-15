@@ -5,3 +5,9 @@ HammerDB-upstream/
 HammerDB-master/
 results/
 /azure/.ssh-controlmasters
+*.yml
+*.yaml
+output/
+__pycache__/
+/model/__pycache__/
+/model/aws
