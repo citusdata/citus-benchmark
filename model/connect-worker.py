@@ -10,6 +10,15 @@ from helper import *
 
 class Logging(object):
 
+    def get_worker_adresses(self):
+
+        """ get adresses from workers in a citus cluster """
+
+        print(os.getcwd())
+        run(["cd", self.HOMEDIR + "/model"], shell = False)
+        print(os.getcwd())
+        return os.popen(f"./worker-adresses.sh {self.HOST} {self.PORT} {self.PASSWORD} {self.USER} {self.DATABASE}").read().split('\n')[0].split(',')
+
 
     def __init__(self, resource, prefix, host, password = "postgres", port = 5432, user = "citus", database = "citus"):
 
@@ -21,6 +30,7 @@ class Logging(object):
         self.DATABASE = database
         self.PREFIX = prefix
         self.RESOURCE = resource
+        self.WORKERS = self.get_worker_adresses()
 
         # Set environment variables
         os.environ['PGPASSWORD'] = self.PASSWORD
@@ -30,11 +40,14 @@ class Logging(object):
         os.environ['PGDATABASE'] = self.DATABASE
 
 
-    def get_worker_adresses(self):
+    def collect_iostat(self):
 
-        """ get adresses from workers in a citus cluster """
-        
-        return os.popen(f"./worker-adresses.sh {self.HOST} {self.PORT} {self.PASSWORD} {self.USER} {self.DATABASE}").read().split('\n')[0].split(',')
+        """ Collect iostat files from every worker and stores in general/resource_group/workername """
+
+        for i, worker in enumerate(self.WORKERS):
+
+            run(['mkdir', '-p', f"output/general/{self.RESOURCE}/worker-{i}"], shell = False)
+            run(["scp", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{worker}:nohup.out", f"output/general/{self.RESOURCE}/worker-{i}"], shell = False)
 
 
     def connect_to_worker(self, worker, workerName, script, outputdir = "output"):
@@ -43,31 +56,21 @@ class Logging(object):
 
         run(["ssh", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{worker}", script], shell = False)
 
-        # copy file from remote to local
-        # now it opens a new ssh to copy the file to local
-
-        # make directory to store logging files
-        run(['mkdir', '-p', outputdir], shell = False)
+    #     # copy file from remote to local
+    #     # now it opens a new ssh to copy the file to local
 
 
-        run(["scp", "-r", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{worker}:results", f"{outputdir}"], shell = False)
+    #     run(["scp", "-r", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{worker}:results", f"{outputdir}/worker-{i}"], shell = False)
 
-        # sleep(10)
-
-        # run([""])
-
-        # get files generated on worker and store on local
-
-        # run(["ssh", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{worker}", "'(iostat -xmt 1 > cpu.log) &'"], shell = False)
 
     def create_output_directories(self):
 
         """ create output directories if not there yet """
 
-        run(['mkdir', '-p', outdir], shell = False)
-        run(['mkdir', '-p', outdir + "/YCSB"], shell = False)
-        run(['mkdir', '-p', outdir + "/pglogging"], shell = False)
-        run(['mkdir', '-p', outdir + "/general"], shell = False)
+        run(['mkdir', '-p', 'output'], shell = False)
+        run(['mkdir', '-p', 'output' + "/YCSB/" + self.RESOURCE + "/results"], shell = False)
+        run(['mkdir', '-p', 'output' + "/pglogging"], shell = False)
+        run(['mkdir', '-p', 'output' + "/general"], shell = False)
 
 
     def get_csv(self, outdir = "results"):
@@ -75,8 +78,8 @@ class Logging(object):
         # make directories to store logging files
         self.create_output_directories()
 
-        run(["./get-csv-from-driver.sh", self.RESOURCE, outdir + "/YCSB"], shell = False)
-   
+        run(["./get-csv-from-driver.sh", self.RESOURCE, f"output/YCSB/{self.RESOURCE}/results"], shell = False)
+
 
     def print_workers(self):
 
@@ -86,44 +89,53 @@ class Logging(object):
             print(worker)
 
 
-    def connect(self):
+    def run_on_all_workers(self, script):
 
         """ runs script in all workers from citus cluster """
 
-        # script = "iostat > cpu.log; cat cpu.log"
-        script = "mkdir results; iostat > results/cpu.log; cat results/cpu.log; ps aux > results/processes.log"
-
-        for i, worker in enumerate(self.get_worker_adresses()):
+        for i, worker in enumerate(self.WORKERS):
             self.connect_to_worker(worker, i, script)
-
-
-    def alter_permissions(self):
-
-        """ give user monitor all necessary permissions """
-        
-        run(f"./alter-user.sh {self.HOST} {self.PORT} {self.PASSWORD} {self.USER} {self.DATABASE}".split(' '))
 
 
     def set_permissions(self):
 
-        """ this doesn't work yet as it is a shell in a shell """
+        """
+        Sets the following permissions for user 'monitor':
+        alter user monitor set log_duration = on
+        alter user monitor set log_min_messages = 'debug1'
+        alter user monitor set log_statement to 'all'
+        """
 
-        # past alter-role script in citus coordinator
-        run(["scp", "-r", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{worker}:.", f"{outputdir}"], shell = False)
-
-        # maybe add script first to coord
-        # then sudo su postgres; script.sh 
-
-        # sudo su postgres
-        # psql -d citus
-        # alter user monitor set log_duration to on;
-        # alter user monitor set log_statement = "all";
+        run(["cd" self.HOMEDIR + "/model", "&&", "./alter-user.sh", self.PREFIX, self.HOST, ">", "/dev/null"], shell = False)
 
 
-        # Connect via SSH to coordinator node
-        run(["ssh", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{self.HOST}", "sudo su postgres; pwd"], shell = False)
+    # def collect_postgres_logs(self):
 
-    
+    #     """ collects postgresql logs in /dat/14/data/pg_logs """
+
+    #     run([], shell = False)
+
+
+    def start(self):
+
+        """ starts the process to automatically connect logs from the worker nodes """
+
+        # Create output directories
+        self.create_output_directories()
+
+        # Sets permissions for second user monitor
+        self.set_permissions()
+
+        # Runs script on workers (IOSTAT) that collects CPU usage for every second
+        self.run_on_all_workers("nohup iostat -xmt 1 &")
+
+        # Sleeps 60 seconds so that cpu usage of 1 minutes is collected
+        sleep(60)
+
+        # Collect nohup.out
+        self.collect_iostat()
+
+
 if __name__ == '__main__':
 
   fire.Fire(Logging)
