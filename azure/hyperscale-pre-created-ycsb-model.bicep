@@ -5,6 +5,7 @@ param vmAdminPublicKey string
 param vmAdminUsername string = 'azureuser'
 param pgHost string
 param pgPort int = 5432
+param monitorpw string
 
 
 param location string = resourceGroup().location
@@ -83,6 +84,7 @@ module driverVm 'driver-vm-ycsb.bicep' = {
     iterations: iterations
     workers: workers
     rg: namePrefix
+    monitorpw: monitorpw
   }
 }
 

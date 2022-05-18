@@ -6,7 +6,7 @@ param pgUser string
 param pgPassword string
 param pgPort int
 param pgVersion string
-param pre_created int
+param monitorpw string
 
 param zone string
 param location string
@@ -16,6 +16,8 @@ param operations string
 param shard_count string
 param thread_counts string
 param iterations int
+param rg string
+param workers int
 
 param vmName string
 param nicName string
@@ -70,10 +72,10 @@ pip3 install pandas
 pip3 install matplotlib
 
 while ! psql -c 'select 1'; do  echo failed; sleep 1; done
-tmux new-session -d -t main -s cloud-init \; send-keys './build-and-run-ycsb.sh {6} {7} {8} {9}' Enter
+tmux new-session -d -t main -s cloud-init \; send-keys './build-and-run-ycsb.sh {6} {7} {8} {9} {10} {11} {12} {13}' Enter
 '''
 
-var driverBootScript = format(driverBootTemplate, pgHost, pgUser, pgPassword, pgPort, bashrcTmuxAutoAttach, pgVersion, records, operations, shard_count, thread_counts, pre_created)
+var driverBootScript = format(driverBootTemplate, pgHost, pgUser, pgPassword, pgPort, bashrcTmuxAutoAttach, pgVersion, records, operations, shard_count, thread_counts, iterations, workers, rg, monitorpw)
 
 module vm 'vm.bicep' = {
   name: '${vmName}-driver-module'
