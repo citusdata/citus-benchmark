@@ -40,7 +40,7 @@ with open('config.yml', 'r') as f:
 #     print("Metadata already stored")
 
 # Create a logging instance
-logs = Logging(resource = cluster['resource'], prefix = cluster['prefix'], host = cluster['host'], password = cluster['pgpassword'], port = cluster['port'])
+logs = Logging(resource = cluster['resource'], prefix = cluster['prefix'], host = cluster['host'], password = cluster['pgpassword'], port = cluster['port'], shard_count = ycsb['shard_count'])
 
 # create output directories if they do not exist
 logs.create_output_directories()

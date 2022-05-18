@@ -24,7 +24,7 @@ class Logging(object):
         return os.popen(f"./worker-adresses.sh {self.HOST} {self.PORT} {self.PASSWORD} {self.USER} {self.DATABASE}").read().split('\n')[0].split(',')
 
 
-    def __init__(self, resource, prefix, host, password = "postgres", port = 5432, user = "citus", database = "citus", iterations = 1):
+    def __init__(self, resource, prefix, host, password = "postgres", port = 5432, user = "citus", database = "citus", iterations = 1, shard_count = 4):
 
         self.HOMEDIR = os.getcwd()
         self.PASSWORD = password
@@ -36,6 +36,8 @@ class Logging(object):
         self.RESOURCE = resource
         self.WORKERS = self.get_worker_adresses()
         self.ITERATIONS = iterations
+        self.SHARD_COUNT = shard_count
+
 
         # Set environment variables
         os.environ['PGPASSWORD'] = self.PASSWORD
