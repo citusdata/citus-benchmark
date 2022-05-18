@@ -170,8 +170,8 @@ class Benchmark(object):
         self.install_jdbc()
 
         # if prepare table
-        if prepare:
-            self.prepare_postgresql_table()
+        # if prepare:
+        #     self.prepare_postgresql_table()
 
         # ready to start benchmark
         self.create_sign()
