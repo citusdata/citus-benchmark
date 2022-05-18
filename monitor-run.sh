@@ -9,7 +9,8 @@ export OPERATIONS=$6
 export ITERATION=$7
 export WORKERS=$8
 export RESOURCE=$9
-export MONITOR=monitor
+export MONITORPW=${10}
+export CITUS_HOST=${11}
 
 cd ycsb-0.17.0
 
