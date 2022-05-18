@@ -1,8 +1,4 @@
 # DRIVER FILE:
-# Builds config file with inputs from internal repo
-# Reads config file (e.g. for DB credentials)
-# Generates a file with metadata about citus cluster (driver_hardware, coord_hardware, coord_vcpu_num, coord_storage, worker_hardware, worker_vcpu_num, worker_storage, workers) and stores metadata.csv in output/{resource_group}
-# Alters user permissions for second user ‘monitor’ (used for logging)
 # Waiting for driver: Checks every 10 seconds for a run.start file on driverVM
 # If run.start, starts background process worker node that runs iostat
 # collect these logs (nohup.out) every x seconds
@@ -16,7 +12,6 @@
 import os
 import pandas as pd
 from helper import *
-# import Threading
 # from run-benchmark import Benchmark
 import yaml
 from model import Logging
@@ -32,26 +27,12 @@ with open('config.yml', 'r') as f:
     except yaml.YAMLError as exc:
         print(exc)
 
-# Store metadata about the resource group (hardware used etc)
-# try:
-#     run(['python3', 'metadata.py'], shell = False)
-# except:
-#     pass
-#     print("Metadata already stored")
-
 # Create a logging instance
 logs = Logging(resource = cluster['resource'], prefix = cluster['prefix'], host = cluster['host'], password = cluster['pgpassword'], port = cluster['port'], shard_count = ycsb['shard_count'])
 
-# create output directories if they do not exist
-logs.create_output_directories()
-
-# create schema for YCSB benchmarks
-logs.prepare_postgresql_table()
-
-# Alter user permissions
-logs.set_permissions()
 
 print("Driver tasks finished 1/2")
+# after cluster is initiated
 
 # Checks every 10 seconds if run.start on drivervm
 # Ignore the authentication
@@ -61,8 +42,6 @@ print("Driver tasks finished 1/2")
 #IPV wait for results we execute second part of the
 # driver script (run.start etc)
 
-# continue with different script?
-# #
 
 # # If run.start is found, then start monitoring on worker nodes
 # logs.start()
