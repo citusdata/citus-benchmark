@@ -54,7 +54,7 @@ class Logging(object):
             a new empty usertable
             """
 
-            run(["./prepare-table-monitor.sh", str(self.SHARD_COUNT), str(self.HOST), str(self.DATABASE), str(self.PGUSER), str(self.PGPASSWORD)], shell = False)
+            run(["./prepare-table-monitor.sh", str(self.SHARD_COUNT), str(self.HOST), str(self.DATABASE), str(self.USER), str(self.PGPASSWORD)], shell = False)
 
             print("Schema and distributed tables prepared")
 

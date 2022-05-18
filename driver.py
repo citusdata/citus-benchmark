@@ -74,18 +74,18 @@ print("Driver tasks finished 1/2")
 # logs.get_csv()
 
 # Get raw ycsb-data from driver for every resource group?
-# to do
+# logs.get_raw_ycsb()
 
 # Get raw postgresql data from worker nodes
-# to do
+# logs.get_postgresl()
 
 # Runs script that pushes gathered data to Blob storage and a PostgreSQL DB
 
 # Push to postgresql
-run(["python3", 'push_to_db.py'], shell = False)
+# run(["python3", 'push_to_db.py'], shell = False)
 
-# Push to blob (Necessary to be configured with AWS cli by aws config)
-run(["./push-to-s3.sh", cluster['resource']], shell = False)
+# # Push to blob
+# run(["./push-to-s3.sh", cluster['resource']], shell = False)
 
 
 
