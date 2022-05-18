@@ -1,12 +1,20 @@
+# Called by hyperscale-{}.bicep, which spins up DriverVM and executes script to install necessary packages
+# Runs driver script ‘run-benchmark.py’ by using tmux (session-name = cloud-init)
+# Downloads and installs YCSB and JDBC driver
+# Starts two YCSB instances, 99% records via Citus user, 1% via Monitor user simultaneously in bash script build-and-run.sh
+# Runs specified workloads (default = workload a and c), iterates multiple times through workloads
+# Stores all raw YCSB output for every workload
+# Generates csv’s from every benchmark iteration
+
+### No config file needed as this script is the driver script on the driver vm
+
+### TO DO
+# Create multithreading for ycsb and monitor simultaneaously
+
 import os
-import subprocess
 import fire
-import sys
 import pandas as pd
-import time
 from helper import *
-import Threading
-import yaml
 
 class Benchmark(object):
 
@@ -110,9 +118,16 @@ class Benchmark(object):
             run(['touch', filename], shell = False)
 
 
+        def calculate_records(self):
+
+            self.INSERTCOUNT_CITUS = 0.99 * self.RECORDS
+            self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT_CITUS
+            self.INSERTSTART = self.INSERTCOUNT_CITUS
+
+
     def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", database = "citus",
     outdir = "output", workloadtype = "load", workloads="workloada", iterations = 1, outputfile = "results.csv", shard_count = 16,
-    workers = "2", resource = "custom", host = "localhost", prepare = 0, use_yaml = True, yaml_input = "config.yml"):
+    workers = "2", resource = "custom", host = "localhost", prepare = 0, monitorpw="monitor", maxtime = 600):
 
         self.HOMEDIR = os.getcwd()
         self.YCSB_WORKLOADS = ["workloada", "workloadb", "workloadc", "workloadf", "workloadd", "workloade"]
@@ -124,7 +139,7 @@ class Benchmark(object):
         self.WORKLOAD_LIST = self.parse_workloads(workloads)
         self.WORKLOAD_NAME = self.check_workloadname(workloadname)
         self.WORKLOAD_TYPE = workloadtype
-        self.OUTDIR = outdir
+        self.OUTDIR = "results"
         self.OUTPUTFILE = outputfile
         self.CURRENT_THREAD = self.THREADS[0]
         self.ITERATIONS = iterations
@@ -135,6 +150,13 @@ class Benchmark(object):
         self.RG = resource
         self.BENCH_RECORDS = records
         self.MONITOR_RECORDS = 0
+        self.MONITORPW = monitorpw
+        self.MAXTIME = maxtime
+        self.INSERTCOUNT_CITUS = 0
+        self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT_CITUS
+        self.INSERTSTART = self.INSERTCOUNT_CITUS
+
+        self.calculate_records()
 
         # Set environment variables
         os.environ['DATABASE'] = self.DATABASE
@@ -155,26 +177,6 @@ class Benchmark(object):
         self.create_sign()
 
 
-    def split(bench = 0.99):
-
-        """
-        split records in BENCH%, MONITOR% amount
-        default: 99%, 1%
-        """
-
-        self.BENCH_RECORDS = bench * self.RECORDS
-        self.MONITOR_RECORDS = self.RECORDS - self.BENCH_RECORDS
-
-
-    def copy_csv_to_local(self):
-
-        # todo insert host
-        # scp to right folder locally
-
-        run(['python3', 'model/connect-worker.py', '--prefix=marlin', f'--resource={self.RG}', f'--password{os.getenv["PGPASSWORD"]}',
-        '--host={self.HOST}', get_csv])
-
-
     def get_workload(self, wtype, workload):
 
         """ returns list with commands to run workload """
@@ -186,6 +188,27 @@ class Benchmark(object):
         else:
 
             return ['./ycsb-run.sh', workload, self.PORT, self.DATABASE, str(self.RECORDS), str(self.CURRENT_THREAD), str(self.OPERATIONS),  str(self.ITERATION), str(self.WORKERS), str(self.RG)]
+
+
+    def run_ycsb_parallel(self, wtype, workload):
+
+        """
+        Runs 2 YCSB instances in parallel.
+        Based on:
+        https://github.com/brianfrankcooper/YCSB/wiki/Running-a-Workload-in-Parallel
+        insertstart=0
+        insertcount=25000000
+        records = insertstart + insertcount
+        """
+
+
+        if wtype == "load":
+            return ['./ycsb-parallel-load.sh', workload, self.PORT, self.DATABASE, str(self.RECORDS), str(self.CURRENT_THREAD), str(self.ITERATION), str(self.WORKERS), str(self.RG),
+            str(self.INSERTCOUNT_CITUS), str(self.INSERTCOUNT_MONITOR), str(self.MONITORPW), str(self.MAXTIME), self.INSERTSTART]
+
+        else:
+            return ['./ycsb-parallel-run.sh', workload, self.PORT, self.DATABASE, str(self.RECORDS), str(self.CURRENT_THREAD), str(self.OPERATIONS),  str(self.ITERATION), str(self.WORKERS), str(self.RG),
+             str(self.MONITORPW), str(self.MAXTIME)]
 
 
     def psql(self, command):
@@ -216,7 +239,7 @@ class Benchmark(object):
         self.psql("truncate usertable")
 
 
-    def single_workload(self):
+    def single_workload(self, parallel = False):
 
         """
         Runs a single ycsb workload
@@ -235,10 +258,14 @@ class Benchmark(object):
             # for workloadc, operation count * 10
             os.environ['OPERATIONS'] = str(self.OPERATIONS * 10)
 
+        if parallel:
+            run(self.run_ycsb_parallel(self.WORKLOAD_TYPE, self.WORKLOAD_NAME), shell = False)
+            return
+
         run(self.get_workload(self.WORKLOAD_TYPE, self.WORKLOAD_NAME), shell = False)
 
 
-    def run_workload(self, workloadname, workloadtype):
+    def run_workload(self, workloadname, workloadtype, parallel = False):
 
         """
         runs a workload and set params accordingly
@@ -246,7 +273,12 @@ class Benchmark(object):
 
         self.WORKLOAD_NAME = workloadname
         self.WORKLOAD_TYPE = workloadtype
-        self.single_workload()
+        self.single_workload(parallel)
+
+
+    def test_parallel_load(self):
+
+        self.run_workload("workloada", "load", parallel = True)
 
 
     def single_workload_multiple_threads(self):
@@ -286,7 +318,7 @@ class Benchmark(object):
             for thread in self.THREADS:
                 self.CURRENT_THREAD = thread
                 self.run_workload("workloada", "load")
-                self.run_workload("workloada", "load", "monitor")
+                # self.run_workload("workloada", "load", "monitor")
                 self.run_workload("workloadc", "run")
 
             print(f"Done running workloadc for iteration {i}")
@@ -295,31 +327,8 @@ class Benchmark(object):
             # gather csv with all results
             run(['python3', 'generate-csv.py', outputdir, f"{outputdir}.csv"], shell = False)
 
-        # Copy to local
-        self.copy_csv_to_local()
-
         # If finished, create a run.finished file
         self.create_sign("run.finished")
-
-
-
-    def run_ycsb_parallel()):
-
-        """"
-        Runs 2 YCSB instances in parallel.
-        Based on:
-        https://github.com/brianfrankcooper/YCSB/wiki/Running-a-Workload-in-Parallel
-        insertstart=0
-        insertcount=25000000
-        Use multithreading to run workloads simultaneausly
-        """"
-
-        bench_thread = Threading.thread(self.citus_workload)
-        monitor_thread = Threading.thread(self.monitor_workload)
-
-        # Wait until both threads are finished
-        bench_thread.join()
-        monitor_thread.join()
 
 
     def run_multiple_workloads(self, workloads):
