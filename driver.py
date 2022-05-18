@@ -45,22 +45,33 @@ logs = Logging(resource = cluster['resource'], prefix = cluster['prefix'], host 
 # create output directories if they do not exist
 logs.create_output_directories()
 
+# create schema for YCSB benchmarks
+logs.prepare_postgresql_table()
+
 # Alter user permissions
 logs.set_permissions()
 
+print("Driver tasks finished 1/2")
+
 # Checks every 10 seconds if run.start on drivervm
-# Ignore the authenticity
-os.chdir(homedir)
-run(["./try-sign.sh", cluster['resource'], 'run.start', '10'], shell = False)
+# Ignore the authentication
+# os.chdir(homedir)
+# run(["./try-sign.sh", cluster['resource'], 'run.start', '10'], shell = False)
+# but need to wait until driver is set up
+#IPV wait for results we execute second part of the
+# driver script (run.start etc)
 
-# If run.start is found, then start monitoring on worker nodes
-logs.start()
+# continue with different script?
+# #
 
-# If 'run.finished' then get all generated csv's from driver vm and store in db's
-run(["./try-sign.sh", cluster['resource'], 'run.finished', '60'], shell = False)
+# # If run.start is found, then start monitoring on worker nodes
+# logs.start()
 
-# Get csv's from driver
-logs.get_csv()
+# # If 'run.finished' then get all generated csv's from driver vm and store in db's
+# run(["./try-sign.sh", cluster['resource'], 'run.finished', '60'], shell = False)
+
+# # Get csv's from driver
+# logs.get_csv()
 
 # Get raw ycsb-data from driver for every resource group?
 # to do
