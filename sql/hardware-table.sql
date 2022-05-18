@@ -1,5 +1,5 @@
 CREATE TABLE HARDWARE(
-   resource_group CHAR(50) PRIMARY KEY NOT NULL,
+   resource_group CHAR(50)  NOT NULL,
    driver_hw   CHAR(30) NOT NULL,
    coord_hw CHAR(30) NOT NULL,
    worker_hw   CHAR(30) NOT NULL,
