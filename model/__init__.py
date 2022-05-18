@@ -45,6 +45,18 @@ class Logging(object):
         os.environ['PGDATABASE'] = self.DATABASE
 
 
+    def prepare_postgresql_table(self):
+
+            """
+            Executes bash script that enters psql, truncates usertable if exists and creates
+            a new empty usertable
+            """
+
+            run(["./prepare-table-monitor.sh", str(self.SHARD_COUNT), str(self.HOST), str(self.DATABASE), str(self.PGUSER), str(self.PGPASSWORD)], shell = False)
+
+            print("Schema and distributed tables prepared")
+
+
     def collect_iostat(self):
 
         """ Collect iostat files from every worker and stores in resource_group/workername/general """
