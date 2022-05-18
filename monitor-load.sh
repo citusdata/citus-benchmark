@@ -27,4 +27,5 @@ bin/ycsb load jdbc \
     -cp ./postgresql-42.2.14.jar \
     -p db.user=monitor \
     -p db.passwd=$MONITORPW \
+    -p maxexecutiontime=$MAXTIME
     -p db.url="jdbc:postgresql://$CITUS_HOST/citus?loadBalanceHosts=true" | tee ${HOMEDIR}/${OUTDIR}/load_${WORKLOAD}_${THREAD}_${RECORDS}_${ITERATION}_${WORKERS}_${RESOURCE}.mlog
