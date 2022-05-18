@@ -51,7 +51,7 @@ def search_file(filename, substring):
                 continue
 
             return float(line.split(' ')[-1].split('\n')[0])
-    
+
     return 0
 
 
@@ -107,11 +107,12 @@ def return_csv(outfolder = "output", csvname="output.csv"):
 
         if values[0] == "load":
 
-            # workers, iteration, workloadtype, workloadname, threads, records, operations, throughput, runtime
+            # resource_group, workers, iteration, workloadtype, workloadname, threads, records, operations, throughput, runtime
             row = [values[-1].split('.')[0], values[-2], values[-3], values[0], values[1], values[2], values[3], 0, get_throughput(output_file), get_runtime(output_file)]
             results.append(row)
             continue
 
+        # resource_group, workers, iteration, workloadtype, workloadname, threads, records, operations, throughput, runtime
         row = [values[-1].split('.')[0], values[-2], values[-3], values[0], values[1], values[2], values[3], values[4], get_throughput(output_file), get_runtime(output_file)]
         results.append(row)
 
@@ -124,7 +125,9 @@ def return_csv(outfolder = "output", csvname="output.csv"):
 
     f.close()
 
+    def concat_csv(self):
+        return
 
 if __name__ == '__main__':
-    
+
   fire.Fire(return_csv)
