@@ -25,7 +25,7 @@ Configs = {
             'operations': sys.argv[9],
             'shard_count': sys.argv[10],
             'thread_counts': sys.argv[11],
-            'iterations': sys.argv[12]
+            'iterations': sys.argv[12],
             'workloads': 'workloada,workloadb,workloadc,workloadd,workloade,workloadf'
         },
 
