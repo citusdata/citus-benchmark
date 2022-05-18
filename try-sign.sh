@@ -5,9 +5,15 @@ SIGN=$2
 SLEEP=$3
 
 while ! test -f $SIGN; do
+
+if [[ -d "citus-benchmark" ]]
+then
+    cd citus-benchmark
+fi
+    sleep $SLEEP
 	./get-sign.sh $RESOURCE_GROUP $SIGN
-	sleep $SLEEP
 done
 
+echo "Benchmark ready to start"
 rm $SIGN
 
