@@ -244,6 +244,7 @@ class Benchmark(object):
             os.environ['OPERATIONS'] = str(self.OPERATIONS * 10)
 
         if parallel:
+            os.chdir(self.HOMEDIR + '/scripts')
             run(self.run_ycsb_parallel(self.WORKLOAD_TYPE, self.WORKLOAD_NAME), shell = False)
             return
 

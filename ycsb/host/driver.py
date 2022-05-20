@@ -14,7 +14,7 @@ import pandas as pd
 from helper import *
 # from run-benchmark import Benchmark
 import yaml
-from model import Logging
+from logs import Logging
 
 homedir = os.getcwd()
 
@@ -36,7 +36,7 @@ logs = Logging(resource = cluster['resource'], prefix = cluster['prefix'], host 
 
 # Checks every 10 seconds if run.start on drivervm after driver is ready
 # Ignore the authentication
-os.chdir(homedir)
+os.chdir(homedir + 'logs/scripts/')
 run(["./try-sign.sh", cluster['resource'], 'run.start', '10'], shell = False)
 
 # # If run.start is found, then start monitoring on worker nodes

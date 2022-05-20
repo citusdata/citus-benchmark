@@ -20,7 +20,7 @@ class Logging(object):
 
         """ get adresses from workers in a citus cluster """
 
-        os.chdir(f'scripts')
+        os.chdir(f"{self.HOMEDIR}/logs/scripts")
         return os.popen(f"./worker-adresses.sh {self.HOST} {self.PORT} {self.PASSWORD} {self.USER} {self.DATABASE}").read().split('\n')[0].split(',')
 
 
@@ -59,9 +59,9 @@ class Logging(object):
             a new empty usertable
             """
 
-            os.chdir(f"{self.HOMEDIR}/logging/scripts")
+            os.chdir(f"{self.HOMEDIR}/logs/scripts")
             run(["./prepare-table-driver.sh", str(self.SHARD_COUNT), str(self.HOST), str(self.DATABASE), str(self.USER), str(self.PASSWORD)], shell = False)
-            os.chdir(f"{self.HOMEDIR}/logging")
+            os.chdir(f"{self.HOMEDIR}/logs")
             print("Schema and distributed tables prepared")
 
 
@@ -90,7 +90,7 @@ class Logging(object):
         run(['mkdir', '-p', self.RESOURCE], shell = False)
         run(['mkdir', '-p', self.RESOURCE + "/YCSB/results"], shell = False)
         run(['mkdir', '-p', self.RESOURCE + "/YCSB/raw"], shell = False)
-        run(['mkdir', '-p', self.RESOURCE + "/pglogging"], shell = False)
+        run(['mkdir', '-p', self.RESOURCE + "/pglogs"], shell = False)
         run(['mkdir', '-p', self.RESOURCE + "/general"], shell = False)
 
 
@@ -99,18 +99,18 @@ class Logging(object):
         """ connects with VM and gets generated csv's """
 
 
-        os.chdir(f'{self.HOMEDIR}/logging/scripts')
+        os.chdir(f'{self.HOMEDIR}/logs/scripts')
         run(["./get-csv-from-driver.sh", self.RESOURCE, f"{self.RESOURCE}/YCSB/results"], shell = False)
-        os.chdir(f"{self.HOMEDIR}/logging")
+        os.chdir(f"{self.HOMEDIR}/logs")
 
 
     def get_raw_ycsb(self):
 
         """ connects with VM and gets raw ycsb log files """
 
-        os.chdir(f'{self.HOMEDIR}/logging/scripts')
+        os.chdir(f'{self.HOMEDIR}/logs/scripts')
         run(["./get-csv-from-driver.sh", self.RESOURCE, f"{self.RESOURCE}/YCSB/raw"], shell = False)
-        os.chdir(f"{self.HOMEDIR}/logging")
+        os.chdir(f"{self.HOMEDIR}/logs")
 
 
     def print_workers(self):
@@ -138,9 +138,9 @@ class Logging(object):
         alter user monitor set log_statement to 'all'
         """
 
-        os.chdir(f'{self.HOMEDIR}/logging/scripts')
+        os.chdir(f'{self.HOMEDIR}/logs/scripts')
         run(["./alter-user.sh", self.PREFIX, self.HOST, ">", "/dev/null"], shell = False)
-        os.chdir(f"{self.HOMEDIR}/logging")
+        os.chdir(f"{self.HOMEDIR}/logs")
 
 
     def collect_postgres_logs(self, outputfolder, iterations):

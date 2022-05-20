@@ -8,7 +8,7 @@
 import os
 from helper import *
 import yaml
-from logging import Logging
+from logs import Logging
 
 homedir = os.getcwd()
 
