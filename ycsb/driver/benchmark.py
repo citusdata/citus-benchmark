@@ -195,11 +195,11 @@ class Benchmark(object):
 
         if wtype == "load":
 
-            return ['./ycsb-parallel-load.sh']
+            return ['./parallel-ycsb-load.sh']
 
         else:
 
-            return ['./ycsb-parallel-run.sh']
+            return ['./parralel-ycsb-run.sh']
 
 
     def psql(self, command):

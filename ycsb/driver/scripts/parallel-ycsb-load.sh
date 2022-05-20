@@ -5,11 +5,11 @@ export CITUS_HOST=`psql -tAX -c "select string_agg(substring(nodename from 9),',
 
 (./ycsb-load-maxtime.sh) &
 
-main_pid = $!
+main_pid=$!
 
 (./monitor-load.sh) &
 
-monitor_pid = $!
+monitor_pid=$!
 
 wait $main_pid
 wait $monitor_pid

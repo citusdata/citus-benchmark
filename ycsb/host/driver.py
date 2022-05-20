@@ -36,11 +36,12 @@ logs = Logging(resource = cluster['resource'], prefix = cluster['prefix'], host 
 
 # Checks every 10 seconds if run.start on drivervm after driver is ready
 # Ignore the authentication
-os.chdir(homedir + 'logs/scripts/')
+os.chdir(homedir + '/logs/scripts/')
 run(["./try-sign.sh", cluster['resource'], 'run.start', '10'], shell = False)
+print("Starting monitoring")
 
 # # If run.start is found, then start monitoring on worker nodes
-logs.start()
+# logs.start()
 
 # # # If 'run.finished' then get all generated csv's from driver vm and store in db's
 # run(["./try-sign.sh", cluster['resource'], 'run.finished', '60'], shell = False)

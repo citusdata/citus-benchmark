@@ -1,1 +1,1 @@
-sudo su postgres -c "psql -c \"select * from run_command_on_workers($$alter user monitor set log_statement to 'all'$$);\" "
+sudo su postgres -c "psql -c \"select * from run_command_on_workers($alter user monitor set log_statement to 'all'$);\" "
