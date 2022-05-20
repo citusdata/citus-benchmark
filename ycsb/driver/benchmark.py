@@ -272,6 +272,9 @@ class Benchmark(object):
 
         os.chdir(self.HOMEDIR)
 
+        # If finished, create a run.finished file
+        self.create_sign("run.finished")
+
 
     def single_workload_multiple_threads(self):
 

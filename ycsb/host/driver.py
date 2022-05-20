@@ -45,7 +45,7 @@ print("Starting monitoring")
 # logs.start()
 
 # # # If 'run.finished' then get all generated csv's from driver vm and store in db's
-# run(["./try-sign.sh", cluster['resource'], 'run.finished', '60'], shell = False)
+run(["./try-sign.sh", cluster['resource'], 'run.finished', '60'], shell = False)
 
 # # # Get csv's from driver
 # logs.get_csv()
