@@ -1,7 +1,0 @@
-workloadtype,workloadname,threads,records,operations,throughput,runtime (s)
-load,workloada,800,10000000,0,19695.15833922547,507.739
-load,workloada,5,1000,0,693.000693000693,1.443
-load,workloada,200,100000,0,12039.489525644112,8.306
-load,workloada,20,1000,0,937.207122774133,1.067
-load,workloada,100,1000000,0,13693.565393621537,73.027
-load,workloada,10,1000,0,858.3690987124463,1.165
