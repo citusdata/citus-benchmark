@@ -31,40 +31,36 @@ with open('config.yml', 'r') as f:
 logs = Logging(resource = cluster['resource'], prefix = cluster['prefix'], host = cluster['host'], password = cluster['pgpassword'], port = cluster['port'], shard_count = ycsb['shard_count'])
 
 
-print("Driver tasks finished 1/2")
 # after cluster is initiated
+# or initiate cluster yourself in the driver file?
 
-# Checks every 10 seconds if run.start on drivervm
+# Checks every 10 seconds if run.start on drivervm after driver is ready
 # Ignore the authentication
-# os.chdir(homedir)
-# run(["./try-sign.sh", cluster['resource'], 'run.start', '10'], shell = False)
-# but need to wait until driver is set up
-#IPV wait for results we execute second part of the
-# driver script (run.start etc)
-
+os.chdir(homedir)
+run(["./try-sign.sh", cluster['resource'], 'run.start', '10'], shell = False)
 
 # # If run.start is found, then start monitoring on worker nodes
-# logs.start()
+logs.start()
 
-# # If 'run.finished' then get all generated csv's from driver vm and store in db's
+# # # If 'run.finished' then get all generated csv's from driver vm and store in db's
 # run(["./try-sign.sh", cluster['resource'], 'run.finished', '60'], shell = False)
 
-# # Get csv's from driver
+# # # Get csv's from driver
 # logs.get_csv()
 
-# Get raw ycsb-data from driver for every resource group?
+# # Get raw ycsb-data from driver for every resource group?
 # logs.get_raw_ycsb()
 
-# Get raw postgresql data from worker nodes
+# # Get raw postgresql data from worker nodes
 # logs.get_postgresl()
 
-# Runs script that pushes gathered data to Blob storage and a PostgreSQL DB
+# # Runs script that pushes gathered data to Blob storage and a PostgreSQL DB
 
-# Push to postgresql
-# run(["python3", 'push_to_db.py'], shell = False)
+# # Push to postgresql
+# # run(["python3", 'push_to_db.py'], shell = False)
 
-# # Push to blob
-# run(["./push-to-s3.sh", cluster['resource']], shell = False)
+# # # Push to blob
+# # run(["./push-to-s3.sh", cluster['resource']], shell = False)
 
 
 

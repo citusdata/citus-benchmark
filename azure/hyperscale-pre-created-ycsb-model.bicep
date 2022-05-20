@@ -23,7 +23,7 @@ param pgVersion string = '14'
 // Configuration of the VM that runs the benchmark (the driver)
 // This VM's should be pretty big, to make sure it does not become the bottleneck
 param driverSize string  = 'Standard_D64s_v3'
-param AnalysisDriverSize string = 'Standard_D8s_v3'
+// param AnalysisDriverSize string = 'Standard_D8s_v3'
 
 param sshAllowIpPrefix string = '*'
 // networking reletaed settings, usually you don't have to change this
@@ -41,9 +41,9 @@ param nsgName string = '${driverVmName}-nsg'
 param vnetName string = '${namePrefix}-vnet'
 param subnetName string = 'default'
 
-param AnalysisDriverVmName string = '${namePrefix}-driver-analysis'
-param AnalysisDriverNicName string = '${AnalysisDriverVmName}-nic'
-param AnalysisDriverIpName string = '${AnalysisDriverVmName}-ip'
+// param AnalysisDriverVmName string = '${namePrefix}-driver-analysis'
+// param AnalysisDriverNicName string = '${AnalysisDriverVmName}-nic'
+// param AnalysisDriverIpName string = '${AnalysisDriverVmName}-ip'
 
 module vnet 'vnet.bicep' = {
   name: vnetName
@@ -88,31 +88,31 @@ module driverVm 'driver-vm-ycsb.bicep' = {
   }
 }
 
-module AnalysisDriverVm 'driver-model.bicep' = {
-  name: AnalysisDriverVmName
-  params: {
-    adminPublicKey: vmAdminPublicKey
-    adminUsername: vmAdminUsername
-    pgPort: pgPort
-    location: location
-    zone: zone
-    size: AnalysisDriverSize
-    vmName: AnalysisDriverVmName
-    nicName: AnalysisDriverNicName
-    ipName: AnalysisDriverIpName
-    nsgName: nsgName
-    vnetName: vnetName
-    subnetName: subnetName
-    pgHost: pgHost
-    pgUser: 'monitor'
-    pgPassword: 'monitorpassword'
-    pgVersion: pgVersion
-    records: records
-    workers: workers
-    rg: namePrefix
-    operations: operations
-  }
-}
+// module AnalysisDriverVm 'driver-model.bicep' = {
+//   name: AnalysisDriverVmName
+//   params: {
+//     adminPublicKey: vmAdminPublicKey
+//     adminUsername: vmAdminUsername
+//     pgPort: pgPort
+//     location: location
+//     zone: zone
+//     size: AnalysisDriverSize
+//     vmName: AnalysisDriverVmName
+//     nicName: AnalysisDriverNicName
+//     ipName: AnalysisDriverIpName
+//     nsgName: nsgName
+//     vnetName: vnetName
+//     subnetName: subnetName
+//     pgHost: pgHost
+//     pgUser: 'monitor'
+//     pgPassword: 'monitorpassword'
+//     pgVersion: pgVersion
+//     records: records
+//     workers: workers
+//     rg: namePrefix
+//     operations: operations
+//   }
+// }
 
 output driverPublicIp string = driverVm.outputs.publicIp
-output AnalysisDriverPublicIp string = AnalysisDriverVm.outputs.AnalysisPublicIp
+// output AnalysisDriverPublicIp string = AnalysisDriverVm.outputs.AnalysisPublicIp

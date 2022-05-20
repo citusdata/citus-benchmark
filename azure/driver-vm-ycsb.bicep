@@ -50,10 +50,15 @@ export PGHOST='{0}'
 export PGUSER={1}
 export PGPASSWORD='{2}'
 export PGPORT={3}
-export ALL_THREADS={9}
-export PRE_CREATED={10}
-
-echo $ALL_THREADS
+export PGDATABASE=citus
+export RECORDS={6}
+export OPERATIONS={7}
+export SHARD_COUNT={8}
+export THREAD_COUNT={9}
+export ITERATIONS={10}
+export WORKERS={11}
+export RESOURCE_GROUP={12}
+export MONITORPW={13}
 
 # Make sure we can open enough connections
 echo 'ulimit -n "$(ulimit -Hn)"' >> .bashrc
@@ -62,8 +67,9 @@ cat >> .bashrc << '__ssh_connection_bashrc__'
 {4}
 __ssh_connection_bashrc__
 
-git clone https://github.com/citusdata/citus-benchmark.git --branch ycsb-model
-cd citus-benchmark
+git clone https://github.com/citusdata/citus-benchmark.git --branch ycsb-refactored
+cd citus-benchmark/ycsb/driver
+export HOMEDIR=$PWD
 sudo apt install -y default-jre python postgresql-client-common postgresql-client-{5}
 
 sudo apt-get install python3-pip -y
@@ -72,7 +78,8 @@ pip3 install pandas
 pip3 install matplotlib
 
 while ! psql -c 'select 1'; do  echo failed; sleep 1; done
-tmux new-session -d -t main -s cloud-init \; send-keys './build-and-run-ycsb.sh {6} {7} {8} {9} {10} {11} {12} {13}' Enter
+cd scripts
+tmux new-session -d -t main -s init-bench \; send-keys './build-and-run-ycsb.sh' Enter
 '''
 
 var driverBootScript = format(driverBootTemplate, pgHost, pgUser, pgPassword, pgPort, bashrcTmuxAutoAttach, pgVersion, records, operations, shard_count, thread_counts, iterations, workers, rg, monitorpw)

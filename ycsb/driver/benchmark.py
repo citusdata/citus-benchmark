@@ -99,30 +99,18 @@ class Benchmark(object):
         os.chdir(self.HOMEDIR)
 
 
-        def prepare_postgresql_table(self):
+    def create_sign(self, filename = "run.start"):
 
-            """
-            Executes bash script that enters psql, truncates usertable if exists and creates
-            a new empty usertable
-            """
+        """ create start file if ready to run ycsb benchmarks """
 
-            run(["./prepare-table.sh", str(self.SHARD_COUNT)], shell = False)
-
-            print("Schema and distributed tables prepared")
+        run(['touch', filename], shell = False)
 
 
-        def create_sign(self, filename = "run.start"):
+    def calculate_records(self):
 
-            """ create start file if ready to run ycsb benchmarks """
-
-            run(['touch', filename], shell = False)
-
-
-        def calculate_records(self):
-
-            self.INSERTCOUNT_CITUS = 0.99 * self.RECORDS
-            self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT_CITUS
-            self.INSERTSTART = self.INSERTCOUNT_CITUS
+        self.INSERTCOUNT_CITUS = int(0.99 * self.RECORDS)
+        self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT_CITUS
+        self.INSERTSTART = self.INSERTCOUNT_CITUS
 
 
     def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", database = "citus",
@@ -148,8 +136,6 @@ class Benchmark(object):
         self.ITERATION = 1
         self.WORKERS = workers
         self.RG = resource
-        self.BENCH_RECORDS = records
-        self.MONITOR_RECORDS = 0
         self.MONITORPW = monitorpw
         self.MAXTIME = maxtime
         self.INSERTCOUNT_CITUS = 0
@@ -164,14 +150,20 @@ class Benchmark(object):
         os.environ['OPERATIONS'] = str(self.OPERATIONS)
         os.environ['PORT'] = str(self.PORT)
         os.environ['HOMEDIR'] = self.HOMEDIR
+        os.environ['HOST'] = self.HOST
+        os.environ['SHARD_COUNT'] = str(self.SHARD_COUNT)
+        os.environ['ITERATION'] = str(self.ITERATION)
+        os.environ['WORKERS'] = str(self.WORKERS)
+        os.environ['RESOURCE'] = str(self.RG)
+        os.environ['MONITORPW'] = str(self.MONITORPW)
+        os.environ['MAXTIME'] = str(self.MAXTIME)
+        os.environ['INSERTCOUNT_CITUS'] = str(self.INSERTCOUNT_CITUS)
+        os.environ['INSERTCOUNT_MONITOR'] = str(self.INSERTCOUNT_MONITOR)
+        os.environ['INSERTSTART'] = str(self.INSERTSTART)
 
         # Install YCSB and JDBC PostgreSQL driver
         self.install_ycsb()
         self.install_jdbc()
-
-        # if prepare table
-        # if prepare:
-        #     self.prepare_postgresql_table()
 
         # ready to start benchmark
         self.create_sign()
@@ -196,19 +188,18 @@ class Benchmark(object):
         Runs 2 YCSB instances in parallel.
         Based on:
         https://github.com/brianfrankcooper/YCSB/wiki/Running-a-Workload-in-Parallel
-        insertstart=0
-        insertcount=25000000
-        records = insertstart + insertcount
+        insertstart = 0
+        insertcount = # Records
+        records >= insertstart + insertcount
         """
 
-
         if wtype == "load":
-            return ['./ycsb-parallel-load.sh', workload, self.PORT, self.DATABASE, str(self.RECORDS), str(self.CURRENT_THREAD), str(self.ITERATION), str(self.WORKERS), str(self.RG),
-            str(self.INSERTCOUNT_CITUS), str(self.INSERTCOUNT_MONITOR), str(self.MONITORPW), str(self.MAXTIME), self.INSERTSTART]
+
+            return ['./ycsb-parallel-load.sh']
 
         else:
-            return ['./ycsb-parallel-run.sh', workload, self.PORT, self.DATABASE, str(self.RECORDS), str(self.CURRENT_THREAD), str(self.OPERATIONS),  str(self.ITERATION), str(self.WORKERS), str(self.RG),
-             str(self.MONITORPW), str(self.MAXTIME)]
+
+            return ['./ycsb-parallel-run.sh']
 
 
     def psql(self, command):
@@ -221,13 +212,7 @@ class Benchmark(object):
     def set_iterations(self, i):
 
         self.ITERATION = i
-
-        # Set environment var for outputdirectory
-        outputdir = self.OUTDIR + f"-{i+1}"
-
-        # Create output folder if it does not exist yet en set env variable
-        run(['mkdir', '-p', outputdir], shell = False)
-        os.environ['OUTDIR'] = outputdir
+        os.environ['ITERATION'] = self.ITERATION
 
 
     def truncate_usertable(self):
@@ -248,11 +233,11 @@ class Benchmark(object):
         os.environ['WORKLOAD'] = self.WORKLOAD_NAME
         os.environ['THREAD'] = str(self.CURRENT_THREAD)
         os.environ['OPERATIONS'] = str(self.OPERATIONS)
+        os.environ['WORKLOAD_TYPE'] = self.WORKLOAD_TYPE
 
         if self.WORKLOAD_TYPE == "load":
             # truncate or load new usertable if type is load
             self.truncate_usertable()
-
 
         if self.WORKLOAD_NAME == "workloadc":
             # for workloadc, operation count * 10
@@ -278,7 +263,12 @@ class Benchmark(object):
 
     def test_parallel_load(self):
 
+        # go to folder for scripts
+        os.chdir("scripts")
+
         self.run_workload("workloada", "load", parallel = True)
+
+        os.chdir(self.HOMEDIR)
 
 
     def single_workload_multiple_threads(self):
@@ -298,7 +288,7 @@ class Benchmark(object):
             print(f"Done running workloadc for iteration {i}")
             print("Generating CSV")
 
-            # gather csv with all results
+            # gather csv with all results after each iteration
             run(['python3', 'generate-csv.py', outputdir, f"{outputdir}.csv"], shell = False)
 
 
@@ -313,8 +303,6 @@ class Benchmark(object):
 
             self.set_iterations(i)
 
-            outputdir = self.OUTDIR + f"-{i+1}"
-
             for thread in self.THREADS:
                 self.CURRENT_THREAD = thread
                 self.run_workload("workloada", "load")
@@ -325,42 +313,10 @@ class Benchmark(object):
             print("Generating CSV")
 
             # gather csv with all results
-            run(['python3', 'generate-csv.py', outputdir, f"{outputdir}.csv"], shell = False)
+            run(['python3', 'generate-csv.py', "results.csv"], shell = False)
 
         # If finished, create a run.finished file
         self.create_sign("run.finished")
-
-
-    def run_multiple_workloads(self, workloads):
-
-        """
-        Method that runs multiple workloads in the order as described in YCSB core workloads
-        """
-
-        # if list contains only workloade then load and run workloade
-        if workloads == ['workloade']:
-            self.WORKLOAD_NAME = workloads[0]
-            self.run_workload("workloade", "load")
-            self.run_workload("workloade", "run")
-
-        # Sort workloads in 'YCSB Core Workloads' order
-        workloads = self.sort_workloads(workloads)
-
-        # DB needs to be loaded so always load with workloada
-        self.run_workload("workloade", "load")
-
-        # Iterate through all workloads
-        for workload in workloads:
-            self.WORKLOAD_NAME = workload
-
-            if self.WORKLOAD_NAME == "workloade":
-                self.run_workload("workloade", "load")
-                self.run_workload("workloade", "run")
-                continue
-
-            self.WORKLOAD_NAME = workload
-            self.single_workload()
-
 
 
     def run_all_workloads(self):
@@ -368,16 +324,10 @@ class Benchmark(object):
         """
         Runs all workloads in the order as described in: https://github.com/brianfrankcooper/YCSB/wiki/Core-Workloads
         under "Running the workloads"
+        Needs to be refactored
         """
 
         for i in range(self.ITERATIONS):
-
-            # Set environment var for outputdirectory
-            outputdir = self.OUTDIR + f"-{i+1}"
-
-            # Create output folder if it does not exist yet en set env variable
-            run(['mkdir', '-p', outputdir], shell = False)
-            os.environ['OUTDIR'] = outputdir
 
             for thread in self.THREADS:
                 self.CURRENT_THREAD = thread
@@ -401,7 +351,7 @@ class Benchmark(object):
             print("Generating CSV")
 
             # gather csv with all results
-            run(['python3', 'generate-csv.py', outputdir, f"{outputdir}.csv"], shell = False)
+            run(['python3', 'generate-csv.py', "results.csv"], shell = False)
 
 
 

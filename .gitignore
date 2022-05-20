@@ -11,3 +11,4 @@ output/
 __pycache__/
 /model/__pycache__/
 /model/aws
+model/

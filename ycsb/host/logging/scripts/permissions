@@ -1,0 +1,1 @@
+ sudo su postgres -c "psql citus -c \"GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO monitor\" "

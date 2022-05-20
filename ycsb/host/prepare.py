@@ -6,11 +6,9 @@
 
 
 import os
-import pandas as pd
 from helper import *
-# from run-benchmark import Benchmark
 import yaml
-from model import Logging
+from logging import Logging
 
 homedir = os.getcwd()
 
@@ -36,21 +34,16 @@ logs = Logging(resource = cluster['resource'], prefix = cluster['prefix'], host 
 # create output directories w/ resource name
 logs.create_output_directories()
 
+# worker adresses
+logs.print_workers()
+
 # create schema for YCSB benchmarks (usertable)
 logs.prepare_postgresql_table()
 
-# Alter user permissions for user monitor
+# # Alter user permissions for user monitor
 logs.set_permissions()
 
-print("Driver tasks finished 1/2")
-
-# Checks every 10 seconds if run.start on drivervm
-# Ignore the authentication
-# os.chdir(homedir)
-# run(["./try-sign.sh", cluster['resource'], 'run.start', '10'], shell = False)
-# but need to wait until driver is set up
-#IPV wait for results we execute second part of the
-# driver script (run.start etc)
+# Subsequently second command is executed on internal repo
 
 
 

@@ -1,0 +1,3 @@
+workloadtype,workloadname,threads,records,operations,throughput,runtime (s)
+load,workloada,800,10000000,0,19580.085486653235,510.723
+load,workloada,100,1000000,0,13468.55765216103,74.247

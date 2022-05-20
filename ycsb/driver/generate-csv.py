@@ -89,18 +89,20 @@ def random_string(length):
     return ''.join(random.choice(letters) for i in range(length))
 
 
-def return_csv(outfolder = "output", csvname="output.csv"):
+def return_csv(csvname="output.csv"):
 
     """
     generates a csv with format:
     id, workers, iteration, workloadtype, workloadname, threads, records, operations, throughput, runtime
     """
 
-    os.chdir(outfolder)
-
     results = [["id", "workers", "iteration", "workloadtype", "workloadname", "threads", "records", "operations", "throughput", "runtime (s)"]]
 
     for output_file in os.listdir('.'):
+
+        # Ignore non-log files
+        if not output_file.endswith(".log"):
+            continue
 
         # Split name of file; determine threadcount and workload type (load or run)
         values = output_file.split('_')
