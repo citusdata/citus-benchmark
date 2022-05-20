@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-cd ycsb-0.17.0
+cd $HOMEDIR/ycsb-0.17.0
 
 bin/ycsb load jdbc \
     -P workloads/$WORKLOAD \

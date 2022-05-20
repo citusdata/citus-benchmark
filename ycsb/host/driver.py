@@ -38,6 +38,7 @@ logs = Logging(resource = cluster['resource'], prefix = cluster['prefix'], host 
 # Ignore the authentication
 os.chdir(homedir + '/logs/scripts/')
 run(["./try-sign.sh", cluster['resource'], 'run.start', '10'], shell = False)
+os.chdir(homedir)
 print("Starting monitoring")
 
 # # If run.start is found, then start monitoring on worker nodes
