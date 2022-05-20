@@ -44,14 +44,17 @@ print("Starting monitoring")
 # # If run.start is found, then start monitoring on worker nodes
 # logs.start()
 
+os.chdir(homedir + '/logs/scripts/')
 # # # If 'run.finished' then get all generated csv's from driver vm and store in db's
 run(["./try-sign.sh", cluster['resource'], 'run.finished', '60'], shell = False)
+os.chdir(homedir)
+print("Finish monitoring")
 
 # # # Get csv's from driver
 # logs.get_csv()
 
 # # Get raw ycsb-data from driver for every resource group?
-# logs.get_raw_ycsb()
+logs.get_raw_ycsb()
 
 # # Get raw postgresql data from worker nodes
 # logs.get_postgresl()

@@ -115,9 +115,10 @@ class Benchmark(object):
 
     def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", database = "citus",
     outdir = "output", workloadtype = "load", workloads="workloada", iterations = 1, outputfile = "results.csv", shard_count = 16,
-    workers = "2", resource = "custom", host = "localhost", prepare = 0, monitorpw="monitor", maxtime = 600):
+    workers = "2", resource = "custom", host = "localhost", parallel = False, monitorpw="monitor", maxtime = 600):
 
         self.HOMEDIR = os.getcwd()
+        self.PARALLEL = parallel
         self.YCSB_WORKLOADS = ["workloada", "workloadb", "workloadc", "workloadf", "workloadd", "workloade"]
         self.THREADS = self.parse_threadcounts(threads)
         self.RECORDS = records
@@ -265,6 +266,8 @@ class Benchmark(object):
 
     def test_parallel_load(self):
 
+        """ For testing a parallel load """
+
         # go to folder for scripts
         os.chdir("scripts")
 
@@ -311,9 +314,13 @@ class Benchmark(object):
             for thread in self.THREADS:
                 self.CURRENT_THREAD = thread
                 os.environ['THREADS'] = str(self.CURRENT_THREAD)
-                self.run_workload("workloada", "load")
-                # self.run_workload("workloada", "load", "monitor")
-                self.run_workload("workloadc", "run")
+
+                if self.PARALLEL:
+                    self.run_workload("workloada", "load", self.PARALLEL)
+                    self.run_workload("workloadc", "run", self.PARALLEL)
+                else:
+                    self.run_workload("workloada", "load")
+                    self.run_workload("workloadc", "run")
 
             print(f"Done running workloadc for iteration {i}")
             print("Generating CSV")

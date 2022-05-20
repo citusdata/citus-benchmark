@@ -101,7 +101,7 @@ class Logging(object):
 
         os.chdir(f'{self.HOMEDIR}/logs/scripts')
         run(["./get-csv-from-driver.sh", self.RESOURCE, f"{self.RESOURCE}/YCSB/results"], shell = False)
-        os.chdir(f"{self.HOMEDIR}/logs")
+        os.chdir(f"{self.HOMEDIR}")
 
 
     def get_raw_ycsb(self):
@@ -109,8 +109,8 @@ class Logging(object):
         """ connects with VM and gets raw ycsb log files """
 
         os.chdir(f'{self.HOMEDIR}/logs/scripts')
-        run(["./get-csv-from-driver.sh", self.RESOURCE, f"{self.RESOURCE}/YCSB/raw"], shell = False)
-        os.chdir(f"{self.HOMEDIR}/logs")
+        run(["./get-ycsb-logs-from-driver.sh", self.RESOURCE, f"{self.RESOURCE}/YCSB/raw"], shell = False)
+        os.chdir(f"{self.HOMEDIR}")
 
 
     def print_workers(self):
@@ -143,12 +143,14 @@ class Logging(object):
         os.chdir(f"{self.HOMEDIR}/logs")
 
 
-    def collect_postgres_logs(self, outputfolder, iterations):
+    def get_postgresql(self, outputfolder, iterations):
 
         """ collects postgresql logs in /dat/14/data/pg_logs """
 
-        for i in range(iterations):
-            run(["", "outputfolder-"+str(i)], shell = False)
+        # connect to worker and then try to collect
+
+        # for i in range(iterations):
+        #     run(["", "outputfolder-"+str(i)], shell = False)
 
 
     def start(self):
