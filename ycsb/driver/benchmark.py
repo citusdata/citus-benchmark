@@ -160,6 +160,7 @@ class Benchmark(object):
         os.environ['INSERTCOUNT_CITUS'] = str(self.INSERTCOUNT_CITUS)
         os.environ['INSERTCOUNT_MONITOR'] = str(self.INSERTCOUNT_MONITOR)
         os.environ['INSERTSTART'] = str(self.INSERTSTART)
+        os.environ['THREADS'] = self.CURRENT_THREAD
 
         # Install YCSB and JDBC PostgreSQL driver
         self.install_ycsb()
@@ -306,6 +307,7 @@ class Benchmark(object):
 
             for thread in self.THREADS:
                 self.CURRENT_THREAD = thread
+                os.environ['THREADS'] = self.CURRENT_THREAD
                 self.run_workload("workloada", "load")
                 # self.run_workload("workloada", "load", "monitor")
                 self.run_workload("workloadc", "run")

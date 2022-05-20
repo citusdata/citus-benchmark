@@ -5,7 +5,7 @@ bin/ycsb load jdbc \
     -P workloads/$WORKLOAD \
     -p db.driver=org.postgresql.Driver \
     -p recordcount=$RECORDS \
-    -p threadcount=$THREADS \
+    -p threadcount=$WORKERS \
     -p insertstart=$INSERTSTART \
     -p insertcount=$INSERTCOUNT_MONITOR \
     -cp ./postgresql-42.2.14.jar \
