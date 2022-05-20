@@ -11,5 +11,5 @@ ip=$(az deployment group show --resource-group "$RESOURCE_GROUP" --name "$RESOUR
 scp \
     -o "UserKnownHostsFile=/dev/null" \
     -o "StrictHostKeyChecking=no" \
-    $AZURE_USER@$ip:$FILENAME . 2>/dev/null
+    $AZURE_USER@$ip:citus-benchmark/ycsb/driver/$FILENAME . 2>/dev/null
 
