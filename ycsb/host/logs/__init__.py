@@ -92,8 +92,8 @@ class Logging(object):
 
 
         os.chdir(f'{self.HOMEDIR}/logs/scripts')
-        run(["./get-csv-from-driver.sh", self.RESOURCE, f"{self.RESOURCE}/YCSB/results", ">", "/dev/null"], shell = False)
-        run(["./get-ycsb-logs-from-driver.sh", self.RESOURCE, f"{self.RESOURCE}/YCSB/raw", ">", "/dev/null"], shell = False)
+        run(["./get-csv-from-driver.sh", self.RESOURCE, f"{self.RESOURCE}/YCSB/results"], shell = False)
+        run(["./get-ycsb-logs-from-driver.sh", self.RESOURCE, f"{self.RESOURCE}/YCSB/raw"], shell = False)
         os.chdir(f"{self.HOMEDIR}")
 
 
@@ -127,15 +127,17 @@ class Logging(object):
         os.chdir(f"{self.HOMEDIR}/logs")
 
 
-    def get_postgresql(self, outputfolder, iterations):
+    def get_postgresql(self):
 
         """ collects postgresql logs in /dat/14/data/pg_logs """
 
         os.chdir(f'{self.HOMEDIR}/logs/scripts')
 
-        for worker_host in self.WORKERS:
+        for worker_num, worker_host in enumerate(self.WORKERS):
 
-            run(["./get-pglog.sh", self.PREFIX, worker_host, ">", "/dev/null"], shell = False)
+            run(["./get-pglog.sh", self.PREFIX, worker_host, str(worker_num)], shell = False)
+
+            # > $resource/pglogs
 
         os.chdir(f"{self.HOMEDIR}/logs")
 
