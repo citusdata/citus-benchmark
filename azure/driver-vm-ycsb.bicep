@@ -75,9 +75,9 @@ sudo apt update -y
 git clone https://github.com/citusdata/citus-benchmark.git --branch ycsb-refactored
 cd citus-benchmark/ycsb/scripts
 
-./install.sh
+tmux new-session -d -t main -s init-install \; send-keys './install.sh' Enter
 
-// while ! psql -c 'select 1'; do  echo failed; sleep 1; done
+while ! psql -c 'select 1'; do  echo failed; sleep 1; done
 tmux new-session -d -t main -s init-bench \; send-keys './build-and-run-ycsb.sh {0} {1} {2} {3} {6} {7} {8} {9} {10} {11} {12} {13}' Enter
 
 '''
