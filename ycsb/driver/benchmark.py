@@ -199,7 +199,7 @@ class Benchmark(object):
 
         else:
 
-            return ['./parralel-ycsb-run.sh']
+            return ['./parallel-ycsb-run.sh']
 
 
     def psql(self, command):
@@ -212,7 +212,7 @@ class Benchmark(object):
     def set_iterations(self, i):
 
         self.ITERATION = i
-        os.environ['ITERATION'] = self.ITERATION
+        os.environ['ITERATION'] = str(self.ITERATION)
 
 
     def truncate_usertable(self):
@@ -229,8 +229,6 @@ class Benchmark(object):
         """
         Runs a single ycsb workload
         """
-
-        os.chdir(self.HOMEDIR + '/scripts')
         os.environ['WORKLOAD'] = self.WORKLOAD_NAME
         os.environ['THREAD'] = str(self.CURRENT_THREAD)
         os.environ['OPERATIONS'] = str(self.OPERATIONS)
@@ -304,9 +302,8 @@ class Benchmark(object):
         Executes loading with workloada, running with workloadc
         Multiple iterations are supported
         """
-
         for i in range(self.ITERATIONS):
-
+            os.chdir(self.HOMEDIR + '/scripts')
             self.set_iterations(i)
 
             for thread in self.THREADS:
@@ -324,6 +321,7 @@ class Benchmark(object):
             print("Generating CSV")
 
             # gather csv with all results
+            os.chdir(self.HOMEDIR)
             run(['python3', 'generate-csv.py', "results.csv"], shell = False)
 
         # If finished, create a run.finished file
