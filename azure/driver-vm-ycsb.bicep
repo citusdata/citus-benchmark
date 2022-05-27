@@ -68,8 +68,8 @@ cat >> .bashrc << '__ssh_connection_bashrc__'
 __ssh_connection_bashrc__
 
 git clone https://github.com/citusdata/citus-benchmark.git --branch ycsb-refactored
-cd citus-benchmark/ycsb/driver
-export HOMEDIR=$PWD
+cd citus-benchmark/ycsb/scripts
+export HOMEDIR=$(PWD)
 sudo apt install -y default-jre python postgresql-client-common postgresql-client-{5}
 
 sudo apt-get install python3-pip -y
@@ -78,8 +78,8 @@ pip3 install pandas
 pip3 install matplotlib
 
 while ! psql -c 'select 1'; do  echo failed; sleep 1; done
-cd scripts
-tmux new-session -d -t main -s init-bench \; send-keys './build-and-run-ycsb.sh' Enter
+tmux new-session -d -t main -s init-bench \; send-keys './build-and-run-ycsb.sh {0} {1} {2} {3} citus {6} {7} {8} {9} {10} {11} {12} {13}' Enter
+
 '''
 
 var driverBootScript = format(driverBootTemplate, pgHost, pgUser, pgPassword, pgPort, bashrcTmuxAutoAttach, pgVersion, records, operations, shard_count, thread_counts, iterations, workers, rg, monitorpw)
