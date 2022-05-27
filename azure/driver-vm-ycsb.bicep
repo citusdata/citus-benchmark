@@ -78,7 +78,7 @@ pip3 install pandas
 pip3 install matplotlib
 
 while ! psql -c 'select 1'; do  echo failed; sleep 1; done
-tmux new-session -d -t main -s init-bench \; send-keys './build-and-run-ycsb.sh {0} {1} {2} {3} citus {6} {7} {8} {9} {10} {11} {12} {13}' Enter
+tmux new-session -d -t main -s init-bench \; send-keys './build-and-run-ycsb.sh {0} {1} {2} {3} {6} {7} {8} {9} {10} {11} {12} {13}' Enter
 
 '''
 
