@@ -8,22 +8,19 @@ def list_csv_files(path, suffix = ".csv"):
 
     """ List all csv files from a specific path and returns list """
 
-    return [filename for filename in path if filename.endswith(suffix)]
+    return [filename for filename in os.listdir(path) if filename.endswith(suffix)]
 
 
 def batch_insert(path, files, query):
 
     """ inserts multiple csv files into postgresql database """
-
+    print(files)
     # Create cursor
     cursor = conn.cursor()
 
     for iteration in files:
-
-        file = path + "/" + iteration
-
         # Parse CSV file
-        with open(file, 'r') as f:
+        with open(path + "/" + iteration, 'r') as f:
             reader = csv.reader(f)
             next(reader)
             for record in reader:
@@ -52,13 +49,13 @@ except:
     sys.exit(1)
 
 # get path
-resource = os.getenv(["RESOURCE"])
+resource = os.getenv("RESOURCE")
 path = sys.argv[1] + "/YCSB/results"
 
 # insert
 sql_insert = """INSERT INTO YCSB(rg, workers, iteration, workloadtype, workloadname, threads, records, operations, throughput, runtime)
                 VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
-batch_insert(path, list_csv_files(resource), sql_insert)
+batch_insert(path, list_csv_files(path), sql_insert)
 
 
