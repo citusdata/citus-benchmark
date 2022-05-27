@@ -1,12 +1,40 @@
 import os
 import psycopg2 as pg
 import csv
-import secrets
 import yaml
 import sys
 
-length = 10
-generated_key = secrets.token_urlsafe(length)
+def list_csv_files(path, suffix = ".csv"):
+
+    """ List all csv files from a specific path and returns list """
+
+    return [filename for filename in path if filename.endswith(suffix)]
+
+
+def batch_insert(path, files, query):
+
+    """ inserts multiple csv files into postgresql database """
+
+    # Create cursor
+    cursor = conn.cursor()
+
+    for iteration in files:
+
+        file = path + "/" + iteration
+
+        # Parse CSV file
+        with open(file, 'r') as f:
+            reader = csv.reader(f)
+            next(reader)
+            for record in reader:
+                cursor.execute(query, record)
+                conn.commit()
+
+    if (conn):
+        cursor.close()
+        conn.close()
+        print("Records succesfully inserted\nConnection closed.")
+
 
 # Read configfile
 with open('RDS.yml') as file:
@@ -23,26 +51,14 @@ except:
     print("Unable to connect to the database")
     sys.exit(1)
 
-# iterate through all files
-file = r'example.csv'
+# get path
+resource = os.getenv(["RESOURCE"])
+path = sys.argv[1] + "/YCSB/results"
 
-sql_insert = """INSERT INTO ycsb_results(id, workers, iteration, workloadtype, workloadname, threads, records, operations, throughput, runtime)
+# insert
+sql_insert = """INSERT INTO YCSB(rg, workers, iteration, workloadtype, workloadname, threads, records, operations, throughput, runtime)
                 VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
-# Create cursor
-cursor = conn.cursor()
+batch_insert(path, list_csv_files(resource), sql_insert)
 
-# Parse CSV file
-with open(file, 'r') as f:
-    reader = csv.reader(f)
-    next(reader)
-    for record in reader:
-        generated_key = secrets.token_urlsafe(length)
-        cursor.execute(sql_insert, record)
-        conn.commit()
-
-if (conn):
-    cursor.close()
-    conn.close()
-    print("Records succesfully inserted\nConnection closed.")
 
