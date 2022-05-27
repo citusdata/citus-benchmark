@@ -67,6 +67,11 @@ cat >> .bashrc << '__ssh_connection_bashrc__'
 {4}
 __ssh_connection_bashrc__
 
+sudo apt -y install vim bash-completion wget
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" |sudo tee  /etc/apt/sources.list.d/pgdg.list
+sudo apt update -y
+
 git clone https://github.com/citusdata/citus-benchmark.git --branch ycsb-refactored
 cd citus-benchmark/ycsb/scripts
 
