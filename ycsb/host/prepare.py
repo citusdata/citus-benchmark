@@ -23,7 +23,7 @@ with open('config.yml', 'r') as f:
 
 # Store metadata about the resource group (hardware used etc)
 def metadata():
-    os.chdir('storage')
+    os.chdir(homedir + '/storage')
 
     try:
         run(['python3', 'metadata.py', homedir], shell = False)
@@ -31,6 +31,8 @@ def metadata():
         pass
     # print("Metadata already stored")
     os.chdir(homedir)
+
+metadata()
 
 # Create a logging instance
 logs = Logging(resource = cluster['resource'], prefix = cluster['prefix'], host = cluster['host'], password = cluster['pgpassword'], port = cluster['port'], shard_count = ycsb['shard_count'])
