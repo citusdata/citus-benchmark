@@ -1,1 +1,1 @@
-sudo su postgres -c "psql -c \"select * from run_command_on_workers($$alter user monitor set log_min_messages = 'debug1'$$);\" "
+sudo su postgres -c "psql -c \"select * from run_command_on_workers('alter user monitor set log_min_messages = ''debug1'' ');\" "

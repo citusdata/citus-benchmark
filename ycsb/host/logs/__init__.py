@@ -8,14 +8,6 @@ from helper import *
 
 class Logging(object):
 
-
-    def get_log_files(self):
-
-        for i in range(self.ITERATIONS):
-            run(['./get-ycsb-logs-from-driver.sh', self.RESOURCE, {self.RESOURCE}/general/worker-{i}], shell = False)
-
-
-
     def get_worker_adresses(self):
 
         """ get adresses from workers in a citus cluster """
@@ -94,22 +86,14 @@ class Logging(object):
         run(['mkdir', '-p', self.RESOURCE + "/general"], shell = False)
 
 
-    def get_csv(self, outdir = "results"):
+    def get_csv_and_ycbs_logs(self, outdir = "results"):
 
         """ connects with VM and gets generated csv's """
 
 
         os.chdir(f'{self.HOMEDIR}/logs/scripts')
-        run(["./get-csv-from-driver.sh", self.RESOURCE, f"{self.RESOURCE}/YCSB/results"], shell = False)
-        os.chdir(f"{self.HOMEDIR}")
-
-
-    def get_raw_ycsb(self):
-
-        """ connects with VM and gets raw ycsb log files """
-
-        os.chdir(f'{self.HOMEDIR}/logs/scripts')
-        run(["./get-ycsb-logs-from-driver.sh", self.RESOURCE, f"{self.RESOURCE}/YCSB/raw"], shell = False)
+        run(["./get-csv-from-driver.sh", self.RESOURCE, f"{self.RESOURCE}/YCSB/results", ">", "/dev/null"], shell = False)
+        run(["./get-ycsb-logs-from-driver.sh", self.RESOURCE, f"{self.RESOURCE}/YCSB/raw", ">", "/dev/null"], shell = False)
         os.chdir(f"{self.HOMEDIR}")
 
 
@@ -147,10 +131,13 @@ class Logging(object):
 
         """ collects postgresql logs in /dat/14/data/pg_logs """
 
-        # connect to worker and then try to collect
+        os.chdir(f'{self.HOMEDIR}/logs/scripts')
 
-        # for i in range(iterations):
-        #     run(["", "outputfolder-"+str(i)], shell = False)
+        for worker_host in self.WORKERS:
+
+            run(["./get-pglog.sh", self.PREFIX, worker_host, ">", "/dev/null"], shell = False)
+
+        os.chdir(f"{self.HOMEDIR}/logs")
 
 
     def start(self):
@@ -161,7 +148,7 @@ class Logging(object):
         self.run_on_all_workers("nohup iostat -xmt 1 &")
 
         # Sleeps 60 seconds so that cpu usage of 1 minutes is collected
-        sleep(60)
+        time.sleep(60)
 
         # Collect nohup.out
         self.collect_iostat()

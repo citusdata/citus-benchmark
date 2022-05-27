@@ -9,6 +9,5 @@ while ! test -f $SIGN; do
 	./get-sign.sh $RESOURCE_GROUP $SIGN
 done
 
-echo "Benchmark ready to start"
 rm $SIGN
 
