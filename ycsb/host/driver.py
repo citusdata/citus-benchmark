@@ -12,9 +12,9 @@
 import os
 import pandas as pd
 from helper import *
-# from run-benchmark import Benchmark
 import yaml
 from logs import Logging
+import time
 
 homedir = os.getcwd()
 
@@ -36,36 +36,40 @@ logs = Logging(resource = cluster['resource'], prefix = cluster['prefix'], host 
 
 # Checks every 10 seconds if run.start on drivervm after driver is ready
 # Ignore the authentication
+time.sleep(120)
+print("Wait for installations on Driver VM")
 os.chdir(homedir + '/logs/scripts/')
 run(["./try-sign.sh", cluster['resource'], 'run.start', '10'], shell = False)
 os.chdir(homedir)
 print("Starting monitoring")
 
-# # If run.start is found, then start monitoring on worker nodes
+# # If run.start is found, then start monitoring on worker nodes (IOSTAT ON WORKER NODES)
 # logs.start()
 
+print("Benchmark running on VM...")
 os.chdir(homedir + '/logs/scripts/')
+
 # # # If 'run.finished' then get all generated csv's from driver vm and store in db's
 run(["./try-sign.sh", cluster['resource'], 'run.finished', '60'], shell = False)
 os.chdir(homedir)
 print("Finish monitoring")
 
-# # # Get csv's from driver
-# logs.get_csv()
-
-# # Get raw ycsb-data from driver for every resource group?
-logs.get_raw_ycsb()
+# # # Get csv's from driver # # Get raw ycsb-data from driver for every resource group and push to blob
+logs.get_csv_and_ycbs_logs()
 
 # # Get raw postgresql data from worker nodes
-# logs.get_postgresl()
+logs.get_postgresl()
 
 # # Runs script that pushes gathered data to Blob storage and a PostgreSQL DB
-
 # # Push to postgresql
-# # run(["python3", 'push_to_db.py'], shell = False)
+
+os.chdir("storage")
+path = homedir + f"/logs/scripts/{logs.RESOURCE}"
+
+run(["python3", 'push_to_db.py', 'path'], shell = False)
 
 # # # Push to blob
-# # run(["./push-to-s3.sh", cluster['resource']], shell = False)
+run(["./push-to-blob.sh", cluster['resource']], shell = False)
 
 
 

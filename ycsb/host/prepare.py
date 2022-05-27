@@ -22,11 +22,15 @@ with open('config.yml', 'r') as f:
         print(exc)
 
 # Store metadata about the resource group (hardware used etc)
-# try:
-#     run(['python3', 'metadata.py'], shell = False)
-# except:
-#     pass
-#     print("Metadata already stored")
+def metadata():
+    os.chdir('storage')
+
+    try:
+        run(['python3', 'metadata.py', homedir], shell = False)
+    except:
+        pass
+    # print("Metadata already stored")
+    os.chdir(homedir)
 
 # Create a logging instance
 logs = Logging(resource = cluster['resource'], prefix = cluster['prefix'], host = cluster['host'], password = cluster['pgpassword'], port = cluster['port'], shard_count = ycsb['shard_count'])
@@ -44,6 +48,7 @@ logs.prepare_postgresql_table()
 logs.set_permissions()
 
 # Subsequently second command is executed on internal repo
+print("Cluster Prepared")
 
 
 
