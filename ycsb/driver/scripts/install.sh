@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export HOMEDIR=$(pwd)
-sudo apt install -y default-jre python postgresql-client-common postgresql-client-{5}
+sudo apt install -y default-jre python postgresql-client-common postgresql-client-14
 
 sudo apt-get install python3-pip -y
 pip3 install fire
