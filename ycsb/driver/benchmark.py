@@ -1,15 +1,13 @@
-# Called by hyperscale-{}.bicep, which spins up DriverVM and executes script to install necessary packages
-# Runs driver script ‘run-benchmark.py’ by using tmux (session-name = cloud-init)
+# This scripts is called by hyperscale-{}.bicep, which spins up DriverVM and executes script to install necessary packages
+# This is the driver script ‘benchmark.py’ which is run in a tmux session (session-name = bench-init)
 # Downloads and installs YCSB and JDBC driver
-# Starts two YCSB instances, 99% records via Citus user, 1% via Monitor user simultaneously in bash script build-and-run.sh
+# Currently starts two parallel YCSB clients. First one runs 99% of records via user 'citus'
+# Second client runs 1% of records via user 'monitor' and sets postgresql logging properties on
 # Runs specified workloads (default = workload a and c), iterates multiple times through workloads
 # Stores all raw YCSB output for every workload
 # Generates csv’s from every benchmark iteration
 
-### No config file needed as this script is the driver script on the driver vm
-
-### TO DO
-# Create multithreading for ycsb and monitor simultaneaously
+### No config file needed as this script is executed on the driver VM on Azure
 
 import os
 import fire
@@ -114,8 +112,8 @@ class Benchmark(object):
 
 
     def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", database = "citus",
-    outdir = "output", workloadtype = "load", workloads="workloada", iterations = 1, outputfile = "results.csv", shard_count = 16,
-    workers = "2", resource = "custom", host = "localhost", parallel = False, monitorpw="monitor", maxtime = 600):
+    workloadtype = "load", workloads="workloada", iterations = 1, outputfile = "results.csv", shard_count = 16,
+    workers = "2", resource = "custom", host = "localhost", parallel = False, monitorpw = "monitor", maxtime = 600):
 
         self.HOMEDIR = os.getcwd()
         self.PARALLEL = parallel
@@ -232,6 +230,7 @@ class Benchmark(object):
         Runs a single ycsb workload
         """
 
+        os.chdir(self.HOMEDIR + '/scripts')
         os.environ['WORKLOAD'] = self.WORKLOAD_NAME
         os.environ['THREAD'] = str(self.CURRENT_THREAD)
         os.environ['OPERATIONS'] = str(self.OPERATIONS)
@@ -246,7 +245,6 @@ class Benchmark(object):
             os.environ['OPERATIONS'] = str(self.OPERATIONS * 10)
 
         if parallel:
-            os.chdir(self.HOMEDIR + '/scripts')
             run(self.run_ycsb_parallel(self.WORKLOAD_TYPE, self.WORKLOAD_NAME), shell = False)
             return
 
