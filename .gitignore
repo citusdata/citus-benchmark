@@ -14,3 +14,4 @@ __pycache__/
 model/
 /ycsb/host/storage/connect-rds.sh
 /ycsb/host/storage/example.csv
+.config
