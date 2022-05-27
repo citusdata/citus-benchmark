@@ -2,11 +2,11 @@
 
 export CITUS_HOST=`psql -tAX -c "select string_agg(substring(nodename from 9),',') from pg_dist_node where groupid > 0 or (select count(*) from pg_dist_node) = 1"`
 
-(.ycsb-load.sh) &
+(./ycsb-run-maxtime.sh) &
 
 main_pid=$!
 
-(monitor-load.sh) &
+(./monitor-run.sh) &
 
 monitor_pid=$!
 
