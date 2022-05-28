@@ -7,6 +7,8 @@ param pgPassword string
 param pgPort int
 param pgVersion string
 param monitorpw string
+param maxtime int
+param parallel bool
 
 param zone string
 param location string
@@ -51,6 +53,8 @@ echo export ITERATIONS={10} >> .bashrc
 echo export WORKERS={11} >> .bashrc
 echo export RESOURCE_GROUP='{12}' >> .bashrc
 echo export MONITORPW='{13}' >> .bashrc
+echo export MAXTIME={14} >> .bashrc
+echo export PARALLEL={15} >> .bashrc
 
 # Use the same environment variables right now, sourcing bashrc doesn't work
 # since we are not in an interactive shell
@@ -68,6 +72,8 @@ export ITERATIONS={10}
 export WORKERS={11}
 export RESOURCE_GROUP={12}
 export MONITORPW={13}
+export MAXTIME={14}
+export PARALLEL={15}
 
 # Make sure we can open enough connections
 echo 'ulimit -n "$(ulimit -Hn)"' >> .bashrc
@@ -89,7 +95,7 @@ tmux new-session -d -t main -s init-bench \; send-keys './build-and-run-ycsb.sh'
 
 '''
 
-var driverBootScript = format(driverBootTemplate, pgHost, pgUser, pgPassword, pgPort, bashrcTmuxAutoAttach, pgVersion, records, operations, shard_count, thread_counts, iterations, workers, rg, monitorpw)
+var driverBootScript = format(driverBootTemplate, pgHost, pgUser, pgPassword, pgPort, bashrcTmuxAutoAttach, pgVersion, records, operations, shard_count, thread_counts, iterations, workers, rg, monitorpw, maxtime, parallel)
 
 module vm 'vm.bicep' = {
   name: '${vmName}-driver-module'
