@@ -80,12 +80,12 @@ sudo apt -y install vim bash-completion wget
 sudo apt update -y
 
 git clone https://github.com/citusdata/citus-benchmark.git --branch ycsb-refactored
-cd citus-benchmark/ycsb/scripts
+cd citus-benchmark/ycsb/driver/scripts
 
-tmux new-session -d -t main -s init-install \; send-keys './install.sh' Enter
+./install.sh
 
 while ! psql -c 'select 1'; do  echo failed; sleep 1; done
-tmux new-session -d -t main -s init-bench \; send-keys './build-and-run-ycsb.sh {0} {1} {2} {3} {6} {7} {8} {9} {10} {11} {12} {13}' Enter
+tmux new-session -d -t main -s init-bench \; send-keys './build-and-run-ycsb.sh' Enter
 
 '''
 
