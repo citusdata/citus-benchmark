@@ -161,7 +161,7 @@ class Benchmark(object):
         os.environ['INSERTSTART'] = str(self.INSERTSTART)
         os.environ['THREADS'] = str(self.CURRENT_THREAD)
         os.environ['HOMEDIR'] = self.HOMEDIR
-        os.environ['PARALLEL'] = self.PARALLEL
+        os.environ['PARALLEL'] = str(self.PARALLEL)
 
         # Install YCSB and JDBC PostgreSQL driver
         self.install_ycsb()
