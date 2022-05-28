@@ -16,6 +16,8 @@ param shard_count string = '64'
 param thread_counts string = '100,300'
 param iterations int = 1
 param workers int = 1
+param maxtime int = 600
+param parallel bool = false
 
 // Configuration of the postgres server group
 param pgVersion string = '14'
@@ -85,6 +87,8 @@ module driverVm 'driver-vm-ycsb.bicep' = {
     workers: workers
     rg: namePrefix
     monitorpw: monitorpw
+    maxtime: maxtime
+    parallel: parallel
   }
 }
 
