@@ -55,7 +55,7 @@ echo export RESOURCE_GROUP='{12}' >> .bashrc
 echo export MONITORPW='{13}' >> .bashrc
 echo export MAXTIME={14} >> .bashrc
 echo export PARALLEL={15} >> .bashrc
-echo export export HOMEDIR=$(pwd) >> .bashrc
+echo export FOLDER=$(pwd) >> .bashrc
 
 # Use the same environment variables right now, sourcing bashrc doesn't work
 # since we are not in an interactive shell
@@ -75,7 +75,7 @@ export RESOURCE_GROUP={12}
 export MONITORPW={13}
 export MAXTIME={14}
 export PARALLEL={15}
-export HOMEDIR=$(pwd)
+export FOLDER=$(pwd)
 
 # Make sure we can open enough connections
 echo 'ulimit -n "$(ulimit -Hn)"' >> .bashrc
@@ -86,11 +86,16 @@ __ssh_connection_bashrc__
 
 sudo apt -y install vim bash-completion wget
 sudo apt update -y
+sudo apt install -y default-jre python postgresql-client-common postgresql-client-14
+sudo apt install python-is-python2 -y
+sudo apt-get install python3-pip -y
+pip3 install fire
+pip3 install pandas
+pip3 install matplotlib
+
 
 git clone https://github.com/citusdata/citus-benchmark.git --branch ycsb-refactored
 cd citus-benchmark/ycsb/driver/scripts
-
-./install.sh
 
 while ! psql -c 'select 1'; do  echo failed; sleep 1; done
 tmux new-session -d -t main -s init-bench \; send-keys './build-and-run-ycsb.sh' Enter
