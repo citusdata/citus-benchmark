@@ -55,6 +55,7 @@ echo export RESOURCE_GROUP='{12}' >> .bashrc
 echo export MONITORPW='{13}' >> .bashrc
 echo export MAXTIME={14} >> .bashrc
 echo export PARALLEL={15} >> .bashrc
+echo export export HOMEDIR=$(pwd) >> .bashrc
 
 # Use the same environment variables right now, sourcing bashrc doesn't work
 # since we are not in an interactive shell
@@ -74,6 +75,7 @@ export RESOURCE_GROUP={12}
 export MONITORPW={13}
 export MAXTIME={14}
 export PARALLEL={15}
+export HOMEDIR=$(pwd)
 
 # Make sure we can open enough connections
 echo 'ulimit -n "$(ulimit -Hn)"' >> .bashrc
