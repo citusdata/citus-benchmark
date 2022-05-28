@@ -175,11 +175,11 @@ class Benchmark(object):
 
         if wtype == "load":
 
-            return ['./ycsb-load.sh', workload, self.PORT, self.DATABASE, str(self.RECORDS), str(self.CURRENT_THREAD), str(self.ITERATION), str(self.WORKERS), str(self.RG)]
+            return ['./ycsb-load.sh']
 
         else:
 
-            return ['./ycsb-run.sh', workload, self.PORT, self.DATABASE, str(self.RECORDS), str(self.CURRENT_THREAD), str(self.OPERATIONS),  str(self.ITERATION), str(self.WORKERS), str(self.RG)]
+            return ['./ycsb-run.sh']
 
 
     def run_ycsb_parallel(self, wtype, workload):

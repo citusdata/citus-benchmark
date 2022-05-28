@@ -1,16 +1,6 @@
 #!/bin/bash
 
-export WORKLOAD=$1
-export PORT=$2
-export PGDATABASE=$3
-export RECORDS=$4
-export THREADS=$5
-export OPERATIONS=$6
-export ITERATION=$7
-export WORKERS=$8
-export RESOURCE=$9
-
-cd ycsb-0.17.0
+cd $HOMEDIR/ycsb-0.17.0
 
 export CITUS_HOST=`psql -tAX -c "select string_agg(substring(nodename from 9),',') from pg_dist_node where groupid > 0 or (select count(*) from pg_dist_node) = 1"`
 
