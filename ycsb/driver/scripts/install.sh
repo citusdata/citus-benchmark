@@ -1,6 +1,5 @@
 #!/bin/bash
 
-export HOMEDIR=$(pwd)
 sudo apt install -y default-jre python postgresql-client-common postgresql-client-14
 
 sudo apt install python-is-python2 -y
