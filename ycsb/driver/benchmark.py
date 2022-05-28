@@ -160,6 +160,8 @@ class Benchmark(object):
         os.environ['INSERTCOUNT_MONITOR'] = str(self.INSERTCOUNT_MONITOR)
         os.environ['INSERTSTART'] = str(self.INSERTSTART)
         os.environ['THREADS'] = str(self.CURRENT_THREAD)
+        os.environ['HOMEDIR'] = self.HOMEDIR
+        os.environ['PARALLEL'] = self.PARALLEL
 
         # Install YCSB and JDBC PostgreSQL driver
         self.install_ycsb()
@@ -282,6 +284,7 @@ class Benchmark(object):
         """
 
         for i in range(self.ITERATIONS):
+            os.chdir(self.HOMEDIR + '/scripts')
             self.set_iterations()
             outputdir = self.OUTDIR + f"-{i+1}"
 
@@ -290,6 +293,7 @@ class Benchmark(object):
                 self.run_workload(self.WORKLOAD_NAME, self.WORKLOAD_TYPE)
 
             print(f"Done running workloadc for iteration {i}")
+            os.chdir(self.HOMEDIR)
             print("Generating CSV")
 
             # gather csv with all results after each iteration
@@ -337,6 +341,7 @@ class Benchmark(object):
         """
 
         for i in range(self.ITERATIONS):
+            os.chdir(self.HOMEDIR + '/scripts')
 
             for thread in self.THREADS:
                 self.CURRENT_THREAD = thread
@@ -357,6 +362,7 @@ class Benchmark(object):
                     self.run_workload(workload, "run")
 
             print("Done running all YCSB core workloads")
+            os.chdir(self.HOMEDIR)
             print("Generating CSV")
 
             # gather csv with all results
