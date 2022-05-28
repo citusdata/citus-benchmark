@@ -95,7 +95,7 @@ pip3 install matplotlib
 
 
 git clone https://github.com/citusdata/citus-benchmark.git --branch ycsb-refactored
-cd citus-benchmark/ycsb/driver/scripts
+cd citus-benchmark/ycsb/driver
 
 while ! psql -c 'select 1'; do  echo failed; sleep 1; done
 tmux new-session -d -t main -s init-bench \; send-keys './build-and-run-ycsb.sh' Enter
