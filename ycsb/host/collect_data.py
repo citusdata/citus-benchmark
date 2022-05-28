@@ -43,7 +43,7 @@ logs.get_postgresql()
 os.chdir(homedir + "/storage")
 path = homedir + f"/logs/scripts/{cluster['resource']}"
 
-run(["python3", 'push_to_db.py', path], shell = False)
+run(["python3", 'push_to_db.py', path, "PARALLEL"], shell = False)
 
 # # Push to blob
 run(["./push-to-blob.sh", f"{path}/YCSB/raw/", bucket, f"{cluster['resource']}/raw/"], shell = False)

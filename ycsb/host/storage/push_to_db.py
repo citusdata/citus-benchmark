@@ -40,6 +40,11 @@ with open('RDS.yml') as file:
     except yaml.YAMLError as exc:
         print(exc)
 
+# get path
+resource = os.getenv("RESOURCE")
+path = sys.argv[1] + "/YCSB/results"
+database = sys.argv[2]
+
 # connect to RDS postgresql database
 try:
     conn = pg.connect(f"dbname='{RDS['database']}' user='{RDS['user']}' host='{RDS['endpoint']}' password='{RDS['password']}'")
@@ -48,12 +53,8 @@ except:
     print("Unable to connect to the database")
     sys.exit(1)
 
-# get path
-resource = os.getenv("RESOURCE")
-path = sys.argv[1] + "/YCSB/results"
-
 # insert
-sql_insert = """INSERT INTO YCSB(rg, workers, iteration, workloadtype, workloadname, threads, records, operations, throughput, runtime)
+sql_insert = f"""INSERT INTO {database}(rg, workers, iteration, workloadtype, workloadname, threads, records, operations, throughput, runtime)
                 VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
 batch_insert(path, list_csv_files(path), sql_insert)
