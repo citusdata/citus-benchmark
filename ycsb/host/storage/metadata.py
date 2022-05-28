@@ -50,7 +50,7 @@ def insert_metadata(query):
         if (conn):
             cursor.close()
             conn.close()
-            print("SUCCES: Metadata sucessfullyS stored")
+            print("SUCCES: Metadata sucessfully stored")
     except:
         print("FATAL: Failed to store metadata")
         pass
