@@ -42,6 +42,15 @@ echo export PGHOST='{0}' >> .bashrc
 echo export PGUSER={1} >> .bashrc
 echo export PGPASSWORD='{2}' >> .bashrc
 echo export PGPORT={3} >> .bashrc
+echo export PGDATABASE=citus >> .bashrc
+echo export RECORDS={6} >> .bashrc
+echo export OPERATIONS={7} >> .bashrc
+echo export SHARD_COUNT={8} >> .bashrc
+echo export THREAD_COUNT={9} >> .bashrc
+echo export ITERATIONS={10} >> .bashrc
+echo export WORKERS={11} >> .bashrc
+echo export RESOURCE_GROUP='{12}' >> .bashrc
+echo export MONITORPW='{13}' >> .bashrc
 
 # Use the same environment variables right now, sourcing bashrc doesn't work
 # since we are not in an interactive shell
@@ -68,8 +77,6 @@ cat >> .bashrc << '__ssh_connection_bashrc__'
 __ssh_connection_bashrc__
 
 sudo apt -y install vim bash-completion wget
-wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" |sudo tee  /etc/apt/sources.list.d/pgdg.list
 sudo apt update -y
 
 git clone https://github.com/citusdata/citus-benchmark.git --branch ycsb-refactored
