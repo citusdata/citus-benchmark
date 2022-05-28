@@ -32,27 +32,32 @@ with open('config.yml', 'r') as f:
 # Create a logging instance
 logs = Logging(resource = cluster['resource'], prefix = cluster['prefix'], host = cluster['host'], password = cluster['pgpassword'], port = cluster['port'], shard_count = ycsb['shard_count'])
 
-# Checks every 10 seconds if run.start on drivervm after driver is ready
-time.sleep(120)
-print("Wait for installations on Driver VM")
-os.chdir(homedir + '/logs/scripts/')
-run(["./try-sign.sh", cluster['resource'], 'run.start', '10'], shell = False)
-os.chdir(homedir)
-print("Starting monitoring")
+# # Get csv's from driver # # Get raw ycsb-data from driver for every resource group and push to blob
+logs.get_csv_and_ycbs_logs()
 
-# # # # If run.start is found, then start monitoring on worker nodes (IOSTAT ON WORKER NODES)
-# # # logs.start()
+# # Get raw postgresql data from worker nodes
+logs.get_postgresql()
 
-print("Benchmark running on VM...")
-os.chdir(homedir + '/logs/scripts/')
+# # Runs script that pushes gathered data to Blob storage and a PostgreSQL DB
+# # Push to postgresql
+os.chdir(homedir + "/storage")
+path = homedir + f"/logs/scripts/{cluster['resource']}"
 
-# # # If 'run.finished' then get all generated csv's from driver vm and store in db's
-run(["./try-sign.sh", cluster['resource'], 'run.finished', '60'], shell = False)
-os.chdir(homedir)
-print("Finish monitoring")
+run(["python3", 'push_to_db.py', path], shell = False)
 
-# Data collection
-run(['python3', 'collect_data.py', bucket], shell = False)
+# # Push to blob
+run(["./push-to-blob.sh", f"{path}/YCSB/raw/", bucket, f"{cluster['resource']}/raw/"], shell = False)
+run(["./push-to-blob.sh", f"{path}/pglogs/", bucket, f"{cluster['resource']}/pglogs"], shell = False)
+
+# DELETE RESOURCE GROUP FOLDER
+# run(["rm", "-r", path], shell = False)
+# print("FOLDER REMOVED")
+# DELETE RESOURCE GROUP
+# os.chdir("")
+# run(["rm", "-r", path], shell = False)
+
+
+print("DONE WITH BENCHMARKS")
 
 
 
