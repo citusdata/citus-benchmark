@@ -90,7 +90,6 @@ class Logging(object):
 
         """ connects with VM and gets generated csv's """
 
-
         os.chdir(f'{self.HOMEDIR}/logs/scripts')
         run(["./get-csv-from-driver.sh", self.RESOURCE, f"{self.RESOURCE}/YCSB/results"], shell = False)
         run(["./get-ycsb-logs-from-driver.sh", self.RESOURCE, f"{self.RESOURCE}/YCSB/raw"], shell = False)

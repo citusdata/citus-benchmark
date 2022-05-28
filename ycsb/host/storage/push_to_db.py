@@ -14,7 +14,7 @@ def list_csv_files(path, suffix = ".csv"):
 def batch_insert(path, files, query):
 
     """ inserts multiple csv files into postgresql database """
-    print(files)
+
     # Create cursor
     cursor = conn.cursor()
 
