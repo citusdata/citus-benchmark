@@ -9,6 +9,4 @@ export LOG_MIN_MESSAGES=$(echo $(cat log-min-messages))
 ssh -t \
     -o "UserKnownHostsFile=/dev/null" \
     -o "StrictHostKeyChecking=no" \
-    $PREFIX@$HOST "$LOG_STATEMENT; $LOG_MIN_MESSAGES; $LOG_DURATION; $PERMISSIONS"
-
-
+    $PREFIX@$HOST "$LOG_STATEMENT; $LOG_MIN_MESSAGES; $LOG_DURATION"
