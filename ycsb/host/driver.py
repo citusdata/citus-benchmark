@@ -1,13 +1,8 @@
-# DRIVER FILE:
-# Waiting for driver: Checks every 10 seconds for a run.start file on driverVM
-# If run.start, starts background process worker node that runs iostat
-# collect these logs (nohup.out) every x seconds
-# Waiting for Driver: Checks every 60 seconds for a run.finished file on driverVM
-# If run.finalized, collect csv’s from driver(s) and raw YCSB output for every workload
-# Collects postgresql logs from /dat/14/data/pg_log/ produced by user ‘monitor’ on every worker/coordinator
-# Stores all collected files in RDS and S3 so that they persist
-# If succeeded, delete locally generated files and folders
-
+# DRIVER SCRIPT:
+# If benchmark is running, i.e. if run.start on driver then start iostat on worker nodes in tmux session cpu-usage
+# Wait for benchmarks to be finished ('run.finished')
+# If benchmark finished, kill tmux session cpu-usage
+# Start collecting data from driver and worker nodes
 
 import os
 import pandas as pd
@@ -34,24 +29,24 @@ logs = Logging(resource = cluster['resource'], prefix = cluster['prefix'], host 
 
 # Checks every 10 seconds if run.start on drivervm after driver is ready
 time.sleep(120)
-print("Wait for installations on Driver VM")
 os.chdir(homedir + '/logs/scripts/')
 run(["./try-sign.sh", cluster['resource'], 'run.start', '10'], shell = False)
 os.chdir(homedir)
-print("Starting monitoring")
 
 # # # # If run.start is found, then start monitoring on worker nodes (IOSTAT ON WORKER NODES)
-# # # logs.start()
+logs.start()
 
 print("Benchmark running on VM...")
 os.chdir(homedir + '/logs/scripts/')
 
-# # # If 'run.finished' then get all generated csv's from driver vm and store in db's
-run(["./try-sign.sh", cluster['resource'], 'run.finished', '60'], shell = False)
-os.chdir(homedir)
-print("Finish monitoring")
+# If 'run.finished' then get all generated csv's from driver vm and store in db's
+run(["./try-sign.sh", cluster['resource'], 'run.finished', '30'], shell = False)
+
+# If run is finished, kill tmux session where iostat runs on the worker nodes
+logs.kill_tmux_session()
 
 # Data collection
+os.chdir(homedir)
 run(['python3', 'collect_data.py', bucket], shell = False)
 
 
