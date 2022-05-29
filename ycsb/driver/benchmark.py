@@ -106,7 +106,7 @@ class Benchmark(object):
 
     def calculate_records(self):
 
-        self.INSERTCOUNT_CITUS = int(0.99 * self.RECORDS)
+        self.INSERTCOUNT_CITUS = int(0.999 * self.RECORDS)
         self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT_CITUS
         self.INSERTSTART = self.INSERTCOUNT_CITUS
 
