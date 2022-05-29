@@ -63,8 +63,7 @@ class Logging(object):
 
         for i, worker in enumerate(self.WORKERS):
 
-            run(['mkdir', '-p', f"{self.RESOURCE}/general/worker-{i}"], shell = False)
-            run(["scp", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{worker}:nohup.out", f"{self.RESOURCE}/general/worker-{i}"], shell = False)
+            run(["scp", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{worker}:nohup.out", f"{self.RESOURCE}/general/worker-{i}.out"], shell = False)
 
 
     def connect_to_worker(self, worker, script):
@@ -72,7 +71,6 @@ class Logging(object):
         """ Connects to a worker via ssh, and runs a script """
 
         run(["ssh", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{worker}", script], shell = False)
-
 
 
     def create_output_directories(self):
@@ -109,7 +107,8 @@ class Logging(object):
         """ runs script in all workers from citus cluster """
 
         for i, worker in enumerate(self.WORKERS):
-            self.connect_to_worker(worker, i, script)
+
+            self.connect_to_worker(worker, script)
 
 
     def set_permissions(self):
@@ -122,7 +121,14 @@ class Logging(object):
         """
 
         os.chdir(f'{self.HOMEDIR}/logs/scripts')
+
+        # change permissions on coordinator node
         run(["./alter-user.sh", self.PREFIX, self.HOST, ">", "/dev/null"], shell = False)
+
+        # Also manually change on all workers
+        for worker in self.WORKERS:
+            run(["./alter-user-on-worker.sh", self.PREFIX, worker, ">", "/dev/null"], shell = False)
+
         os.chdir(f"{self.HOMEDIR}/logs")
 
 
@@ -136,23 +142,22 @@ class Logging(object):
 
             run(["./get-pglog.sh", self.PREFIX, worker_host, str(worker_num)], shell = False)
 
-            # > $resource/pglogs
-
         os.chdir(f"{self.HOMEDIR}/logs")
 
 
     def start(self):
 
-        """ starts the process to automatically connect logs from the worker nodes """
+        """ starts the tmux process to automatically measure cpu usage during benchmarks """
 
-        # Runs script on workers (IOSTAT) that collects CPU usage for every second
-        self.run_on_all_workers("nohup iostat -xmt 1 &")
+        # Runs script on workers (IOSTAT) that collects CPU usage for every 2 seconds
+        self.run_on_all_workers("tmux new -s cpu-usage -d; tmux send-keys -t cpu-usage 'nohup iostat -xmt 2 &' Enter")
 
-        # Sleeps 60 seconds so that cpu usage of 1 minutes is collected
-        time.sleep(60)
 
-        # Collect nohup.out
-        self.collect_iostat()
+    def kill_tmux_session(self):
+
+        """ kills tmux session that writes iostat output to nohup.out """
+
+        self.run_on_all_workers("tmux kill-session -t cpu-usage")
 
 
 if __name__ == '__main__':
