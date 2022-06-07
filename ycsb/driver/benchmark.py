@@ -13,6 +13,7 @@ import os
 import fire
 import pandas as pd
 from helper import *
+import time
 
 class Benchmark(object):
 
@@ -101,12 +102,12 @@ class Benchmark(object):
 
         """ create start file if ready to run ycsb benchmarks """
 
-        run(['touch', filename], shell = False)
+        run(['touch', filename + f'-{self.ITERATION}'], shell = False)
 
 
     def calculate_records(self):
 
-        self.INSERTCOUNT_CITUS = int(0.999 * self.RECORDS)
+        self.INSERTCOUNT_CITUS = int(0.99999 * self.RECORDS)
         self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT_CITUS
         self.INSERTSTART = self.INSERTCOUNT_CITUS
 
@@ -167,9 +168,6 @@ class Benchmark(object):
         self.install_ycsb()
         self.install_jdbc()
 
-        # ready to start benchmark
-        self.create_sign()
-
 
     def get_workload(self, wtype, workload):
 
@@ -184,7 +182,7 @@ class Benchmark(object):
             return ['./ycsb-run.sh']
 
 
-    def run_ycsb_parallel(self, wtype, workload):
+    def run_ycsb_parallel(self, wtype):
 
         """
         Runs 2 YCSB instances in parallel.
@@ -231,6 +229,7 @@ class Benchmark(object):
         """
         Runs a single ycsb workload
         """
+
         os.environ['WORKLOAD'] = self.WORKLOAD_NAME
         os.environ['THREAD'] = str(self.CURRENT_THREAD)
         os.environ['OPERATIONS'] = str(self.OPERATIONS)
@@ -306,6 +305,11 @@ class Benchmark(object):
         Executes loading with workloada, running with workloadc
         Multiple iterations are supported
         """
+
+        # create sign if benchmark can start
+        self.create_sign()
+        time.sleep(60)
+
         for i in range(self.ITERATIONS):
             os.chdir(self.HOMEDIR + '/scripts')
             self.set_iterations(i)
@@ -330,6 +334,40 @@ class Benchmark(object):
 
         # If finished, create a run.finished file
         self.create_sign("run.finished")
+
+
+    def monitor_workloadc(self):
+
+        """
+        Executes loading with workloada in a regular fashion
+        Monitors workload c
+        """
+
+        for i in range(self.ITERATIONS):
+            os.chdir(self.HOMEDIR + '/scripts')
+            self.set_iterations(i)
+
+            for thread in self.THREADS:
+                self.CURRENT_THREAD = thread
+                os.environ['THREADS'] = str(self.CURRENT_THREAD)
+
+                self.run_workload("workloada", "load")
+
+                # create sign for starting monitoring
+                self.create_sign()
+                time.sleep(30)
+
+                self.run_workload("workloadc", "run", self.PARALLEL)
+
+                # If workloadc finished, create a run.finished-iteration file
+                self.create_sign("run.finished")
+
+            print(f"Done running workloadc for iteration {i}")
+            print("Generating CSV")
+
+            # gather csv with all results
+            os.chdir(self.HOMEDIR)
+            run(['python3', 'generate-csv.py', "results.csv"], shell = False)
 
 
     def run_all_workloads(self):
@@ -372,7 +410,12 @@ class Benchmark(object):
 
 if __name__ == '__main__':
 
-  fire.Fire(Benchmark)
+    try:
+        fire.Fire(Benchmark)
+
+    except KeyboardInterrupt:
+         run(['python3', 'generate-csv.py', "results.csv"], shell = False)
+
 
 
 
