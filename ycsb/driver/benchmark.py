@@ -107,7 +107,7 @@ class Benchmark(object):
 
     def calculate_records(self):
 
-        self.INSERTCOUNT_CITUS = int(0.99999 * self.RECORDS)
+        self.INSERTCOUNT_CITUS = int(0.999 * self.RECORDS)
         self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT_CITUS
         self.INSERTSTART = self.INSERTCOUNT_CITUS
 
@@ -359,6 +359,7 @@ class Benchmark(object):
                 time.sleep(60)
 
                 os.chdir(self.HOMEDIR + '/scripts')
+                self.INSERTCOUNT_MONITOR = self.INSERTCOUNT_MONITOR * 10
                 self.run_workload("workloadc", "run", self.PARALLEL)
                 os.chdir(self.HOMEDIR)
 

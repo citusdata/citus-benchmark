@@ -8,9 +8,9 @@ bin/ycsb run jdbc \
     -p threadcount=$WORKERS \
     -p insertstart=$INSERTSTART \
     -p insertcount=$INSERTCOUNT_MONITOR \
-    -p operationcount=$OPERATIONS \
+    -p operationcount=$INSERTCOUNT_MONITOR \
     -cp ./postgresql-42.2.14.jar \
     -p db.user=monitor \
     -p db.passwd=$MONITORPW \
     -p maxexecutiontime=$MAXTIME \
-    -p db.url="jdbc:postgresql://$CITUS_HOST/$PGDATABASE?loadBalanceHosts=true" | tee ${HOMEDIR}/run_${WORKLOAD}_${THREAD}_${RECORDS}_${ITERATION}_${WORKERS}_${RESOURCE}.mlog
+    -p db.url="jdbc:postgresql://$CITUS_HOST/$PGDATABASE?loadBalanceHosts=true" | tee ${HOMEDIR}/run_${WORKLOAD}_${THREAD}_${INSERTCOUNT_MONITOR}_${RECORDS}_${ITERATION}_${WORKERS}_${RESOURCE}.mlog
