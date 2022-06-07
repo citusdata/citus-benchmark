@@ -98,11 +98,11 @@ class Benchmark(object):
         os.chdir(self.HOMEDIR)
 
 
-    def create_sign(self, filename = "run.start"):
+    def create_sign(self, filename = "run.start", iteration = 0):
 
         """ create start file if ready to run ycsb benchmarks """
 
-        run(['touch', filename + f'-{self.ITERATION}'], shell = False)
+        run(['touch', filename + f'-{iteration}'], shell = False)
 
 
     def calculate_records(self):
@@ -169,7 +169,7 @@ class Benchmark(object):
         self.install_jdbc()
 
 
-    def get_workload(self, wtype, workload):
+    def get_workload(self, wtype):
 
         """ returns list with commands to run workload """
 
@@ -244,10 +244,10 @@ class Benchmark(object):
             os.environ['OPERATIONS'] = str(self.OPERATIONS * 10)
 
         if parallel:
-            run(self.run_ycsb_parallel(self.WORKLOAD_TYPE, self.WORKLOAD_NAME), shell = False)
+            run(self.run_ycsb_parallel(self.WORKLOAD_TYPE), shell = False)
             return
 
-        run(self.get_workload(self.WORKLOAD_TYPE, self.WORKLOAD_NAME), shell = False)
+        run(self.get_workload(self.WORKLOAD_TYPE), shell = False)
 
 
     def run_workload(self, workloadname, workloadtype, parallel = False):
@@ -344,29 +344,31 @@ class Benchmark(object):
         """
 
         for i in range(self.ITERATIONS):
-            os.chdir(self.HOMEDIR + '/scripts')
             self.set_iterations(i)
 
             for thread in self.THREADS:
                 self.CURRENT_THREAD = thread
                 os.environ['THREADS'] = str(self.CURRENT_THREAD)
 
+                os.chdir(self.HOMEDIR + '/scripts')
                 self.run_workload("workloada", "load")
+                os.chdir(self.HOMEDIR)
 
                 # create sign for starting monitoring
-                self.create_sign()
-                time.sleep(30)
+                self.create_sign(iteration = i)
+                time.sleep(60)
 
+                os.chdir(self.HOMEDIR + '/scripts')
                 self.run_workload("workloadc", "run", self.PARALLEL)
+                os.chdir(self.HOMEDIR)
 
                 # If workloadc finished, create a run.finished-iteration file
-                self.create_sign("run.finished")
+                self.create_sign("run.finished", iteration = i)
 
             print(f"Done running workloadc for iteration {i}")
             print("Generating CSV")
 
             # gather csv with all results
-            os.chdir(self.HOMEDIR)
             run(['python3', 'generate-csv.py', "results.csv"], shell = False)
 
 
