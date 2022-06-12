@@ -9,5 +9,5 @@ while ! test -f $SIGN; do
 	./get-sign.sh $RESOURCE_GROUP $SIGN
 done
 
-rm $SIGN
+# rm $SIGN
 

@@ -1,12 +1,10 @@
 import os
-import subprocess
 import fire
-import sys
-import pandas as pd
-import time
-from helper import *
+from helper import run, eprint
+import datetime
 
 class Logging(object):
+
 
     def get_worker_adresses(self):
 
@@ -16,7 +14,17 @@ class Logging(object):
         return os.popen(f"./worker-adresses.sh {self.HOST} {self.PORT} {self.PASSWORD} {self.USER} {self.DATABASE}").read().split('\n')[0].split(',')
 
 
-    def __init__(self, resource, prefix, host, password = "postgres", port = 5432, user = "citus", database = "citus", iterations = 1, shard_count = 4):
+    def get_weekday(self):
+
+        """ returns abbreviation of current weekday """
+
+        day_name = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat','Sun']
+        day = datetime.datetime.strptime(datetime.date.today(), '%d %m %Y').weekday()
+        return day_name[day]
+
+
+    def __init__(self, resource, prefix, host, password = "postgres", port = 5432, user = "citus", database = "citus",
+    iterations = 1, shard_count = 4, iteration = 0):
 
         self.HOMEDIR = os.getcwd()
         self.PASSWORD = password
@@ -29,6 +37,7 @@ class Logging(object):
         self.WORKERS = self.get_worker_adresses()
         self.ITERATIONS = iterations
         self.SHARD_COUNT = shard_count
+        self.CURRENT_ITERATION = iteration
 
 
         # Set environment variables
@@ -55,15 +64,6 @@ class Logging(object):
             run(["./prepare-table-driver.sh", str(self.SHARD_COUNT), str(self.HOST), str(self.DATABASE), str(self.USER), str(self.PASSWORD)], shell = False)
             os.chdir(f"{self.HOMEDIR}/logs")
             print("Schema and distributed tables prepared")
-
-
-    def collect_iostat(self):
-
-        """ Collect iostat files from every worker and stores in resource_group/workername/general """
-
-        for i, worker in enumerate(self.WORKERS):
-
-            run(["scp", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{worker}:nohup.out", f"{self.RESOURCE}/general/worker-{i}.out"], shell = False)
 
 
     def connect_to_worker(self, worker, script):
@@ -107,7 +107,6 @@ class Logging(object):
         """ runs script in all workers from citus cluster """
 
         for i, worker in enumerate(self.WORKERS):
-
             self.connect_to_worker(worker, script)
 
 
@@ -139,18 +138,48 @@ class Logging(object):
         os.chdir(f'{self.HOMEDIR}/logs/scripts')
 
         for worker_num, worker_host in enumerate(self.WORKERS):
-
-            run(["./get-pglog.sh", self.PREFIX, worker_host, str(worker_num)], shell = False)
+            run(["./get-pglog.sh", self.PREFIX, worker_host, str(worker_num), str(self.CURRENT_ITERATION)], shell = False)
 
         os.chdir(f"{self.HOMEDIR}/logs")
 
 
-    def start(self):
+    def truncate_pg_log(self):
+
+        """
+        truncates pg_log in /dat/14/data/pg_logs
+        no run_on_all_workers is used due to sudo
+        """
+
+        os.chdir(f'{self.HOMEDIR}/logs/scripts')
+
+        for worker_host in self.WORKERS:
+            run(["./truncate-pg_log.sh", self.PREFIX, worker_host, f"postgresql-{self.get_weekday()}.log"], shell = False)
+
+        os.chdir(f"{self.HOMEDIR}/logs")
+
+
+    def start_iostat(self):
 
         """ starts the tmux process to automatically measure cpu usage during benchmarks """
 
-        # Runs script on workers (IOSTAT) that collects CPU usage for every 2 seconds
-        self.run_on_all_workers("tmux new -s cpu-usage -d; tmux send-keys -t cpu-usage 'nohup iostat -xmt 2 &' Enter")
+        # Runs script on workers (IOSTAT) that collects CPU usage for every second
+        self.run_on_all_workers("tmux new -s cpu-usage -d; tmux send-keys -t cpu-usage 'nohup iostat -xmt 1 &' Enter")
+
+
+    def collect_iostat(self):
+
+        """ Collect iostat files from every worker and stores in resource_group/workername/general """
+
+        for i, worker in enumerate(self.WORKERS):
+
+            run(["scp", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{worker}:nohup.out", f"{self.RESOURCE}/general/worker-{i}-{self.CURRENT_ITERATION}.out"], shell = False)
+
+
+    def delete_iostat(self):
+
+        """ Collect iostat files from every worker and stores in resource_group/workername/general """
+
+        self.run_on_all_workers("rm nohup.out")
 
 
     def kill_tmux_session(self):
@@ -158,6 +187,7 @@ class Logging(object):
         """ kills tmux session that writes iostat output to nohup.out """
 
         self.run_on_all_workers("tmux kill-session -t cpu-usage")
+
 
 
 if __name__ == '__main__':
