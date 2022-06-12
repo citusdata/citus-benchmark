@@ -100,9 +100,9 @@ class Benchmark(object):
 
     def create_sign(self, filename = "run.start", iteration = 0):
 
-        """ create start file if ready to run ycsb benchmarks """
+        """ create start file containing the current time in UTC if ready to run ycsb benchmarks """
 
-        run(['touch', filename + f'-{iteration}'], shell = False)
+        run(['date', 'cut', '-d', "' '", '-f', '4', '>', filename + f'-{iteration}'], shell = False)
 
 
     def calculate_records(self):
@@ -308,7 +308,7 @@ class Benchmark(object):
 
         # create sign if benchmark can start
         self.create_sign()
-        time.sleep(60)
+        time.sleep(20)
 
         for i in range(self.ITERATIONS):
             os.chdir(self.HOMEDIR + '/scripts')
@@ -356,7 +356,7 @@ class Benchmark(object):
 
                 # create sign for starting monitoring
                 self.create_sign(iteration = i)
-                time.sleep(60)
+                time.sleep(20)
 
                 os.chdir(self.HOMEDIR + '/scripts')
                 self.INSERTCOUNT_MONITOR = self.INSERTCOUNT_MONITOR * 10
