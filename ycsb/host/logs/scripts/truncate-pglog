@@ -1,0 +1,1 @@
+ sudo su postgres -c "psql citus -c \"alter user monitor set log_duration = on\" "
