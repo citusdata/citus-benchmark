@@ -4,6 +4,7 @@ import sys
 import subprocess
 
 pglog = sys.argv[1]
+homedir = os.getcwd()
 
 def eprint(*args, **kwargs):
 
@@ -27,13 +28,16 @@ def run(command, *args, shell=True, **kwargs):
 output_internal='internal-1.txt'
 output_external='external-1.txt'
 
+os.chdir("scripts")
 run(["./internal.sh", pglog, output_internal], shell = False)
 run(["./external.sh", pglog, output_external], shell = False)
+os.chdir(homedir)
+
 
 total = 0
 
 for results in [output_internal, output_external]:
-    
+
     nonumber = 0
     total = 0
     with open(results) as f:
