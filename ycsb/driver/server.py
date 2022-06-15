@@ -49,3 +49,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             flag = False
 
             clientsocket.sendall(b"Benchmark execution finished on Driver VM")
+
+            # wait to go to next iteration until ok is received from client
+            data = clientsocket.recv(1024)

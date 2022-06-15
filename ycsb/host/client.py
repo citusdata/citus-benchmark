@@ -87,6 +87,7 @@ for iteration in range(int(ycsb['iterations'])):
 
         # Wait for server to bench Finished
         data3 = s.recv(1024)
+
         # os.chdir(homedir + '/logs/scripts/')
 
         # If 'run.finished' then get all generated csv's from driver vm and store in db's
@@ -103,6 +104,10 @@ for iteration in range(int(ycsb['iterations'])):
 
         # Collects IOSTAT, PG_LOG data per iteration and truncates such that files are smaller
         run(['python3', 'collect_data_per_iteration.py', bucket, str(iteration)], shell = False)
+
+        # send ok after all data is gathered and metrics are stopped
+        # Send to server when monitoring started
+        s.sendall(b"OK")
 
 # collect data per iteration?
 run(['python3', 'collect_data.py', bucket], shell = False)
