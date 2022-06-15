@@ -42,7 +42,7 @@ print(f"Connecting with IP: {HOST}, PORT: {PORT}")
 
 # Make sure that we wait long enough so that all packages can be installed
 # takes approximately 8 minutes
-# time.sleep(500)
+time.sleep(500)
 
 # for every iteration, start monitoring
 for iteration in range(int(ycsb['iterations'])):
@@ -68,10 +68,6 @@ for iteration in range(int(ycsb['iterations'])):
         logs = Logging(iteration = iteration, resource = cluster['resource'], prefix = cluster['prefix'], host = cluster['host'], password = cluster['pgpassword'], port = cluster['port'],
         shard_count = ycsb['shard_count'])
 
-        # os.chdir(homedir + '/logs/scripts/')
-        # run(["./try-sign.sh", cluster['resource'], f'run.start-{iteration}', '10'], shell = False)
-        # os.chdir(homedir)
-
         # truncate pg_log on every worker to reduce data size
         logs.truncate_pg_log()
 
@@ -82,16 +78,12 @@ for iteration in range(int(ycsb['iterations'])):
         s.sendall(b"READY")
 
         # Wait for server to send ready for benchmark
-        data2 = s.recv(1024)
+        s.recv(1024)
+
         print("Benchmark running on driver VM")
 
         # Wait for server to bench Finished
-        data3 = s.recv(1024)
-
-        # os.chdir(homedir + '/logs/scripts/')
-
-        # If 'run.finished' then get all generated csv's from driver vm and store in db's
-        # run(["./try-sign.sh", cluster['resource'], f'run.finished-{iteration}', '30'], shell = False)
+        s.recv(1024)
 
         # If run is finished, kill tmux session where iostat runs on the worker nodes
         try:
@@ -107,7 +99,7 @@ for iteration in range(int(ycsb['iterations'])):
 
         # send ok after all data is gathered and metrics are stopped
         # Send to server when monitoring started
-        s.sendall(b"OK")
+        s.sendall(b"READY")
 
-# collect data per iteration?
+# collect resulting data after all runs are finished
 run(['python3', 'collect_data.py', bucket], shell = False)

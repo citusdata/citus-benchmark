@@ -397,6 +397,7 @@ class Benchmark(object):
             # start server again for next iteration
             os.chdir('scripts')
             run("./kill-server.sh", shell = False)
+            time.sleep(10)
             run(["./start-server.sh", self.HOMEDIR], shell = False)
             os.chdir(self.HOMEDIR)
 
