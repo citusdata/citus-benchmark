@@ -5,7 +5,7 @@ import os
 from helper import run
 
 HOST = socket.gethostbyname(socket.gethostname())
-PORT = os.getenv["SERVERHOST"]
+PORT = os.getenv["SERVERPOST"]
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.bind((HOST, PORT))
