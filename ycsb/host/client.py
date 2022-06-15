@@ -38,15 +38,21 @@ stdout=subprocess.PIPE, shell = False).stdout
 HOST = str(IP).split("'")[1][:-2]
 PORT = server['port']
 
-# Checks every 10 seconds if run.start on drivervm after driver is ready
-time.sleep(120)
+# Make sure that we wait long enough so that all packages can be installed
+time.sleep(180)
 
 # for every iteration, start monitoring
 for iteration in range(int(ycsb['iterations'])):
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
-        s.connect((HOST, PORT))
+        # connect with server if server is running
+        while True:
+            try:
+                s.connect((HOST, PORT))
+                break
+            except:
+                time.sleep(5)
 
         data = s.recv(1024)
         print(f"Starting monitoring for iteration {iteration}")
@@ -93,6 +99,3 @@ for iteration in range(int(ycsb['iterations'])):
 
 # collect data per iteration?
 run(['python3', 'collect_data.py', bucket], shell = False)
-
-
-
