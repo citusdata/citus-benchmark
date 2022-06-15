@@ -39,7 +39,7 @@ Configs = {
         },
 
         'server': {
-            'port': sys.arv[19]
+            'port': sys.argv[19]
         }
 
 }

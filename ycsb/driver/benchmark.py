@@ -174,8 +174,8 @@ class Benchmark(object):
         os.environ['PARALLEL'] = str(self.PARALLEL)
 
         # start server in background process to communicate with client
-        os.chdir('/scripts')
-        run("./start-server.sh", shell = False)
+        os.chdir('scripts')
+        run(["./start-server.sh", self.HOMEDIR],  shell = False)
         os.chdir(self.HOMEDIR)
 
         # Install YCSB and JDBC PostgreSQL driver
@@ -395,7 +395,7 @@ class Benchmark(object):
             run(['python3', 'generate-csv.py', "results.csv"], shell = False)
 
             # start server again for next iteration
-            os.chdir('/scripts')
+            os.chdir('scripts')
             run("./kill-server.sh", shell = False)
             run("./start-server.sh", shell = False)
             os.chdir(self.HOMEDIR)

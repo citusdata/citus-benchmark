@@ -36,10 +36,12 @@ IP = run(f"az deployment group show --resource-group {cluster['resource']} --nam
 stdout=subprocess.PIPE, shell = False).stdout
 
 HOST = str(IP).split("'")[1][:-2]
-PORT = server['port']
+PORT = int(server['port'])
+
+print(f"Connecting with IP: {HOST}, PORT: {PORT}")
 
 # Make sure that we wait long enough so that all packages can be installed
-time.sleep(180)
+time.sleep(300)
 
 # for every iteration, start monitoring
 for iteration in range(int(ycsb['iterations'])):
