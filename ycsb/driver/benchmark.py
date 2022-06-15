@@ -349,6 +349,10 @@ class Benchmark(object):
         self.create_sign("run.finished")
 
 
+    def monitor_workload(self, workload):
+
+        pass
+
     def monitor_workloadc(self):
 
         """
