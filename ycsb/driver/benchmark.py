@@ -102,7 +102,14 @@ class Benchmark(object):
 
         """ create start file containing the current time in UTC if ready to run ycsb benchmarks """
 
-        run(['date', 'cut', '-d', "' '", '-f', '4', '>', filename + f'-{iteration}'], shell = False)
+        os.chdir('scripts')
+
+        if not iteration:
+            run(['./timestamp.sh', filename, self.HOMEDIR], shell = False)
+        else:
+            run(['./timestamp.sh', filename + f'-{iteration}', self.HOMEDIR], shell = False)
+
+        os.chdir(self.HOMEDIR)
 
 
     def calculate_records(self):
@@ -346,6 +353,11 @@ class Benchmark(object):
         for i in range(self.ITERATIONS):
             self.set_iterations(i)
 
+            # start server in background process to communicate with client
+            os.chdir('/scripts')
+            run("./start-server.sh", shell = False)
+            os.chdir(self.HOMEDIR)
+
             for thread in self.THREADS:
                 self.CURRENT_THREAD = thread
                 os.environ['THREADS'] = str(self.CURRENT_THREAD)
@@ -355,22 +367,27 @@ class Benchmark(object):
                 os.chdir(self.HOMEDIR)
 
                 # create sign for starting monitoring
-                self.create_sign(iteration = i)
-                time.sleep(20)
+                self.create_sign("benchmark.start")
+                sleep(3)
 
                 os.chdir(self.HOMEDIR + '/scripts')
                 self.INSERTCOUNT_MONITOR = self.INSERTCOUNT_MONITOR * 10
                 self.run_workload("workloadc", "run", self.PARALLEL)
                 os.chdir(self.HOMEDIR)
 
-                # If workloadc finished, create a run.finished-iteration file
-                self.create_sign("run.finished", iteration = i)
+                # If workloadc finished, create a benchmark-finished file
+                self.create_sign("benchmark.finished")
 
             print(f"Done running workloadc for iteration {i}")
             print("Generating CSV")
 
             # gather csv with all results
             run(['python3', 'generate-csv.py', "results.csv"], shell = False)
+
+            # kills server background process
+            os.chdir('/scripts')
+            run("./kill-server.sh", shell = False)
+            os.chdir(self.HOMEDIR)
 
 
     def run_all_workloads(self):
@@ -414,9 +431,11 @@ class Benchmark(object):
 if __name__ == '__main__':
 
     try:
+
         fire.Fire(Benchmark)
 
     except KeyboardInterrupt:
+
          run(['python3', 'generate-csv.py', "results.csv"], shell = False)
 
 
