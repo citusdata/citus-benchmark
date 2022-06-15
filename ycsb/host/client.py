@@ -5,7 +5,6 @@
 # Start collecting data from driver and worker nodes
 
 import os
-import pandas as pd
 from helper import *
 import yaml
 from logs import Logging
@@ -13,7 +12,6 @@ import time
 import sys
 import socket
 import subprocess
-import datetime
 
 
 homedir = os.getcwd()
@@ -31,21 +29,21 @@ with open('config.yml', 'r') as f:
         print(exc)
 
 
-# print date time to estimate how long the wait is
-print(datetime.datetime.now())
+PORT = int(server['port'])
+
+# Make sure azure port is open
+# run(['az', 'vm', 'open-port', '--resource-group', f'{cluster["resource"]}', '--name', f'{cluster["resource"]}-driver', '--port', str(PORT)], shell = False)
+
+run(['./port.sh', cluster['resource'], server['port'] , '>/dev/null', '2>&1'], shell = False)
 
 # get IP from created VM
 IP = run(f"az deployment group show --resource-group {cluster['resource']} --name {cluster['resource']} --query properties.outputs.driverPublicIp.value --output tsv".split(),
 stdout=subprocess.PIPE, shell = False).stdout
-
 HOST = str(IP).split("'")[1][:-2]
-PORT = int(server['port'])
 
 # Make sure that we wait long enough so that all packages can be installed
 # takes approximately 7 minutes
-time.sleep(420)
-
-print(f"Connecting with Public IP: {HOST} on PORT: {PORT}")
+time.sleep(180)
 
 # for every iteration, start monitoring
 for iteration in range(int(ycsb['iterations'])):
@@ -53,22 +51,20 @@ for iteration in range(int(ycsb['iterations'])):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
         tries = 0
+        connected = False
         # connect with server if server is running
-        while True:
+        while not connected:
             try:
                 s.connect((HOST, PORT))
-                break
+                connected = True
             except:
                 tries += 1
-                if tries % 60:
+                if tries % 60 == 0:
                     print(str(tries / 60) + " minute(s) elapsed")
                 time.sleep(1)
 
-
-        print("Connection with server established")
-
+        # wait to receive data from server to start monitoring
         data = s.recv(1024)
-        print(f"Starting monitoring for iteration {iteration}")
 
         # Create a logging instance
         logs = Logging(iteration = iteration, resource = cluster['resource'], prefix = cluster['prefix'], host = cluster['host'], password = cluster['pgpassword'], port = cluster['port'],

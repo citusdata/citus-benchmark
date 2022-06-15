@@ -38,7 +38,7 @@ run(["python3", 'push_to_db.py', path, "PARALLEL"], shell = False)
 run(["./push-to-blob.sh", f"{path}/YCSB/raw/", bucket, f"{cluster['resource']}/raw/"], shell = False)
 
 # DELETE RESOURCE GROUP FOLDER
-run(["rm", "-r", path], shell = False)
+# run(["rm", "-r", path], shell = False)
 # print("FOLDER REMOVED")
 print("DONE WITH BENCHMARKS")
 
