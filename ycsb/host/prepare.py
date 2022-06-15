@@ -24,7 +24,6 @@ with open('config.yml', 'r') as f:
 # Store metadata about the resource group (hardware used etc)
 def metadata():
     os.chdir(homedir + '/storage')
-
     try:
         run(['python3', 'metadata.py', homedir], shell = False)
     except:

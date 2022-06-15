@@ -11,6 +11,10 @@ import yaml
 from logs import Logging
 import time
 import sys
+import socket
+import subprocess
+import time
+
 
 homedir = os.getcwd()
 bucket = sys.argv[1]
@@ -22,9 +26,17 @@ with open('config.yml', 'r') as f:
         config = yaml.safe_load(f)
         ycsb = config['ycsb']
         cluster = config['cluster']
+        server = config['server']
     except yaml.YAMLError as exc:
         print(exc)
 
+
+# get IP from created VM
+IP = run(f"az deployment group show --resource-group {cluster['resource']} --name {cluster['resource']} --query properties.outputs.driverPublicIp.value --output tsv".split(),
+stdout=subprocess.PIPE, shell = False).stdout
+
+HOST = str(IP).split("'")[1][:-2]
+PORT = server['port']
 
 # Checks every 10 seconds if run.start on drivervm after driver is ready
 time.sleep(120)
@@ -32,39 +44,52 @@ time.sleep(120)
 # for every iteration, start monitoring
 for iteration in range(int(ycsb['iterations'])):
 
-    print(f"Starting monitoring for iteration {iteration}")
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
-    # Create a logging instance
-    logs = Logging(iteration = iteration, resource = cluster['resource'], prefix = cluster['prefix'], host = cluster['host'], password = cluster['pgpassword'], port = cluster['port'],
-    shard_count = ycsb['shard_count'])
+        s.connect((HOST, PORT))
 
-    os.chdir(homedir + '/logs/scripts/')
-    run(["./try-sign.sh", cluster['resource'], f'run.start-{iteration}', '10'], shell = False)
-    os.chdir(homedir)
+        data = s.recv(1024)
+        print(f"Starting monitoring for iteration {iteration}")
 
-    # truncate pg_log on every worker to reduce data size
-    logs.truncate_pg_log()
+        # Create a logging instance
+        logs = Logging(iteration = iteration, resource = cluster['resource'], prefix = cluster['prefix'], host = cluster['host'], password = cluster['pgpassword'], port = cluster['port'],
+        shard_count = ycsb['shard_count'])
 
-    # If run.start is found, then start monitoring on worker nodes (IOSTAT ON WORKER NODES)
-    logs.start_iostat()
+        # os.chdir(homedir + '/logs/scripts/')
+        # run(["./try-sign.sh", cluster['resource'], f'run.start-{iteration}', '10'], shell = False)
+        # os.chdir(homedir)
 
-    print("Benchmark running on VM...")
-    os.chdir(homedir + '/logs/scripts/')
+        # truncate pg_log on every worker to reduce data size
+        logs.truncate_pg_log()
 
-    # If 'run.finished' then get all generated csv's from driver vm and store in db's
-    run(["./try-sign.sh", cluster['resource'], f'run.finished-{iteration}', '30'], shell = False)
+        # If run.start is found, then start monitoring on worker nodes (IOSTAT ON WORKER NODES)
+        logs.start_iostat()
 
-    # If run is finished, kill tmux session where iostat runs on the worker nodes
-    try:
-        logs.kill_tmux_session()
-    except:
-        ("No tmux session 'cpu-usage' running")
+        # Send to server when monitoring started
+        s.sendall(b"READY")
 
-    # Data collection
-    os.chdir(homedir)
+        # Wait for server to send ready for benchmark
+        data2 = s.recv(1024)
+        print("Benchmark running on driver VM")
 
-    # Collects IOSTAT, PG_LOG data per iteration and truncates such that files are smaller
-    run(['python3', 'collect_data_per_iteration.py', bucket, str(iteration)], shell = False)
+        # Wait for server to bench Finished
+        data3 = s.recv(1024)
+        # os.chdir(homedir + '/logs/scripts/')
+
+        # If 'run.finished' then get all generated csv's from driver vm and store in db's
+        # run(["./try-sign.sh", cluster['resource'], f'run.finished-{iteration}', '30'], shell = False)
+
+        # If run is finished, kill tmux session where iostat runs on the worker nodes
+        try:
+            logs.kill_tmux_session()
+        except:
+            ("No tmux session 'cpu-usage' running")
+
+        # Data collection
+        os.chdir(homedir)
+
+        # Collects IOSTAT, PG_LOG data per iteration and truncates such that files are smaller
+        run(['python3', 'collect_data_per_iteration.py', bucket, str(iteration)], shell = False)
 
 # collect data per iteration?
 run(['python3', 'collect_data.py', bucket], shell = False)
