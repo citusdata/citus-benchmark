@@ -150,10 +150,17 @@ class Logging(object):
 
         os.chdir(f'{self.HOMEDIR}/logs/scripts')
 
-        for worker_num, worker_host in list(zip(self.get_worker_name, self.WORKERS)):
+        for worker_num, worker_host in list(zip(self.get_worker_name(), self.WORKERS)):
             run(["./get-pglog.sh", self.PREFIX, worker_host, worker_num, str(self.CURRENT_ITERATION)], shell = False)
 
         os.chdir(f"{self.HOMEDIR}/logs")
+
+
+    def workers_and_ids(self):
+
+        """ Print worker id and corresponding worker adresses """
+
+        return list(zip(self.get_worker_name(), self.WORKERS))
 
 
     def truncate_pg_log(self):

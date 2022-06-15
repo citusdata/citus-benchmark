@@ -13,7 +13,7 @@ import time
 import sys
 import socket
 import subprocess
-import time
+import datetime
 
 
 homedir = os.getcwd()
@@ -31,6 +31,9 @@ with open('config.yml', 'r') as f:
         print(exc)
 
 
+# print date time to estimate how long the wait is
+print(datetime.datetime.now())
+
 # get IP from created VM
 IP = run(f"az deployment group show --resource-group {cluster['resource']} --name {cluster['resource']} --query properties.outputs.driverPublicIp.value --output tsv".split(),
 stdout=subprocess.PIPE, shell = False).stdout
@@ -39,8 +42,8 @@ HOST = str(IP).split("'")[1][:-2]
 PORT = int(server['port'])
 
 # Make sure that we wait long enough so that all packages can be installed
-# takes approximately 10 minutes
-time.sleep(600)
+# takes approximately 7 minutes
+time.sleep(420)
 
 print(f"Connecting with Public IP: {HOST} on PORT: {PORT}")
 
@@ -49,15 +52,18 @@ for iteration in range(int(ycsb['iterations'])):
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
+        tries = 0
         # connect with server if server is running
-        flag = False
-
-        while not flag:
+        while True:
             try:
                 s.connect((HOST, PORT))
-                flag = True
+                break
             except:
-                time.sleep(5)
+                tries += 1
+                if tries % 60:
+                    print(str(tries / 60) + " minute(s) elapsed")
+                time.sleep(1)
+
 
         print("Connection with server established")
 
@@ -78,12 +84,12 @@ for iteration in range(int(ycsb['iterations'])):
         s.sendall(b"READY")
 
         # Wait for server to send ready for benchmark
-        s.recv(1024)
+        data3 = s.recv(1024)
 
         print("Benchmark running on driver VM")
 
         # Wait for server to bench Finished
-        s.recv(1024)
+        data4 = s.recv(1024)
 
         # If run is finished, kill tmux session where iostat runs on the worker nodes
         try:

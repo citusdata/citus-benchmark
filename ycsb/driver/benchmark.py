@@ -361,8 +361,9 @@ class Benchmark(object):
             self.set_iterations(i)
 
             if i > 0:
-                # sleep such that port is free again
+                # sleep such that same port is free again
                 time.sleep(60)
+
                 run(["./start-server.sh", self.HOMEDIR], shell = False)
                 os.chdir(self.HOMEDIR)
 
