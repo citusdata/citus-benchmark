@@ -43,10 +43,6 @@ param nsgName string = '${driverVmName}-nsg'
 param vnetName string = '${namePrefix}-vnet'
 param subnetName string = 'default'
 
-// param AnalysisDriverVmName string = '${namePrefix}-driver-analysis'
-// param AnalysisDriverNicName string = '${AnalysisDriverVmName}-nic'
-// param AnalysisDriverIpName string = '${AnalysisDriverVmName}-ip'
-
 module vnet 'vnet.bicep' = {
   name: vnetName
   params: {
@@ -92,31 +88,4 @@ module driverVm 'driver-vm-ycsb.bicep' = {
   }
 }
 
-// module AnalysisDriverVm 'driver-model.bicep' = {
-//   name: AnalysisDriverVmName
-//   params: {
-//     adminPublicKey: vmAdminPublicKey
-//     adminUsername: vmAdminUsername
-//     pgPort: pgPort
-//     location: location
-//     zone: zone
-//     size: AnalysisDriverSize
-//     vmName: AnalysisDriverVmName
-//     nicName: AnalysisDriverNicName
-//     ipName: AnalysisDriverIpName
-//     nsgName: nsgName
-//     vnetName: vnetName
-//     subnetName: subnetName
-//     pgHost: pgHost
-//     pgUser: 'monitor'
-//     pgPassword: 'monitorpassword'
-//     pgVersion: pgVersion
-//     records: records
-//     workers: workers
-//     rg: namePrefix
-//     operations: operations
-//   }
-// }
-
 output driverPublicIp string = driverVm.outputs.publicIp
-// output AnalysisDriverPublicIp string = AnalysisDriverVm.outputs.AnalysisPublicIp

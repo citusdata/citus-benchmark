@@ -94,7 +94,7 @@ pip3 install pandas
 pip3 install matplotlib
 
 
-git clone https://github.com/citusdata/citus-benchmark.git --branch ycsb-refactored
+git clone https://github.com/citusdata/citus-benchmark.git --branch ccfelius/ycsb
 cd citus-benchmark/ycsb/driver
 
 while ! psql -c 'select 1'; do  echo failed; sleep 1; done
