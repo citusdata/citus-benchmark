@@ -14,9 +14,22 @@ class Logging(object):
         return os.popen(f"./worker-adresses.sh {self.HOST} {self.PORT} {self.PASSWORD} {self.USER} {self.DATABASE}").read().split('\n')[0].split(',')
 
 
+    def get_worker_name(self):
+
+        """ get worker name (e.g. 0, 1 etc) """
+
+        workers = self.get_worker_adresses()
+        names = []
+
+        for worker in workers:
+            names.append(worker[1:].split('.')[0])
+
+        return names
+
+
     def get_weekday(self):
 
-        """ returns abbreviation of current weekday """
+        """ returns abbreviation of current weekday needed for PostgreSQL log """
 
         day_name = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat','Sun']
 
@@ -137,8 +150,8 @@ class Logging(object):
 
         os.chdir(f'{self.HOMEDIR}/logs/scripts')
 
-        for worker_num, worker_host in enumerate(self.WORKERS):
-            run(["./get-pglog.sh", self.PREFIX, worker_host, str(worker_num), str(self.CURRENT_ITERATION)], shell = False)
+        for worker_num, worker_host in list(zip(self.get_worker_name, self.WORKERS)):
+            run(["./get-pglog.sh", self.PREFIX, worker_host, worker_num, str(self.CURRENT_ITERATION)], shell = False)
 
         os.chdir(f"{self.HOMEDIR}/logs")
 
