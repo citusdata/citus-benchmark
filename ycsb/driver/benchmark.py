@@ -14,6 +14,8 @@ import fire
 import pandas as pd
 from helper import *
 import time
+from os.path import exists
+
 
 class Benchmark(object):
 
@@ -170,6 +172,11 @@ class Benchmark(object):
         os.environ['THREADS'] = str(self.CURRENT_THREAD)
         os.environ['HOMEDIR'] = self.HOMEDIR
         os.environ['PARALLEL'] = str(self.PARALLEL)
+
+        # start server in background process to communicate with client
+        os.chdir('/scripts')
+        run("./start-server.sh", shell = False)
+        os.chdir(self.HOMEDIR)
 
         # Install YCSB and JDBC PostgreSQL driver
         self.install_ycsb()
@@ -353,11 +360,6 @@ class Benchmark(object):
         for i in range(self.ITERATIONS):
             self.set_iterations(i)
 
-            # start server in background process to communicate with client
-            os.chdir('/scripts')
-            run("./start-server.sh", shell = False)
-            os.chdir(self.HOMEDIR)
-
             for thread in self.THREADS:
                 self.CURRENT_THREAD = thread
                 os.environ['THREADS'] = str(self.CURRENT_THREAD)
@@ -368,7 +370,15 @@ class Benchmark(object):
 
                 # create sign for starting monitoring
                 self.create_sign("benchmark.start")
-                sleep(3)
+
+                # Check if client has prepared everything
+                flag = False
+
+                while not flag:
+                    flag = exists("benchmark.ready")
+                    time.sleep(1)
+
+                os.remove("benchmark.ready")
 
                 os.chdir(self.HOMEDIR + '/scripts')
                 self.INSERTCOUNT_MONITOR = self.INSERTCOUNT_MONITOR * 10
@@ -384,9 +394,10 @@ class Benchmark(object):
             # gather csv with all results
             run(['python3', 'generate-csv.py', "results.csv"], shell = False)
 
-            # kills server background process
+            # start server again for next iteration
             os.chdir('/scripts')
             run("./kill-server.sh", shell = False)
+            run("./start-server.sh", shell = False)
             os.chdir(self.HOMEDIR)
 
 

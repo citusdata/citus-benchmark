@@ -2,9 +2,10 @@ import socket
 import time
 from os.path import exists
 import os
+from helper import run
 
 HOST = socket.gethostbyname(socket.gethostname())
-PORT = os.getenv["SERVERPORT"]
+PORT = os.getenv["SERVERHOST"]
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.bind((HOST, PORT))
@@ -17,26 +18,30 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         print(f"Connection from {address} has been established")
 
         while True:
-            clientsocket.sendall(b"RECEIVED")
-
-            data = clientsocket.recv(1024)
-
-            if not data:
-                break
-
             flag = False
 
             while not flag:
                 flag = exists("benchmark.start")
-                time.sleep(2)
+                time.sleep(1)
+
+            # Send prepare to prepare for monitor run
+            clientsocket.sendall(b"PREPARE")
+
+            # wait until a READY from the client
+            data = clientsocket.recv(1024)
+            run(['touch', 'benchmark.ready'], shell = False)
+
+            if not data:
+                break
 
             clientsocket.sendall(b"Starting Benchmark Execution on Driver VM")
             os.remove("benchmark.start")
+
             flag = False
 
             while not flag:
                 flag = exists("benchmark.finished")
-                time.sleep(3)
+                time.sleep(1)
 
             os.remove("benchmark.finished")
             flag = False
