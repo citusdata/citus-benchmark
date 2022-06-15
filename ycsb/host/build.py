@@ -36,6 +36,10 @@ Configs = {
             'worker_vcpu': sys.argv[16],
             'coord_storage': sys.argv[17],
             'worker_storage': sys.argv[18]
+        },
+
+        'server': {
+            'port': sys.arv[19]
         }
 
 }
