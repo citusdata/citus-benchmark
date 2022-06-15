@@ -11,7 +11,7 @@ print(f"Connect on IP: {HOST}, PORT: {PORT}")
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.bind((HOST, PORT))
-    s.listen(3)
+    s.listen(10)
 
     clientsocket, address = s.accept()
 
