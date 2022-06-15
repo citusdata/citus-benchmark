@@ -397,7 +397,7 @@ class Benchmark(object):
             # start server again for next iteration
             os.chdir('scripts')
             run("./kill-server.sh", shell = False)
-            run("./start-server.sh", shell = False)
+            run(["./start-server.sh", self.HOMEDIR], shell = False)
             os.chdir(self.HOMEDIR)
 
 
@@ -436,8 +436,6 @@ class Benchmark(object):
 
             # gather csv with all results
             run(['python3', 'generate-csv.py', "results.csv"], shell = False)
-
-
 
 if __name__ == '__main__':
 

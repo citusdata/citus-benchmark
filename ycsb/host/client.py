@@ -36,12 +36,14 @@ IP = run(f"az deployment group show --resource-group {cluster['resource']} --nam
 stdout=subprocess.PIPE, shell = False).stdout
 
 HOST = str(IP).split("'")[1][:-2]
-PORT = int(server['port'])
+# PORT = int(server['port'])
+PORT = 7877
 
 print(f"Connecting with IP: {HOST}, PORT: {PORT}")
 
 # Make sure that we wait long enough so that all packages can be installed
-time.sleep(300)
+# takes approximately 8 minutes
+# time.sleep(500)
 
 # for every iteration, start monitoring
 for iteration in range(int(ycsb['iterations'])):
@@ -49,12 +51,16 @@ for iteration in range(int(ycsb['iterations'])):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
         # connect with server if server is running
-        while True:
+        flag = False
+
+        while not flag:
             try:
                 s.connect((HOST, PORT))
-                break
+                flag = True
             except:
                 time.sleep(5)
+
+        print("Connection with server established")
 
         data = s.recv(1024)
         print(f"Starting monitoring for iteration {iteration}")
