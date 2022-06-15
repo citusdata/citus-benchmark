@@ -18,6 +18,7 @@ param iterations int = 1
 param workers int = 1
 param maxtime int = 600
 param parallel bool = false
+param serverport int = 9999
 
 // Configuration of the postgres server group
 param pgVersion string = '14'
@@ -85,6 +86,7 @@ module driverVm 'driver-vm-ycsb.bicep' = {
     monitorpw: monitorpw
     maxtime: maxtime
     parallel: parallel
+    serverport: serverport
   }
 }
 
