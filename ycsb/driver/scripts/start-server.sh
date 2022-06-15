@@ -4,4 +4,4 @@ dir=$1
 
 cd $dir
 
-tmux new -s server -d; tmux send-keys -t server 'python3 server.py' Enter
+tmux new-session -d -t main -s init-bench \; send-keys 'python3 server.py' Enter

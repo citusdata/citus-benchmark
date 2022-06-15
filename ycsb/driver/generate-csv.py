@@ -1,42 +1,9 @@
-from concurrent.futures import thread
 import os
-import subprocess
 import fire
-import sys
 import csv
 import random, string
 
 homedir = os.getcwd()
-
-def eprint(*args, **kwargs):
-
-    """
-    eprint prints to stderr
-    """
-
-    print(*args, file=sys.stderr, **kwargs)
-
-
-def run(command, *args, shell=True, **kwargs):
-
-    """
-    run runs the given command and prints it to stderr.
-    """
-
-    eprint(f"+ {command}")
-    result = subprocess.run(command, *args, check=True, shell=shell, **kwargs)
-    return result
-
-
-def change_directory(name="."):
-
-    """
-    changes directory
-    """
-
-    global homedir
-
-    os.chdir(homedir + "/" + name)
 
 
 def search_file(filename, substring):

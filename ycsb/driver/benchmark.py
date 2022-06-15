@@ -1,8 +1,8 @@
 # This scripts is called by hyperscale-{}.bicep, which spins up DriverVM and executes script to install necessary packages
-# This is the driver script ‘benchmark.py’ which is run in a tmux session (session-name = bench-init)
+# This is the driver script ‘benchmark.py’ which is run in a tmux session (session-name = init-bench)
 # Downloads and installs YCSB and JDBC driver
-# Currently starts two parallel YCSB clients. First one runs 99% of records via user 'citus'
-# Second client runs 1% of records via user 'monitor' and sets postgresql logging properties on
+# Could start two parallel YCSB clients. First one runs 99.9% of records via user 'citus'
+# Second client runs 0.1% of records via user 'monitor', these records are logged
 # Runs specified workloads (default = workload a and c), iterates multiple times through workloads
 # Stores all raw YCSB output for every workload
 # Generates csv’s from every benchmark iteration
@@ -11,8 +11,7 @@
 
 import os
 import fire
-import pandas as pd
-from helper import *
+from helper import run
 import time
 from os.path import exists
 
