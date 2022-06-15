@@ -36,8 +36,7 @@ IP = run(f"az deployment group show --resource-group {cluster['resource']} --nam
 stdout=subprocess.PIPE, shell = False).stdout
 
 HOST = str(IP).split("'")[1][:-2]
-# PORT = int(server['port'])
-PORT = 7877
+PORT = int(server['port'])
 
 print(f"Connecting with IP: {HOST}, PORT: {PORT}")
 
