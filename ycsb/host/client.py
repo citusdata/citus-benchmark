@@ -88,10 +88,10 @@ for iteration in range(int(ycsb['iterations'])):
         data4 = s.recv(1024)
 
         # If run is finished, kill tmux session where iostat runs on the worker nodes
-        try:
-            logs.kill_tmux_session()
-        except:
-            ("No tmux session 'cpu-usage' running")
+        # try:
+        #     logs.kill_tmux_session()
+        # except:
+        #     ("No tmux session 'cpu-usage' running")
 
         # Data collection
         os.chdir(homedir)

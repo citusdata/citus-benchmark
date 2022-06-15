@@ -199,7 +199,7 @@ class Logging(object):
 
         """ Collect iostat files from every worker and stores in resource_group/workername/general """
 
-        self.run_on_all_workers("rm nohup.out")
+        self.run_on_all_workers("tmux kill-session -t cpu-usage; rm nohup.out")
 
 
     def kill_tmux_session(self):
