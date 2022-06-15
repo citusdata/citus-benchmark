@@ -19,8 +19,8 @@ class Logging(object):
         """ returns abbreviation of current weekday """
 
         day_name = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat','Sun']
-        day = datetime.datetime.strptime(datetime.date.today(), '%d %m %Y').weekday()
-        return day_name[day]
+
+        return day_name[datetime.datetime.today().weekday()]
 
 
     def __init__(self, resource, prefix, host, password = "postgres", port = 5432, user = "citus", database = "citus",
