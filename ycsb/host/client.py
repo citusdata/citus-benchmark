@@ -38,11 +38,11 @@ stdout=subprocess.PIPE, shell = False).stdout
 HOST = str(IP).split("'")[1][:-2]
 PORT = int(server['port'])
 
-print(f"Connecting with IP: {HOST}, PORT: {PORT}")
-
 # Make sure that we wait long enough so that all packages can be installed
-# takes approximately 8 minutes
-time.sleep(500)
+# takes approximately 10 minutes
+time.sleep(600)
+
+print(f"Connecting with Public IP: {HOST} on PORT: {PORT}")
 
 # for every iteration, start monitoring
 for iteration in range(int(ycsb['iterations'])):

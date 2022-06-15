@@ -360,6 +360,12 @@ class Benchmark(object):
         for i in range(self.ITERATIONS):
             self.set_iterations(i)
 
+            if i > 0:
+                # sleep such that port is free again
+                time.sleep(60)
+                run(["./start-server.sh", self.HOMEDIR], shell = False)
+                os.chdir(self.HOMEDIR)
+
             for thread in self.THREADS:
                 self.CURRENT_THREAD = thread
                 os.environ['THREADS'] = str(self.CURRENT_THREAD)
@@ -397,9 +403,6 @@ class Benchmark(object):
             # start server again for next iteration
             os.chdir('scripts')
             run("./kill-server.sh", shell = False)
-            time.sleep(60)
-            run(["./start-server.sh", self.HOMEDIR], shell = False)
-            os.chdir(self.HOMEDIR)
 
 
     def run_all_workloads(self):
