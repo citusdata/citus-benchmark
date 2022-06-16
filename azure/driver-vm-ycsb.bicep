@@ -87,8 +87,8 @@ cat >> .bashrc << '__ssh_connection_bashrc__'
 {4}
 __ssh_connection_bashrc__
 
-sudo apt -y install vim bash-completion wget
 sudo apt update -y
+sudo apt -y install vim bash-completion wget
 sudo apt install -y default-jre python postgresql-client-common postgresql-client-14
 sudo apt install python-is-python2 -y
 sudo apt-get install python3-pip -y
