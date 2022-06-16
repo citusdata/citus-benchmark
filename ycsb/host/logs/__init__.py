@@ -79,13 +79,6 @@ class Logging(object):
             print("Schema and distributed tables prepared")
 
 
-    def connect_to_worker(self, worker, script):
-
-        """ Connects to a worker via ssh, and runs a script """
-
-        run(["ssh", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{worker}", script], shell = False)
-
-
     def create_output_directories(self):
 
         """ create output directories if not there yet """
@@ -113,6 +106,13 @@ class Logging(object):
 
         for worker in self.get_worker_adresses():
             print(worker)
+
+
+    def connect_to_worker(self, worker, script):
+
+        """ Connects to a worker via ssh, and runs a script """
+
+        run(["ssh", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{worker}", script], shell = False)
 
 
     def run_on_all_workers(self, script):
@@ -192,7 +192,7 @@ class Logging(object):
 
         for i, worker in enumerate(self.WORKERS):
 
-            run(["scp", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{worker}:nohup.out", f"{self.RESOURCE}/general/worker-{i}-{self.CURRENT_ITERATION}.out"], shell = False)
+            run(["scp", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{worker}:nohup.out", f"{self.HOMEDIR}/logs/scripts/{self.RESOURCE}/general/worker-{i}-{self.CURRENT_ITERATION}.out"], shell = False)
 
 
     def delete_iostat(self):
@@ -200,13 +200,6 @@ class Logging(object):
         """ Collect iostat files from every worker and stores in resource_group/workername/general """
 
         self.run_on_all_workers("tmux kill-session -t cpu-usage; rm nohup.out")
-
-
-    def kill_tmux_session(self):
-
-        """ kills tmux session that writes iostat output to nohup.out """
-
-        self.run_on_all_workers("tmux kill-session -t cpu-usage")
 
 
 
