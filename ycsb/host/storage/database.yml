@@ -1,0 +1,9 @@
+- PostgreSQL:
+    database: databaseName
+    endpoint: ***.com
+    port: 1234
+    table: tableName
+    user: userName
+    password: myPassword
+    masteruser: postgres
+    masterpassword: masterPassword

@@ -1,0 +1,26 @@
+cluster:
+  database: citus
+  host: coordinator.***.com
+  pgpassword: myPassword
+  port: '5000'
+  prefix: prefix
+  resource: myResourceGroup
+  table: usertable
+  user: citus
+  workers: '8'
+hardware:
+  coord_hw: Standard_D16ds_v5
+  coord_storage: '524288'
+  coord_vcpu: '16'
+  worker_hw: Standard_E16ds_v5
+  worker_storage: '524288'
+  worker_vcpu: '16'
+server:
+  port: '1234'
+ycsb:
+  iterations: '10'
+  operations: '10000000'
+  records: '10000000'
+  shard_count: '16'
+  thread_counts: '800,1000'
+  workloads: workloada,workloadb,workloadc,workloadd,workloade,workloadf
