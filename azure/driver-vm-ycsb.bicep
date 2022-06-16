@@ -87,14 +87,14 @@ cat >> .bashrc << '__ssh_connection_bashrc__'
 {4}
 __ssh_connection_bashrc__
 
-// sudo apt update -y
-// sudo apt -y install vim bash-completion wget
-// sudo apt install -y default-jre
+sudo apt update -y
+sudo apt -y install vim bash-completion wget
+sudo apt install -y default-jre
 
 sudo apt install python-is-python2 -y
 sudo apt-get install python3-pip -y
 sudo apt install -y postgresql-client-common postgresql-client-14
-sudo apt install default-jdk
+// sudo apt install default-jdk
 pip3 install fire
 pip3 install pandas
 pip3 install matplotlib
