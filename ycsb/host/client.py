@@ -12,7 +12,6 @@ import time
 import sys
 import socket
 import subprocess
-import datetime
 
 homedir = os.getcwd()
 bucket = sys.argv[1]
