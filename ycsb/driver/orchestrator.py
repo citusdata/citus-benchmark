@@ -3,6 +3,7 @@ import os
 import socket
 from _thread import *
 from helper import run
+import sys
 
 # code derived from / based on:
 # https://www.geeksforgeeks.org/simple-chat-room-using-python/
@@ -33,6 +34,7 @@ def clientthread(conn, addr):
                     remove(conn)
 
                 print("<" + addr[0] + "> " + message.decode('UTF-8'))
+                print("")
 
                 # Calls broadcast function to send message to all
                 message_to_send = message.decode('UTF-8') + " < " + addr[0] + " >"
@@ -41,8 +43,8 @@ def clientthread(conn, addr):
                 i += 1
 
                 if i == 1000:
-                    print("FATAL: ENDING SERVER")
-                    run(["tmux", "kill-session", "-t", "server"], shell = False)
+                    sys.exit("FATAL: too much messages")
+                    # run(["tmux", "kill-session", "-t", "server"], shell = False)
 
             except:
 

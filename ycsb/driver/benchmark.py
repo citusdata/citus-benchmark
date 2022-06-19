@@ -380,6 +380,7 @@ class Benchmark(object):
 
                 # send data to server because ready to start benchmarks
                 server.sendall("Ready to benchmark".encode('UTF-8'))
+                print("Waiting for Host...")
 
                 # receive data from host to start bench
                 start_bench = server.recv(1024)
