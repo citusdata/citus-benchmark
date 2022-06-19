@@ -14,7 +14,7 @@ import fire
 from helper import run
 import time
 from os.path import exists
-
+import socket
 
 class Benchmark(object):
 
@@ -350,8 +350,8 @@ class Benchmark(object):
 
 
     def monitor_workload(self, workload):
-
         pass
+
 
     def monitor_workloadc(self):
 
@@ -360,17 +360,17 @@ class Benchmark(object):
         Monitors workload c
         """
 
+        # Connect with server running in background
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        IP = socket.gethostbyname(socket.gethostname())
+        PORT = int(os.getenv("SERVERPORT"))
+        server.connect((IP, PORT))
+
         for i in range(self.ITERATIONS):
             self.set_iterations(i)
 
-            # if i > 0:
-            #     # sleep such that same port is free again
-            #     time.sleep(60)
-
-            #     run(["./start-server.sh", self.HOMEDIR], shell = False)
-            #     os.chdir(self.HOMEDIR)
-
             for thread in self.THREADS:
+
                 self.CURRENT_THREAD = thread
                 os.environ['THREADS'] = str(self.CURRENT_THREAD)
 
@@ -378,35 +378,30 @@ class Benchmark(object):
                 self.run_workload("workloada", "load")
                 os.chdir(self.HOMEDIR)
 
-                # create sign for starting monitoring
-                self.create_sign("benchmark.start")
+                # send data to server because ready to start benchmarks
+                server.sendall("Ready to benchmark".encode('UTF-8'))
 
-                # Check if client has prepared everything
-                flag = False
-
-                while not flag:
-                    flag = exists("benchmark.ready")
-                    time.sleep(1)
-
-                os.remove("benchmark.ready")
+                # receive data from host to start bench
+                start_bench = server.recv(1024)
+                print("Starting Benchmark...")
 
                 os.chdir(self.HOMEDIR + '/scripts')
                 self.INSERTCOUNT_MONITOR = self.INSERTCOUNT_MONITOR * 10
                 self.run_workload("workloadc", "run", self.PARALLEL)
                 os.chdir(self.HOMEDIR)
 
-                # If workloadc finished, create a benchmark-finished file
-                self.create_sign("benchmark.finished")
+                # If workloadc finished, send a message to the server
+                server.sendall(f"Execution iteration {i} finished".encode('UTF-8'))
+
+                # Wait for host to all data collected
+                next_configuration = server.recv(1024)
+                print(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
 
             print(f"Done running workloadc for iteration {i}")
             print("Generating CSV")
 
             # gather csv with all results
             run(['python3', 'generate-csv.py', "results.csv"], shell = False)
-
-            # start server again for next iteration
-            os.chdir('scripts')
-            run("./kill-server.sh", shell = False)
 
 
     def run_all_workloads(self):
