@@ -2,6 +2,7 @@
 import os
 import socket
 from _thread import *
+from helper import run
 
 # code derived from / based on:
 # https://www.geeksforgeeks.org/simple-chat-room-using-python/
@@ -21,6 +22,7 @@ def clientthread(conn, addr):
     # sends a message to the client whose user object is conn
     conn.send(f"Connected to server with IP: {IP}".encode('utf-8'))
 
+    i = 0
     while True:
 
             try:
@@ -35,6 +37,12 @@ def clientthread(conn, addr):
                 # Calls broadcast function to send message to all
                 message_to_send = message.decode('UTF-8') + " < " + addr[0] + " >"
                 broadcast(message_to_send.encode('UTF-8'), conn)
+
+                i += 1
+
+                if i == 1000:
+                    print("FATAL: ENDING SERVER")
+                    run(["tmux", "kill-session", "-t", "server"], shell = False)
 
             except:
 
