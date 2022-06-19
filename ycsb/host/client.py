@@ -48,6 +48,8 @@ time.sleep(180)
 while True:
     try:
         server.connect((HOST, PORT))
+        msg = server.recv(1024)
+        print(msg.decode('UTF-8'))
         break
     except:
         time.sleep(10)
@@ -86,6 +88,7 @@ for iteration in range(int(ycsb['iterations'])):
         logs.get_postgresql()
 
         os.chdir(homedir + "/storage")
+
         path = homedir + f"/logs/scripts/{cluster['resource']}"
 
         # Push postgresql and IOSTAT data to blob

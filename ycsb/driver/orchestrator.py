@@ -99,5 +99,7 @@ while True:
     # If local connection, make do work for benchmark.py
     start_new_thread(clientthread, (conn,addr))
 
-conn.close()
-server.close()
+    if not list_of_clients:
+        conn.close()
+        server.close()
+        sys.exit("No open connections...\nClosing Server")

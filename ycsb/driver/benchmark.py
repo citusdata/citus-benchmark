@@ -366,6 +366,10 @@ class Benchmark(object):
         PORT = int(os.getenv("SERVERPORT"))
         server.connect((IP, PORT))
 
+        # Print if connected to server
+        msg = server.recv(1024)
+        print(msg.decode('UTF-8'))
+
         for i in range(self.ITERATIONS):
             self.set_iterations(i)
 
