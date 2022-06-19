@@ -57,12 +57,12 @@ while True:
 # for every iteration, start monitoring
 for iteration in range(int(ycsb['iterations'])):
 
-        # wait to receive data from server to start monitoring
-        start_monitoring = server.recv(1024)
-
         # Create a logging instance
         logs = Logging(iteration = iteration, resource = cluster['resource'], prefix = cluster['prefix'], host = cluster['host'], password = cluster['pgpassword'], port = cluster['port'],
         shard_count = ycsb['shard_count'])
+
+        # wait to receive data from server to start monitoring
+        start_monitoring = server.recv(1024)
 
         # truncate pg_log on every worker to reduce data size
         logs.truncate_pg_log()

@@ -34,12 +34,10 @@ def clientthread(conn, addr):
                     remove(conn)
 
                 print("<" + addr[0] + "> " + message.decode('UTF-8'))
-                print("")
 
                 # Calls broadcast function to send message to all
                 message_to_send = message.decode('UTF-8') + " < " + addr[0] + " >"
                 broadcast(message_to_send.encode('UTF-8'), conn)
-
                 i += 1
 
                 if i == 1000:
@@ -47,7 +45,6 @@ def clientthread(conn, addr):
                     # run(["tmux", "kill-session", "-t", "server"], shell = False)
 
             except:
-
                 continue
 
 """ Using the below function, we broadcast the message to all
@@ -56,10 +53,10 @@ the message """
 
 def broadcast(message, connection):
 
+    """ broadcast message to other connected clients """
+
     for clients in list_of_clients:
-
         if clients != connection:
-
             try:
                 clients.sendall(message)
 
@@ -75,8 +72,9 @@ the program"""
 
 def remove(connection):
 
-    if connection in list_of_clients:
+    """ remove connection if client unconnects """
 
+    if connection in list_of_clients:
         list_of_clients.remove(connection)
 
 while True:
