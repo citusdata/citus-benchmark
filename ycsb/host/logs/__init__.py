@@ -18,10 +18,9 @@ class Logging(object):
 
         """ get worker name (e.g. 0, 1 etc) """
 
-        workers = self.get_worker_adresses()
         names = []
 
-        for worker in workers:
+        for worker in self.get_worker_adresses():
             names.append(worker[1:].split('.')[0])
 
         return names
