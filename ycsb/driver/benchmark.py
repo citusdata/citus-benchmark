@@ -173,9 +173,9 @@ class Benchmark(object):
         os.environ['PARALLEL'] = str(self.PARALLEL)
 
         # start server in background process to communicate with client
-        os.chdir('scripts')
-        run(["./start-server.sh", self.HOMEDIR],  shell = False)
-        os.chdir(self.HOMEDIR)
+        # os.chdir('scripts')
+        # run(["./start-server.sh", self.HOMEDIR],  shell = False)
+        # os.chdir(self.HOMEDIR)
 
         # Install YCSB and JDBC PostgreSQL driver
         self.install_ycsb()
@@ -363,12 +363,12 @@ class Benchmark(object):
         for i in range(self.ITERATIONS):
             self.set_iterations(i)
 
-            if i > 0:
-                # sleep such that same port is free again
-                time.sleep(60)
+            # if i > 0:
+            #     # sleep such that same port is free again
+            #     time.sleep(60)
 
-                run(["./start-server.sh", self.HOMEDIR], shell = False)
-                os.chdir(self.HOMEDIR)
+            #     run(["./start-server.sh", self.HOMEDIR], shell = False)
+            #     os.chdir(self.HOMEDIR)
 
             for thread in self.THREADS:
                 self.CURRENT_THREAD = thread
