@@ -33,7 +33,9 @@ param subnetName string
 var bashrcTmuxAutoAttach = '''
 if [[ -n "${PS1:-}" ]] && [[ -z "${TMUX:-}" ]] && [[ -n "${SSH_CONNECTION:-}" ]] ; then
   if { tmux list-sessions | grep '(group main)' ; } > /dev/null 2>&1; then
-    tmux attach-session -t ssh 2> /dev/null || tmux new-session -t main -s ssh
+    // tmux attach-session -t ssh 2> /dev/null || tmux new-session -t main -s ssh
+    echo "Benchmark running in tmux session init-bench."
+    echo "To connect run: tmux attach-session -t init-bench"
   else
     echo "WARNING: Benchmark isn't running yet, try connecting again in a few minutes"
   fi
