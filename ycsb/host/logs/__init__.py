@@ -201,6 +201,29 @@ class Logging(object):
         self.run_on_all_workers("tmux kill-session -t cpu-usage; rm nohup.out")
 
 
+    def prepare_monitor_run(self):
+
+        """ prepares for a monitor run """
+
+        self.truncate_pg_log()
+        self.start_iostat()
+
+
+    def stop_monitoring(self):
+
+        """
+        Stop Monitoring:
+        - collect nohup.out on every worker
+        - stop execution of iostat
+        - get postgresql logs
+        """
+
+        self.collect_iostat()
+        self.delete_iostat()
+        self.get_postgresql()
+
+
+
 
 if __name__ == '__main__':
 
