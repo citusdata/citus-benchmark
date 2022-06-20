@@ -197,7 +197,7 @@ class Client(object):
         return logs
 
 
-    def finish_monitoring(self, logs, server):
+    def finish_monitoring(self, logs, server, homedir, bucket):
 
         """
         - stop monitoring
@@ -224,7 +224,7 @@ class Client(object):
         return "Iteration {iteration} finished"
 
 
-    def monitor_iteration(self, server):
+    def monitor_iteration(self, server, homedir, bucket):
 
         """ for every iteration, start monitoring """
 
@@ -233,10 +233,10 @@ class Client(object):
         for iteration in range(iterations):
 
                 logs = self.prepare_monitoring(iteration, server)
-                print(self.finish_monitoring(logs, server))
+                print(self.finish_monitoring(logs, server, homedir, bucket))
 
 
-def collect_data():
+def collect_data(bucket):
 
     """ collect resulting data after all runs are finished """
 

@@ -5,7 +5,6 @@ from client import Client, collect_data
 
 homedir = os.getcwd()
 bucket = sys.argv[1]
-counter = 0
 
 client = Client('config.yml')
 
@@ -16,11 +15,10 @@ time.sleep(100)
 server = client.try_to_connect_with_socket()
 
 # monitor iterations
-client.monitor_iteration(server)
+client.monitor_iteration(server, homedir, bucket)
 
 # Collect data after iterations are finised
 os.chdir(homedir)
-
-collect_data()
+collect_data(bucket)
 
 print("SUCCES: EXECUTION FINISHED")
