@@ -228,6 +228,17 @@ class Benchmark(object):
         os.environ['ITERATION'] = str(self.ITERATION)
 
 
+    def set_current_thread(self, thread):
+
+        self.CURRENT_THREAD = thread
+        os.environ['THREAD'] = str(self.CURRENT_THREAD)
+
+
+    def set_insertcount_monitor(self):
+
+        self.INSERTCOUNT_MONITOR = self.INSERTCOUNT_MONITOR * 10
+
+
     def truncate_usertable(self):
 
         """
@@ -269,9 +280,11 @@ class Benchmark(object):
         runs a workload and set params accordingly
         """
 
+        os.chdir(self.HOMEDIR + '/scripts')
         self.WORKLOAD_NAME = workloadname
         self.WORKLOAD_TYPE = workloadtype
         self.single_workload(parallel)
+        os.chdir(self.HOMEDIR)
 
 
     def test_parallel_load(self):
@@ -345,12 +358,77 @@ class Benchmark(object):
             os.chdir(self.HOMEDIR)
             run(['python3', 'generate-csv.py', "results.csv"], shell = False)
 
-        # If finished, create a run.finished file
-        self.create_sign("run.finished")
+
+    def connect_to_socket(self):
+
+        """ Connect to local socket for communication with remote host """
+
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        IP = socket.gethostbyname(socket.gethostname())
+        PORT = int(os.getenv("SERVERPORT"))
+        server.connect((IP, PORT))
+
+        # Print if connected to server
+        msg = server.recv(1024)
+        print(msg.decode('UTF-8'))
+
+        return server
 
 
-    def monitor_workload(self, workload):
-        pass
+    def communicate_with_host_pre_benchmark(selft, server, thread):
+
+        """
+        Communicate with socket
+        Send data to socket (ready to benchmark)
+        Receive data from socket (start benchmark)
+        """
+
+        server.sendall(f"-{thread}-workloadc".encode('UTF-8'))
+        print("Waiting for Host...")
+
+        # receive data from host to start bench
+        start_bench = server.recv(1024)
+        print("Starting Benchmark...")
+
+
+    def communicate_with_host_post_benchmark(selft, server, thread, i):
+
+        """
+        Communicate with socket after benchmark is ready
+        Send data to socket (Execution iteration x finished)
+        Receive data from socket (Wait for an acknowledge)
+        """
+
+        # If workloadc finished, send a message to the server
+        server.sendall(f"Execution iteration {i} finished".encode('UTF-8'))
+
+        # Wait for host to all data collected
+        next_configuration = server.recv(1024)
+        print(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
+
+
+    def monitor_workload(self, workload, type, server, thread, i):
+
+        """
+        Wrapper for monitoring any workload
+        """
+
+        # send data to server because ready to start benchmarks
+        self.communicate_with_host_pre_benchmark(server, thread)
+
+        self.set_insertcount_monitor()
+        self.run_workload(workload, type, self.PARALLEL)
+
+        # If workload finished, send a message to the server
+        self.communicate_with_host_post_benchmark(server, thread, i)
+
+
+    def execute_workloada_monitor_workloadc(self, server, thread, i):
+
+        """ Loads data with workload a, monitors workload c """
+
+        self.run_workload("workloada", "load")
+        self.monitor_workload("workloadc",  "run", server, thread, i)
 
 
     def monitor_workloadc(self):
@@ -361,46 +439,14 @@ class Benchmark(object):
         """
 
         # Connect with server running in background
-        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        IP = socket.gethostbyname(socket.gethostname())
-        PORT = int(os.getenv("SERVERPORT"))
-        server.connect((IP, PORT))
-
-        # Print if connected to server
-        msg = server.recv(1024)
-        print(msg.decode('UTF-8'))
+        server = self.connect_to_socket()
 
         for i in range(self.ITERATIONS):
             self.set_iterations(i)
 
             for thread in self.THREADS:
-
-                self.CURRENT_THREAD = thread
-                os.environ['THREADS'] = str(self.CURRENT_THREAD)
-
-                os.chdir(self.HOMEDIR + '/scripts')
-                self.run_workload("workloada", "load")
-                os.chdir(self.HOMEDIR)
-
-                # send data to server because ready to start benchmarks
-                server.sendall("Ready to benchmark".encode('UTF-8'))
-                print("Waiting for Host...")
-
-                # receive data from host to start bench
-                start_bench = server.recv(1024)
-                print("Starting Benchmark...")
-
-                os.chdir(self.HOMEDIR + '/scripts')
-                self.INSERTCOUNT_MONITOR = self.INSERTCOUNT_MONITOR * 10
-                self.run_workload("workloadc", "run", self.PARALLEL)
-                os.chdir(self.HOMEDIR)
-
-                # If workloadc finished, send a message to the server
-                server.sendall(f"Execution iteration {i} finished".encode('UTF-8'))
-
-                # Wait for host to all data collected
-                next_configuration = server.recv(1024)
-                print(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
+                self.set_current_thread(thread)
+                self.execute_workloada_monitor_workloadc(server, thread, i)
 
             print(f"Done running workloadc for iteration {i}")
             print("Generating CSV")
@@ -445,14 +491,13 @@ class Benchmark(object):
             # gather csv with all results
             run(['python3', 'generate-csv.py', "results.csv"], shell = False)
 
+
 if __name__ == '__main__':
 
     try:
-
         fire.Fire(Benchmark)
 
     except KeyboardInterrupt:
-
          run(['python3', 'generate-csv.py', "results.csv"], shell = False)
 
 

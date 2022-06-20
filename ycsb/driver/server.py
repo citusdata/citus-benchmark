@@ -1,54 +1,130 @@
-import socket
-import time
-from os.path import exists
+
 import os
+import socket
+from _thread import *
 from helper import run
+import sys
 
-HOST = socket.gethostbyname(socket.gethostname())
-PORT = int(os.getenv("SERVERPORT"))
+# code derived from / based on:
+# https://www.geeksforgeeks.org/simple-chat-room-using-python/
 
-print(f"Connect on IP: {HOST}, PORT: {PORT}")
+def print_current_time():
 
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    s.bind((HOST, PORT))
-    s.listen(10)
+    """ print current timestamp """
 
-    clientsocket, address = s.accept()
+    run(["date"], shell = False)
 
-    with clientsocket:
 
-        print(f"Connection from {address} has been established")
+def clientthread(conn, addr):
 
-        while True:
-            flag = False
+    # sends a message to the client whose user object is conn
+    conn.send(f"Connected to server with IP: {IP}".encode('utf-8'))
 
-            while not flag:
-                flag = exists("benchmark.start")
-                time.sleep(1)
+    i = 0
 
-            # Send prepare to prepare for monitor run
-            clientsocket.sendall(b"PREPARE")
+    while True:
+            try:
+                message = conn.recv(2048)
 
-            # wait until a READY from the client
-            data = clientsocket.recv(1024)
-            run(['touch', 'benchmark.ready'], shell = False)
+                if not message:
+                    remove(conn)
 
-            if not data:
-                break
+                print_current_time()
+                print("<" + addr[0] + "> " + message.decode('UTF-8'))
 
-            clientsocket.sendall(b"Starting Benchmark Execution on Driver VM")
-            os.remove("benchmark.start")
+                # Calls broadcast function to send message to all
+                message_to_send = message.decode('UTF-8') + " < " + addr[0] + " >"
+                broadcast(message_to_send.encode('UTF-8'), conn)
+                i += 1
 
-            flag = False
+                if i == 1000:
+                    sys.exit("FATAL: too much messages")
 
-            while not flag:
-                flag = exists("benchmark.finished")
-                time.sleep(1)
+            except:
+                continue
 
-            os.remove("benchmark.finished")
-            flag = False
+""" Using the below function, we broadcast the message to all
+clients who's object is not the same as the one sending
+the message """
 
-            clientsocket.sendall(b"Benchmark execution finished on Driver VM")
+def broadcast(message, connection):
 
-            # wait to go to next iteration until ok is received from client
-            clientsocket.recv(1024)
+    """ broadcast message to other connected clients """
+
+    for clients in list_of_clients:
+        if clients != connection:
+            try:
+                clients.sendall(message)
+
+            except:
+                clients.close()
+
+                # if the link is broken, we remove the client
+                remove(clients)
+
+"""The following function simply removes the object
+from the list that was created at the beginning of
+the program"""
+
+def remove(connection):
+
+    """ remove connection if client unconnects """
+
+    if connection in list_of_clients:
+        list_of_clients.remove(connection)
+
+def create_server():
+
+    """ creates a server """
+
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+    return server
+
+
+def bind_and_listen(server, ip, port, listen = 10):
+
+    """
+    - binds to a port
+    - listens to incoming connections
+    """
+
+    server.bind((ip, port))
+    server.listen(listen)
+
+
+if __name__ == "__main__":
+
+    IP = "0.0.0.0"
+    PORT = int(os.getenv("SERVERPORT"))
+
+    server = create_server()
+    bind_and_listen(server, IP, PORT, 10)
+    list_of_clients = []
+
+
+    while True:
+
+        """Accepts a connection request and stores two parameters,
+        conn which is a socket object for that user, and addr
+        which contains the IP address of the client that just
+        connected"""
+
+        conn, addr = server.accept()
+
+        """ Maintains a list of clients for ease forwarding messages """
+        list_of_clients.append(conn)
+
+        # prints the address of the user that just connected
+        print(addr[0] + " connected")
+
+        # creates and individual threads
+
+        # If local connection, make do work for benchmark.py
+        start_new_thread(clientthread, (conn,addr))
+
+        if not list_of_clients:
+            conn.close()
+            server.close()
+            sys.exit("No open connections...\nClosing Server")
