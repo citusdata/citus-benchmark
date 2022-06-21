@@ -1,9 +1,3 @@
-# DRIVER SCRIPT:
-# If benchmark is running, i.e. if run.start on driver then start iostat on worker nodes in tmux session cpu-usage
-# Wait for benchmarks to be finished
-# If benchmark finished, kill tmux sessions and remove resource metrics
-# Start collecting data from driver and worker nodes
-
 import os
 from helper import *
 import yaml
@@ -13,23 +7,6 @@ import socket
 import subprocess
 
 class Client(object):
-
-    def read_config_file(self, configfile):
-
-        """ read config file """
-
-        with open(configfile, 'r') as f:
-
-            try:
-                config = yaml.safe_load(f)
-                ycsb = config['ycsb']
-                cluster = config['cluster']
-                port = config['server']
-
-            except yaml.YAMLError as exc:
-                print(exc)
-
-        return config, ycsb, cluster, port
 
 
     def __init__(self, configfile = 'config.yml'):
@@ -52,6 +29,24 @@ class Client(object):
         self.ITERATIONS = ycsb['iterations']
 
 
+    def read_config_file(self, configfile):
+
+        """ read config file """
+
+        with open(configfile, 'r') as f:
+
+            try:
+                config = yaml.safe_load(f)
+                ycsb = config['ycsb']
+                cluster = config['cluster']
+                port = config['server']
+
+            except yaml.YAMLError as exc:
+                print(exc)
+
+        return config, ycsb, cluster, port
+
+
     def get_ip(self, cluster):
 
         """ get IP from created VM """
@@ -62,47 +57,64 @@ class Client(object):
         return str(IP).split("'")[1][:-2]
 
 
-    def get_config(self):
-
-        """ returns config file """
-
+    @property
+    def resource(self):
         return self.CONFIG
 
+    @property
+    def config(self):
+        return self.CONFIG
 
-    def get_ycsb(self):
-
-        """ returns ycsb config file dict """
-
+    @property
+    def ycsb(self):
         return self.YCSB
 
-
-    def get_cluster(self):
-
-
-        """ returns cluster config file dict"""
-
+    @property
+    def cluster(self):
         return self.CLUSTER
 
-
-    def get_ip_adress(self):
-
-        """ returns public ip of driver VM """
-
+    @property
+    def ip(self):
         return self.IP
 
-
-    def get_port(self):
-
-        """ returns port to connect to with server """
-
+    @property
+    def port(self):
         return self.PORT
+
+    @property
+    def prefix(self):
+        return self.PREFIX
+
+    @property
+    def password(self):
+        return self.PGPASSWORD
+
+    @property
+    def pghost(self):
+        return self.PGHOST
+
+    @property
+    def pgport(self):
+        return self.PGPORT
+
+    @property
+    def pghost(self):
+        return self.PGPORT
+
+    @property
+    def shards(self):
+        return self.SHARD_COUNT
+
+    @property
+    def iterations(self):
+        return self.ITERATIONS
 
 
     def open_port(self):
 
         """ opens port on azure VM """
 
-        run(['./port.sh', self.RESOURCE, self.PORT, '>/dev/null', '2>&1'], shell = False)
+        run(['./port.sh', self.resource, self.port, '>/dev/null', '2>&1'], shell = False)
 
 
     def print_current_time(self):
@@ -136,7 +148,7 @@ class Client(object):
 
         """ try to connect to socket and wait for message from socket """
 
-        server.connect((self.IP, int(self.PORT)))
+        server.connect((self.ip, int(self.port)))
         msg = server.recv(1024)
         print(msg.decode('UTF-8'))
 
@@ -169,8 +181,8 @@ class Client(object):
 
         """ generates a logging instance (from class Logging) """
 
-        logs = Logging(iteration = iteration, resource = self.RESOURCE, prefix = self.PREFIX, host = self.PGHOST,
-        password = self.PGPASSWORD, port = self.PGPORT, shard_count = self.SHARD_COUNT)
+        logs = Logging(iteration = iteration, resource = self.resource, prefix = self.prefix, host = self.pghost,
+        password = self.password, port = self.pgport, shard_count = self.shards)
 
         return logs
 
@@ -197,7 +209,7 @@ class Client(object):
         return logs
 
 
-    def finish_monitoring(self, logs, server, homedir, bucket):
+    def finish_monitoring(self, logs, server, homedir, bucket, iteration):
 
         """
         - stop monitoring
@@ -221,19 +233,18 @@ class Client(object):
         # Wait for server to benchmark to be finished on driver
         server.sendall(f"Monitoring Finished".encode('UTF-8'))
 
-        return "Iteration {iteration} finished"
+        return f"Iteration {iteration} finished"
 
 
     def monitor_iteration(self, server, homedir, bucket):
 
         """ for every iteration, start monitoring """
 
-        iterations = int(self.ITERATIONS)
+        iterations = int(self.iterations)
 
         for iteration in range(iterations):
-
                 logs = self.prepare_monitoring(iteration, server)
-                print(self.finish_monitoring(logs, server, homedir, bucket))
+                print(self.finish_monitoring(logs, server, homedir, bucket, iteration))
 
 
 def collect_data(bucket):
