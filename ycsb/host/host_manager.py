@@ -16,12 +16,13 @@ if __name__ == "__main__":
     bucket = sys.argv[1]
 
     client = Client('config.yml')
+    _socket = client.try_to_connect_with_socket()
 
-    # Wait for benchmark run
-    time.sleep(110)
+    # Wait to connect with socket
+    time.sleep(90)
 
     # monitor iterations
-    client.monitor_iteration(client.try_to_connect_with_socket(), homedir, bucket)
+    client.monitor_iteration(_socket, homedir, bucket)
 
     # Collect data after iterations are finised
     os.chdir(homedir)

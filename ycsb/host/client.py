@@ -98,10 +98,6 @@ class Client(object):
         return self.PGPORT
 
     @property
-    def pghost(self):
-        return self.PGPORT
-
-    @property
     def shards(self):
         return self.SHARD_COUNT
 
@@ -180,7 +176,6 @@ class Client(object):
     def get_logging_instance(self, iteration):
 
         """ generates a logging instance (from class Logging) """
-
         logs = Logging(iteration = iteration, resource = self.resource, prefix = self.prefix, host = self.pghost,
         password = self.password, port = self.pgport, shard_count = self.shards)
 
