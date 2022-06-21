@@ -59,7 +59,7 @@ class Client(object):
 
     @property
     def resource(self):
-        return self.CONFIG
+        return self.RESOURCE
 
     @property
     def config(self):
