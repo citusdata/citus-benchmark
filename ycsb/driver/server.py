@@ -1,12 +1,32 @@
 
 import os
 import socket
+from _thread import Lock
 from _thread import *
 from helper import run
 import sys
+import pickle
 
-# code derived from / based on:
-# https://www.geeksforgeeks.org/simple-chat-room-using-python/
+
+# states:
+# ready to benchmark (start), prepared monitoring (prepared), finished bench finish, done collecting data (done)
+states = [0, 0, 0, 0]
+lock = allocate_lock()
+
+def flush():
+
+    """ if all states are 1 then flush """
+
+    global states
+    states = [0, 0, 0, 0]
+
+
+def is_state_valid(states, index):
+
+    """ simple checksum to see if states are correct """
+
+    return sum(states) == index
+
 
 def print_current_time():
 
@@ -15,30 +35,53 @@ def print_current_time():
     run(["date"], shell = False)
 
 
+def update_state(index):
+
+    """ updates state """
+
+    global states
+
+    states[index - 1] = 1
+    print("<" + addr[0] + f"> adjusted state at index {index - 1}")
+
+
 def clientthread(conn, addr):
 
-    # sends a message to the client whose user object is conn
-    conn.send(f"Connected to server with IP: {IP}".encode('utf-8'))
+    global states
+    data = pickle.dumps(states)
 
-    i = 0
+    # sends current states to client
+    conn.send(data)
 
     while True:
+
             try:
-                message = conn.recv(2048)
+                message = conn.recv(10)
 
                 if not message:
-                    remove(conn)
+                    conn.close()
 
-                print_current_time()
-                print("<" + addr[0] + "> " + message.decode('UTF-8'))
+                index = len(message)
 
-                # Calls broadcast function to send message to all
-                message_to_send = message.decode('UTF-8') + " < " + addr[0] + " >"
-                broadcast(message_to_send.encode('UTF-8'), conn)
-                i += 1
+                if index < 1:
+                    continue
 
-                if i == 1000:
-                    sys.exit("FATAL: too much messages")
+                if index == 5:
+                    flush()
+                    print("RESET STATES")
+                    continue
+
+                if not is_state_valid(states, index):
+                    raise Exception(f"Invalid states encountered: {states}")
+
+                lock.acquire()
+                update_state(index)
+                lock.release()
+
+
+                # Calls broadcast function to send updated states
+                message_to_send = pickle.dumps(states)
+                broadcast(message_to_send, conn)
 
             except:
                 continue
@@ -73,6 +116,7 @@ def remove(connection):
     if connection in list_of_clients:
         list_of_clients.remove(connection)
 
+
 def create_server():
 
     """ creates a server """
@@ -106,20 +150,20 @@ if __name__ == "__main__":
 
     while True:
 
-        """Accepts a connection request and stores two parameters,
+        """
+        Accepts a connection request and stores two parameters,
         conn which is a socket object for that user, and addr
         which contains the IP address of the client that just
-        connected"""
+        connected
+        """
 
         conn, addr = server.accept()
 
-        """ Maintains a list of clients for ease forwarding messages """
+        """ Maintains a list of clients for ease of forwarding messages """
         list_of_clients.append(conn)
 
         # prints the address of the user that just connected
         print(addr[0] + " connected")
-
-        # creates and individual threads
 
         # If local connection, make do work for benchmark.py
         start_new_thread(clientthread, (conn,addr))

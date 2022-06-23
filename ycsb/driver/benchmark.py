@@ -383,12 +383,18 @@ class Benchmark(object):
         Receive data from socket (start benchmark)
         """
 
-        server.sendall(f"-{thread}-workloadc".encode('UTF-8'))
+        # server.sendall(f"-{thread}-workloadc".encode('UTF-8'))
+        server.send(bytearray(1))
         print("Waiting for Host...")
 
         # receive data from host to start bench
-        start_bench = server.recv(1024)
-        print("Starting Benchmark...")
+        while True:
+
+            start_bench = server.recv(100)
+
+            if sum(start_bench) == 2:
+                print("Starting Benchmark...")
+                break
 
 
     def communicate_with_host_post_benchmark(selft, server, thread, i):
@@ -400,10 +406,20 @@ class Benchmark(object):
         """
 
         # If workloadc finished, send a message to the server
-        server.sendall(f"Execution iteration {i} finished".encode('UTF-8'))
+        # server.sendall(f"Execution iteration {i} finished".encode('UTF-8'))
+        server.send(bytearray(3))
 
         # Wait for host to all data collected
-        next_configuration = server.recv(1024)
+        while True:
+
+            next_configuration = server.recv(100)
+
+            if sum(next_configuration) == 4:
+                print("Starting Benchmark...")
+
+                break
+
+        server.send(bytearray(5))
         print(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
 
 
