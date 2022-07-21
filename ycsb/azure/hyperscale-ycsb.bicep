@@ -12,6 +12,7 @@ param shard_count string = '64'
 param thread_counts string = '100,300'
 param pgPort int = 5432
 param iterations int = 1
+param workloads string = 'run_all_workload'
 
 
 
@@ -126,6 +127,7 @@ module driverVm 'driver-vm-ycsb-azure.bicep' = {
     iterations: iterations
     namePrefix: namePrefix
     workers: workers
+    workloads: workloads
   }
 }
 

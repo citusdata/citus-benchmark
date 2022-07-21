@@ -90,7 +90,7 @@ class StartBenchmark(object):
             return ','.join([str(self.check_if_int(thread)) for thread in thread_counts])
 
 
-    def __init__(self, resource, threads = "248", records = 1000, operations = 10000, database = "citus",  workloads = "workloada", iterations = 1, workers = "2", deployment = "hyperscale-ycsb",
+    def __init__(self, resource, threads = "248", records = 1000, operations = 10000, database = "citus",  workloads = "run_all_workloads", iterations = 1, workers = "2", deployment = "hyperscale-ycsb",
     out = "results", autodelete = False):
 
         self.YCSB_WORKLOADS = ["workloada", "workloadb", "workloadc", "workloadf", "workloadd", "workloade"]
@@ -116,7 +116,7 @@ class StartBenchmark(object):
         os.environ['WORKERS'] = str(self.WORKERS)
         os.environ['RECORDS'] = str(self.RECORDS)
         os.environ['THREADS'] = str(self.THREADS)
-        os.environ['WORKLOADS'] = str(self.WORKLOAD_LIST)
+        os.environ['WORKLOADS'] = workloads
         os.environ['OPERATIONS'] = str(self.OPERATIONS)
 
         # directory for output of results

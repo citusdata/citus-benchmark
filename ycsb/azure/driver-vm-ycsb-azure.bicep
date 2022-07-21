@@ -17,6 +17,7 @@ param thread_counts string
 param iterations int
 param namePrefix string
 param workers int
+param workloads string
 
 param vmName string
 param nicName string
@@ -69,6 +70,7 @@ export ITERATIONS={10}
 export WORKERS={11}
 export RESOURCE_GROUP={12}
 export FOLDER=$(pwd)
+export WORKLOAD_FUNCTION={13}
 
 # Make sure we can open enough connections
 echo 'ulimit -n "$(ulimit -Hn)"' >> .bashrc
@@ -94,7 +96,7 @@ tmux new-session -d -t main -s init-bench \; send-keys './run-azure-benchmark.sh
 
 '''
 
-var driverBootScript = format(driverBootTemplate, pgHost, pgUser, pgPassword, pgPort, bashrcTmuxAutoAttach, pgVersion, records, operations, shard_count, thread_counts, iterations, workers, namePrefix)
+var driverBootScript = format(driverBootTemplate, pgHost, pgUser, pgPassword, pgPort, bashrcTmuxAutoAttach, pgVersion, records, operations, shard_count, thread_counts, iterations, workers, namePrefix, workloads)
 
 module vm 'vm.bicep' = {
   name: '${vmName}-driver-module'
