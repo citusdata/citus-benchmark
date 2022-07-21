@@ -235,7 +235,7 @@ class Benchmark(object):
             print("Generating CSV")
 
             # gather csv with all results after each iteration
-            run(['python3', 'csv.py', outputdir, f"{outputdir}.csv"], shell = False)
+            run(['python3', 'generate_csv.py', outputdir, f"{outputdir}.csv"], shell = False)
 
 
     def citus_workload(self):
@@ -244,9 +244,10 @@ class Benchmark(object):
             Executes loading with workloada, running with workloadc
             Multiple iterations are supported
             """
+            print("loading workload a, running workload c")
 
             for i in range(self.ITERATIONS):
-                os.chdir(self.HOMEDIR + '/scripts')
+
                 self.set_iterations(i)
 
                 for thread in self.THREADS:
@@ -260,8 +261,7 @@ class Benchmark(object):
                 print("Generating CSV")
 
                 # gather csv with all results
-                os.chdir(self.HOMEDIR)
-                run(['python3', 'csv.py', "results.csv"], shell = False)
+                run(['python3', 'generate_csv.py', "results.csv"], shell = False)
 
 
     def run_all_workloads(self):
@@ -299,7 +299,7 @@ class Benchmark(object):
             print(f"Done with iteration {i}")
 
             # gather csv with all results
-            run(['python3', 'csv.py', "results.csv"], shell = False)
+            run(['python3', 'generate_csv.py', "results.csv"], shell = False)
 
 
 if __name__ == '__main__':
@@ -308,7 +308,7 @@ if __name__ == '__main__':
         fire.Fire(Benchmark)
 
     except KeyboardInterrupt:
-         run(['python3', 'csv.py', "results.csv"], shell = False)
+         run(['python3', 'generate_csv.py', "results.csv"], shell = False)
 
     # if benchmarks are finished, create token
     run(['touch', 'benchmarks.finished'], shell = False)
