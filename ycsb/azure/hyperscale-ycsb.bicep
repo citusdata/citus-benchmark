@@ -124,7 +124,7 @@ module driverVm 'driver-vm-ycsb-azure.bicep' = {
     zone: zone
     pgPort: pgPort
     iterations: iterations
-    rg: namePrefix
+    namePrefix: namePrefix
     workers: workers
   }
 }

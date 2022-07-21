@@ -65,6 +65,10 @@ class StartBenchmark(object):
         try:
                 if int(thread) > 1000:
                     raise ValueError('Error: Invalid input, threadcount exceeds maximum of 1000')
+
+                elif int(thread) < 1:
+                    raise ValueError('Error: Invalid input, threadcount exceeds minimum of 1')
+
         except:
                 raise ValueError('Error: Invalid input, please enter integers in format "300" or "300;400" if multiple threadcounts')
 
@@ -78,16 +82,15 @@ class StartBenchmark(object):
         """
 
         try:
+
             int(thread_counts)
-            return thread_counts
+            return self.check_if_int(thread_counts)
 
         except:
-            threads = thread_counts.split(',')
-
-        return ','.join([self.check_if_int(thread) for thread in threads])
+            return ','.join([str(self.check_if_int(thread)) for thread in thread_counts])
 
 
-    def __init__(self, resource, threads = "248", records = 1000, operations = 10000, port = "5432", database = "citus",  workloads = "workloada", iterations = 1, workers = "2", deployment = "hyperscale-ycsb",
+    def __init__(self, resource, threads = "248", records = 1000, operations = 10000, database = "citus",  workloads = "workloada", iterations = 1, workers = "2", deployment = "hyperscale-ycsb",
     out = "results", autodelete = False):
 
         self.YCSB_WORKLOADS = ["workloada", "workloadb", "workloadc", "workloadf", "workloadd", "workloade"]
@@ -142,18 +145,24 @@ class StartBenchmark(object):
         return self.AUTO
 
 
+    def start_benchmark(self):
+
+        """ initiates benchmark run and corresponding infrastructure """
+
+        # start the benchmark
+        run(['./start-benchmark-ycsb.sh', self.resource, self.deployment], shell = False)
+
+        # Wait for finalization of benchmarks
+        run(['./wait-for-results-ycsb.sh', self.resource, 'benchmarks.finished', '10'], shell = False)
+
+        # Delete cluster if autodelete is set to true
+        if self.autodelete:
+                run(['./cleanup.sh', self.resource], shell = False)
+
+
 if __name__ == '__main__':
 
     benchmark = fire.Fire(StartBenchmark)
 
-    # start the benchmark
-    run(['./start-benchmark-ycsb.sh', benchmark.resource, benchmark.deployment], shell = False)
-
-    # Wait for finalization of benchmarks
-    run(['./wait-for-results-ycsb.sh', benchmark.resource, 'benchmarks.finished', '10'], shell = False)
-
-    # Delete cluster if autodelete is set to true
-    if benchmark.autodelete:
-            run(['./cleanup.sh', benchmark.resource], shell = False)
 
 

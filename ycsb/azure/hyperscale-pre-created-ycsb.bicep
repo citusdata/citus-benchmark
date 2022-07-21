@@ -1,11 +1,11 @@
 @secure()
 param pgAdminPassword string
-
 @secure()
 param vmAdminPublicKey string
 param vmAdminUsername string = 'azureuser'
 param pgHost string
 param pgPort int = 5432
+param monitorpw string
 
 
 param location string = resourceGroup().location
@@ -15,7 +15,10 @@ param operations string = '10000'
 param shard_count string = '64'
 param thread_counts string = '100,300'
 param iterations int = 1
-param workers int = 2
+param workers int = 1
+param maxtime int = 600
+param parallel bool = false
+param serverport int = 9999
 
 // Configuration of the postgres server group
 param pgVersion string = '14'
@@ -23,6 +26,7 @@ param pgVersion string = '14'
 // Configuration of the VM that runs the benchmark (the driver)
 // This VM's should be pretty big, to make sure it does not become the bottleneck
 param driverSize string  = 'Standard_D64s_v3'
+// param AnalysisDriverSize string = 'Standard_D8s_v3'
 
 param sshAllowIpPrefix string = '*'
 // networking reletaed settings, usually you don't have to change this
@@ -39,7 +43,6 @@ param driverIpName string = '${driverVmName}-ip'
 param nsgName string = '${driverVmName}-nsg'
 param vnetName string = '${namePrefix}-vnet'
 param subnetName string = 'default'
-
 
 module vnet 'vnet.bicep' = {
   name: vnetName
@@ -80,8 +83,11 @@ module driverVm 'driver-vm-ycsb.bicep' = {
     iterations: iterations
     workers: workers
     rg: namePrefix
+    monitorpw: monitorpw
+    maxtime: maxtime
+    parallel: parallel
+    serverport: serverport
   }
 }
 
 output driverPublicIp string = driverVm.outputs.publicIp
-

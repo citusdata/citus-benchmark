@@ -18,7 +18,7 @@ pip3 install matplotlib
 Example usage:
 
 ```
-python3 run-benchmarks-ycsb.py --records=1000 --operations=1000 --threads=50,100 --iterations=2 --workers=2 --shard_count=4
+python3 run.py --resource=yourname --records=1000 --operations=1000 --threads=50,100 --iterations=2 --workers=2 start_benchmark
 ```
 
 #### Batch Run
