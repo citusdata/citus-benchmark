@@ -1,9 +1,6 @@
 import os
 import fire
 from helper import run
-import time
-from os.path import exists
-import socket
 
 class Benchmark(object):
 
@@ -88,6 +85,13 @@ class Benchmark(object):
         os.chdir(self.HOMEDIR)
 
 
+    def usertable(self):
+
+        """ usertable schema for ycsb benchmarks """
+
+        run(['./usertable.sh'], shell = False)
+
+
     def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", database = "citus",
     workloadtype = "load", workloads="workloada", iterations = 1, outputfile = "results.csv", shard_count = 16,
     workers = "2", resource = "custom"):
@@ -109,24 +113,27 @@ class Benchmark(object):
         self.DATABASE = database
         self.ITERATION = 1
         self.WORKERS = workers
-        self.RG = resource
 
         # Set environment variables
         os.environ['DATABASE'] = self.DATABASE
         os.environ['RECORDS'] = str(self.RECORDS)
         os.environ['OPERATIONS'] = str(self.OPERATIONS)
         os.environ['PORT'] = str(self.PORT)
-        os.environ['HOST'] = self.HOST
         os.environ['SHARD_COUNT'] = str(self.SHARD_COUNT)
         os.environ['ITERATION'] = str(self.ITERATION)
         os.environ['WORKERS'] = str(self.WORKERS)
-        os.environ['RESOURCE'] = str(self.RG)
         os.environ['THREADS'] = str(self.CURRENT_THREAD)
         os.environ['HOMEDIR'] = self.HOMEDIR
 
         # Install YCSB and JDBC PostgreSQL driver
         self.install_ycsb()
         self.install_jdbc()
+
+        # YCSB schema for citus
+
+        os.chdir(self.HOMEDIR + '/scripts')
+        self.usertable()
+        os.chdir(self.HOMEDIR)
 
 
     def get_workload(self, wtype):
@@ -196,7 +203,7 @@ class Benchmark(object):
         run(self.get_workload(self.WORKLOAD_TYPE), shell = False)
 
 
-    def run_workload(self, workloadname, workloadtype, parallel = False):
+    def run_workload(self, workloadname, workloadtype):
 
         """
         runs a workload and set params accordingly
@@ -205,7 +212,6 @@ class Benchmark(object):
         os.chdir(self.HOMEDIR + '/scripts')
         self.WORKLOAD_NAME = workloadname
         self.WORKLOAD_TYPE = workloadtype
-        self.single_workload(parallel)
         os.chdir(self.HOMEDIR)
 
 
@@ -232,16 +238,12 @@ class Benchmark(object):
             run(['python3', 'csv.py', outputdir, f"{outputdir}.csv"], shell = False)
 
 
-        def citus_workload(self):
+    def citus_workload(self):
 
             """
             Executes loading with workloada, running with workloadc
             Multiple iterations are supported
             """
-
-            # create sign if benchmark can start
-            self.create_sign()
-            time.sleep(20)
 
             for i in range(self.ITERATIONS):
                 os.chdir(self.HOMEDIR + '/scripts')
