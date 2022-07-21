@@ -177,7 +177,7 @@ class Benchmark(object):
         self.psql("truncate usertable")
 
 
-    def single_workload(self, parallel = False):
+    def single_workload(self):
 
         """
         Runs a single ycsb workload
@@ -196,10 +196,6 @@ class Benchmark(object):
             # for workloadc, operation count * 10
             os.environ['OPERATIONS'] = str(self.OPERATIONS * 10)
 
-        if parallel:
-            run(self.run_ycsb_parallel(self.WORKLOAD_TYPE), shell = False)
-            return
-
         run(self.get_workload(self.WORKLOAD_TYPE), shell = False)
 
 
@@ -212,6 +208,7 @@ class Benchmark(object):
         os.chdir(self.HOMEDIR + '/scripts')
         self.WORKLOAD_NAME = workloadname
         self.WORKLOAD_TYPE = workloadtype
+        self.single_workload()
         os.chdir(self.HOMEDIR)
 
 
