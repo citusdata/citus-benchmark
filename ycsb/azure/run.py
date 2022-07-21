@@ -27,35 +27,6 @@ def run(command, *args, shell=True, **kwargs):
 class StartBenchmark(object):
 
 
-    def check_workloadname(self, workloadname):
-
-            """ Check if workloadname is in existing workloads """
-
-            if workloadname.lower() not in set(self.YCSB_WORKLOADS):
-
-                raise ValueError(f"Invalid input: '{workloadname}'. Choose existing workload(s): {self.YCSB_WORKLOADS}")
-
-            return workloadname.lower()
-
-
-    def parse_workloads(self, workloads):
-
-        """
-        parses string of workloads seperated by a comma
-        returns list of workloads
-        """
-
-        if type(workloads) == str:
-            return [self.check_workloadname(workloads)]
-
-        # Raise error if there are any workloads that do not exist
-        if workloads.intersection(set(self.YCSB_WORKLOADS)) != workloads:
-            raise ValueError(f"Invalid input: '{workloads}'. Choose existing workload(s): {self.YCSB_WORKLOADS}")
-
-        # Remove repeated workloads
-        return ','.join(list(set(workloads)))
-
-
     def check_if_int(self, thread):
 
         """
@@ -93,12 +64,10 @@ class StartBenchmark(object):
     def __init__(self, resource, threads = "248", records = 1000, operations = 10000, database = "citus",  workloads = "run_all_workloads", iterations = 1, workers = "2", deployment = "hyperscale-ycsb",
     out = "results", autodelete = False):
 
-        self.YCSB_WORKLOADS = ["workloada", "workloadb", "workloadc", "workloadf", "workloadd", "workloade"]
         self.THREADS = self.parse_threadcounts(threads)
         self.RECORDS = records
         self.OPERATIONS = operations
         self.SHARD_COUNT = 2 * int(workers)
-        self.WORKLOAD_LIST = self.parse_workloads(workloads)
         self.OUTDIR = out
         self.ITERATIONS = iterations
         self.WORKERS = workers
