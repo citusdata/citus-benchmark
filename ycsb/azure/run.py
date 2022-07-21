@@ -61,20 +61,29 @@ class StartBenchmark(object):
             return ','.join([str(self.check_if_int(thread)) for thread in thread_counts])
 
 
-    def __init__(self, resource, threads = "248", records = 1000, operations = 10000, database = "citus",  workloads = "run_all_workloads", iterations = 1, workers = "2", deployment = "hyperscale-ycsb",
-    out = "results", autodelete = False):
+    def set_shard_count(self, workers, shards):
+
+        if not shards:
+            return 2 * int(workers)
+
+        return shards
+
+
+    def __init__(self, resource, threads = "248", records = 1000, operations = 10000, database = "citus",  workloads = "run_all_workloads",
+    iterations = 1, workers = "2", deployment = "hyperscale-ycsb", out = "results", shard_count = 0, autodelete = False):
 
         self.THREADS = self.parse_threadcounts(threads)
         self.RECORDS = records
         self.OPERATIONS = operations
-        self.SHARD_COUNT = 2 * int(workers)
         self.OUTDIR = out
         self.ITERATIONS = iterations
         self.WORKERS = workers
+        self.SHARD_COUNT = self.set_shard_count(workers, shard_count)
         self.DATABASE = database
         self.RG = resource
         self.DEPLOYMENT = deployment
         self.AUTO = autodelete
+        self.WORKLOAD_FUNCTION = workloads
 
         # Set environment variables
         os.environ['HOMEDIR'] = os.getcwd()
@@ -85,7 +94,7 @@ class StartBenchmark(object):
         os.environ['WORKERS'] = str(self.WORKERS)
         os.environ['RECORDS'] = str(self.RECORDS)
         os.environ['THREADS'] = str(self.THREADS)
-        os.environ['WORKLOADS'] = workloads
+        os.environ['WORKLOADS'] = str(self.WORKLOAD_FUNCTION)
         os.environ['OPERATIONS'] = str(self.OPERATIONS)
 
         # directory for output of results
@@ -121,8 +130,11 @@ class StartBenchmark(object):
         # start the benchmark
         run(['./start-benchmark-ycsb.sh', self.resource, self.deployment], shell = False)
 
-        # Wait for finalization of benchmarks
-        run(['./wait-for-results-ycsb.sh', self.resource, 'benchmarks.finished', '10'], shell = False)
+        try:
+            run(['./wait-for-results-ycsb.sh', self.resource, 'benchmarks.finished', '10'], shell = False)
+
+        except KeyboardInterrupt:
+            run(['./get-file.sh', self.resource, 'results.csv'], shell = False)
 
         # Delete cluster if autodelete is set to true
         if self.autodelete:

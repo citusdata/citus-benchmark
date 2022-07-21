@@ -28,10 +28,8 @@ az deployment group create \
     --parameters "shard_count=$SHARD_COUNT" \
     --parameters "iterations=$ITERATIONS" \
     --parameters "workers=$WORKERS" \
+    --parameters "workloads=$WORKLOADS" \
     --parameters "records=$RECORDS" \
     --parameters "operations=$OPERATIONS" \
     --parameters "thread_counts=$THREADS" \
-    --parameters "workloads=$WORKLOADS" \
     "$@" > /dev/null
-
-'''

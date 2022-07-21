@@ -94,7 +94,7 @@ class Benchmark(object):
 
     def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", database = "citus",
     workloadtype = "load", workloads="workloada", iterations = 1, outputfile = "results.csv", shard_count = 16,
-    workers = "2", resource = "custom"):
+    workers = "2"):
 
         self.HOMEDIR = os.getcwd()
         self.YCSB_WORKLOADS = ["workloada", "workloadb", "workloadc", "workloadf", "workloadd", "workloade"]
@@ -266,7 +266,6 @@ class Benchmark(object):
         """
         Runs all workloads in the order as described in: https://github.com/brianfrankcooper/YCSB/wiki/Core-Workloads
         under "Running the workloads"
-        Needs to be refactored
         """
 
         for i in range(self.ITERATIONS):
