@@ -31,7 +31,7 @@ az deployment group create \
     --parameters "records=$RECORDS" \
     --parameters "operations=$OPERATIONS" \
     --parameters "thread_counts=$THREADS" \
-    --parameters "workloads=$WORKLOADS"
+    --parameters "workloads=$WORKLOADS" \
     "$@" > /dev/null
 
 '''
