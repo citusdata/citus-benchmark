@@ -11,6 +11,5 @@ done
 
 ./get-file.sh $RESOURCE_GROUP results.csv
 
-mv results.csv $OUTDIR
 rm $SIGN
 
