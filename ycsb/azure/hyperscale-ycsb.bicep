@@ -11,13 +11,12 @@ param operations string = '10000'
 param shard_count string = '64'
 param thread_counts string = '100,300'
 param pgPort int = 5432
-param pre_created int = 0
+param iterations int = 1
 
 
 
 // Configuration of the postgres server group
 param pgVersion string = '14'
-// param pgVersion string = '12'
 param coordinatorVcores int = 16
 param coordinatorStorageSizeMB int = 2097152 // 2TB
 param workers int = 2
@@ -101,7 +100,7 @@ module vnet 'vnet.bicep' = {
   }
 }
 
-module driverVm 'driver-vm-ycsb.bicep' = {
+module driverVm 'driver-vm-ycsb-azure.bicep' = {
   name: driverVmName
   params: {
     adminPublicKey: vmAdminPublicKey
@@ -124,7 +123,9 @@ module driverVm 'driver-vm-ycsb.bicep' = {
     thread_counts: thread_counts
     zone: zone
     pgPort: pgPort
-    pre_created: pre_created
+    iterations: iterations
+    rg: namePrefix
+    workers: workers
   }
 }
 

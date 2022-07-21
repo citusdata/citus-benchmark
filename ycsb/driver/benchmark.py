@@ -370,7 +370,7 @@ class Benchmark(object):
 
         # Print if connected to server
         msg = server.recv(1024)
-        print(msg.decode('UTF-8'))
+        print(f"Current states: '{msg}'")
 
         return server
 
@@ -391,7 +391,6 @@ class Benchmark(object):
         while True:
 
             start_bench = server.recv(100)
-
             if sum(start_bench) == 2:
                 print("Starting Benchmark...")
                 break
@@ -411,16 +410,13 @@ class Benchmark(object):
 
         # Wait for host to all data collected
         while True:
-
             next_configuration = server.recv(100)
 
             if sum(next_configuration) == 4:
-                print("Starting Benchmark...")
+                server.send(bytearray(5))
+                print(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
 
                 break
-
-        server.send(bytearray(5))
-        print(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
 
 
     def monitor_workload(self, workload, type, server, thread, i):
