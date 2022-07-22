@@ -212,33 +212,10 @@ class Benchmark(object):
         os.chdir(self.HOMEDIR)
 
 
-    def single_workload_multiple_threads(self):
-
-        """
-        Runs a single ycsb workload with multiple threadcounts
-        """
-
-        for i in range(self.ITERATIONS):
-            os.chdir(self.HOMEDIR + '/scripts')
-            self.set_iterations()
-            outputdir = self.OUTDIR + f"-{i+1}"
-
-            for thread in self.THREADS:
-                self.CURRENT_THREAD = thread
-                self.run_workload(self.WORKLOAD_NAME, self.WORKLOAD_TYPE)
-
-            print(f"Done running workloadc for iteration {i}")
-            os.chdir(self.HOMEDIR)
-            print("Generating CSV")
-
-            # gather csv with all results after each iteration
-            run(['python3', 'generate_csv.py', outputdir, f"{outputdir}.csv"], shell = False)
-
-
     def create_csv(self):
         """ generates a csv from ycsb output """
 
-        run(['python3', 'generate_csv.py', "results.csv"], shell = False)
+        run(['python3', 'generate_csv.py', f"{os.getenv['RESOURCE']}-results.csv"], shell = False)
 
 
     def loada(self):
@@ -263,10 +240,10 @@ class Benchmark(object):
                 self.CURRENT_THREAD = thread
                 os.environ['THREADS'] = str(self.CURRENT_THREAD)
 
-                if workload.lower() is not "workloade":
-                    self.loada()
-                else:
+                if workload.lower() is "workloade":
                     self.loade()
+                else:
+                    self.loada()
 
                 self.run_workload(workload, "run")
 
@@ -308,31 +285,6 @@ class Benchmark(object):
         """ run workload e """
 
         self.run_single_workload("workloade")
-
-
-    # def citus_workload(self):
-
-    #         """
-    #         Executes loading with workloada, running with workloadc
-    #         Multiple iterations are supported
-    #         """
-
-    #         for i in range(self.ITERATIONS):
-
-    #             self.set_iterations(i)
-
-    #             for thread in self.THREADS:
-    #                 self.CURRENT_THREAD = thread
-    #                 os.environ['THREADS'] = str(self.CURRENT_THREAD)
-
-    #                 self.run_workload("workloada", "load")
-    #                 self.run_workload("workloadc", "run")
-
-    #             print(f"Done running workloadc for iteration {i}")
-    #             print("Generating CSV")
-
-    #             # gather csv with all results
-    #             run(['python3', 'generate_csv.py', "results.csv"], shell = False)
 
 
     def run_all_workloads(self):
