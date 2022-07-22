@@ -1,1 +1,1 @@
-python3 benchmark-azure.py --records=$RECORDS --operations=$OPERATIONS --shard_count=$SHARD_COUNT --threads=$THREAD_COUNT --iterations=$ITERATIONS --workers=$WORKERS --resource=$RESOURCE_GROUP $WORKLOAD_FUNCTION
+python3 benchmark-azure.py --records=$RECORDS --operations=$OPERATIONS --shard_count=$SHARD_COUNT --threads=$THREAD_COUNT --iterations=$ITERATIONS --workers=$WORKERS $WORKLOAD_FUNCTION
