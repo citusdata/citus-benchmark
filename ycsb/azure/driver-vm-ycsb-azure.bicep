@@ -51,7 +51,7 @@ echo export SHARD_COUNT={8} >> .bashrc
 echo export THREAD_COUNT={9} >> .bashrc
 echo export ITERATIONS={10} >> .bashrc
 echo export WORKERS={11} >> .bashrc
-echo export RESOURCE_GROUP='{12}' >> .bashrc
+echo export RESOURCE='{12}' >> .bashrc
 echo export FOLDER=$(pwd) >> .bashrc
 
 # Use the same environment variables right now, sourcing bashrc doesn't work
@@ -68,7 +68,7 @@ export SHARD_COUNT={8}
 export THREAD_COUNT={9}
 export ITERATIONS={10}
 export WORKERS={11}
-export RESOURCE_GROUP={12}
+export RESOURCE={12}
 export FOLDER=$(pwd)
 export WORKLOAD_FUNCTION={13}
 

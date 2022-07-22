@@ -235,30 +235,104 @@ class Benchmark(object):
             run(['python3', 'generate_csv.py', outputdir, f"{outputdir}.csv"], shell = False)
 
 
-    def citus_workload(self):
+    def create_csv(self):
+        """ generates a csv from ycsb output """
 
-            """
-            Executes loading with workloada, running with workloadc
-            Multiple iterations are supported
-            """
-            print("loading workload a, running workload c")
+        run(['python3', 'generate_csv.py', "results.csv"], shell = False)
 
-            for i in range(self.ITERATIONS):
 
-                self.set_iterations(i)
+    def loada(self):
+        """ load workload a """
 
-                for thread in self.THREADS:
-                    self.CURRENT_THREAD = thread
-                    os.environ['THREADS'] = str(self.CURRENT_THREAD)
+        self.run_workload("workloada", "load")
 
-                    self.run_workload("workloada", "load")
-                    self.run_workload("workloadc", "run")
 
-                print(f"Done running workloadc for iteration {i}")
-                print("Generating CSV")
+    def loade(self):
+        """ load workload e """
 
-                # gather csv with all results
-                run(['python3', 'generate_csv.py', "results.csv"], shell = False)
+        self.run_workload("workloade", "load")
+
+
+    def run_single_workload(self, workload):
+
+        for i in range(self.ITERATIONS):
+
+            self.set_iterations(i)
+
+            for thread in self.THREADS:
+                self.CURRENT_THREAD = thread
+                os.environ['THREADS'] = str(self.CURRENT_THREAD)
+
+                if workload.lower() is not "workloade":
+                    self.loada()
+                else:
+                    self.loade()
+
+                self.run_workload(workload, "run")
+
+            self.create_csv()
+
+
+    def workloada(self):
+
+        """ run workload a """
+
+        self.run_single_workload("workloada")
+
+
+    def workloadb(self):
+        """ run workload b """
+
+        self.run_single_workload("workloadb")
+
+
+    def workloadc(self):
+        """ run workload c """
+
+        self.run_single_workload("workloadc")
+
+
+    def workloadf(self):
+        """ run workload f """
+
+        self.run_single_workload("workloadf")
+
+
+    def workloadd(self):
+        """ run workload d """
+
+        self.run_single_workload("workloadd")
+
+
+    def workloade(self):
+        """ run workload e """
+
+        self.run_single_workload("workloade")
+
+
+    # def citus_workload(self):
+
+    #         """
+    #         Executes loading with workloada, running with workloadc
+    #         Multiple iterations are supported
+    #         """
+
+    #         for i in range(self.ITERATIONS):
+
+    #             self.set_iterations(i)
+
+    #             for thread in self.THREADS:
+    #                 self.CURRENT_THREAD = thread
+    #                 os.environ['THREADS'] = str(self.CURRENT_THREAD)
+
+    #                 self.run_workload("workloada", "load")
+    #                 self.run_workload("workloadc", "run")
+
+    #             print(f"Done running workloadc for iteration {i}")
+    #             print("Generating CSV")
+
+    #             # gather csv with all results
+    #             run(['python3', 'generate_csv.py', "results.csv"], shell = False)
 
 
     def run_all_workloads(self):

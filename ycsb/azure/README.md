@@ -18,5 +18,5 @@ pip3 install matplotlib
 Example usage:
 
 ```
-python3 ycsb.py --resource=yourname --records=1000 --operations=1000 --threads=50,100 --iterations=2 --workers=2 --workloads="run_all_workloads" start_benchmark
+python3 ycsb.py --resource=yourname --records=10000 --operations=10000 --threads=100,200,300 --iterations=2 --workers=2 --workloads="run_all_workloads" start_benchmark
 ```
