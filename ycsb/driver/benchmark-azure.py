@@ -215,7 +215,7 @@ class Benchmark(object):
     def create_csv(self):
         """ generates a csv from ycsb output """
 
-        run(['python3', 'generate_csv.py', f"{os.getenv['RESOURCE']}-results.csv"], shell = False)
+        run(['python3', 'generate_csv.py', f'{os.getenv["RESOURCE"]}-results.csv'], shell = False)
 
 
     def loada(self):
@@ -330,7 +330,7 @@ if __name__ == '__main__':
         fire.Fire(Benchmark)
 
     except KeyboardInterrupt:
-         run(['python3', 'generate_csv.py', "results.csv"], shell = False)
+         run(['python3', 'generate_csv.py', f'{os.getenv["RESOURCE"]}-results.csv'], shell = False)
 
     # if benchmarks are finished, create token
     run(['touch', 'benchmarks.finished'], shell = False)

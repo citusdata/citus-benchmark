@@ -99,6 +99,7 @@ class StartBenchmark(object):
 
         # directory for output of results
         if not os.path.isdir(self.OUTDIR):
+
             os.mkdir(self.OUTDIR)
 
 
