@@ -131,10 +131,10 @@ class StartBenchmark(object):
         run(['./start-benchmark-ycsb.sh', self.resource, self.deployment], shell = False)
 
         try:
-            run(['./wait-for-results-ycsb.sh', self.resource, 'benchmarks.finished', '10'], shell = False)
+            run(['./wait-for-results-ycsb.sh', 'benchmarks.finished', '10'], shell = False)
 
         except KeyboardInterrupt:
-            run(['./get-file.sh', self.resource, 'results.csv'], shell = False)
+            run(['./get-file.sh', 'results.csv'], shell = False)
 
         # Delete cluster if autodelete is set to true
         if self.autodelete:

@@ -1,15 +1,14 @@
 #!/bin/bash
 
-RESOURCE_GROUP=$1
-SIGN=$2
-SLEEP=$3
+SIGN=$1
+SLEEP=$2
 
 while ! test -f $SIGN; do
     sleep $SLEEP
-	./get-file.sh $RESOURCE_GROUP $SIGN
+	./get-file.sh $SIGN
 done
 
-./get-file.sh $RESOURCE_GROUP results.csv
+./get-file.sh results.csv
 
 rm $SIGN
 
