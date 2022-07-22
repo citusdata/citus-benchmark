@@ -23,14 +23,14 @@ python3 ycsb.py --resource=yourname --records=10000 --operations=10000 --threads
 
 ##### Parameters explained
 
-> `resource` is the name of the resource group that will be created for running the benchmarks
-> `records` the amount of records to be inserted by YCSB
-> `operations` is the amount of operations performed by YCSB
-> `threads` is a list (seperated by a comma) of the different threadcouns used during the YCSB benchmarks
-> `iterations` is the amount of iterations for the benchmarks
-> `workers` represents the amount of workers in the Citus cluster
-> `autodelete` default value is false. If set to true, cluster will be automatically deleted when benchmarks are finished.
-> `workloads` are the YCSB workloads one can test. We have the following options:
+> `resource` is the name of the resource group that will be created for running the benchmarks <br>
+> `records` the amount of records to be inserted by YCSB <br>
+> `operations` is the amount of operations performed by YCSB <br>
+> `threads` is a list (seperated by a comma) of the different threadcouns used during the YCSB benchmarks <br>
+> `iterations` is the amount of iterations for the benchmarks <br>
+> `workers` represents the amount of workers in the Citus cluster <br>
+> `autodelete` default value is false. If set to true, cluster will be automatically deleted when benchmarks are finished. <br>
+> `workloads` are the YCSB workloads one can test. We have the following options: <br>
 > > - workloada
 > > - workloadb
 > > - workloadc
