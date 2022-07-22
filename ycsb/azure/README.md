@@ -27,6 +27,7 @@ python3 ycsb.py --resource=yourname --records=10000 --operations=10000 --threads
 > `records` the amount of records to be inserted by YCSB <br>
 > `operations` is the amount of operations performed by YCSB <br>
 > `threads` is a list (seperated by a comma) of the different threadcouns used during the YCSB benchmarks <br>
+> `shard_count` default is 2 * workers. You can set your own shard count with this parameter. <br>
 > `iterations` is the amount of iterations for the benchmarks <br>
 > `workers` represents the amount of workers in the Citus cluster <br>
 > `autodelete` default value is false. If set to true, cluster will be automatically deleted when benchmarks are finished. <br>

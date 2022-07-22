@@ -97,11 +97,6 @@ class StartBenchmark(object):
         os.environ['WORKLOADS'] = str(self.WORKLOAD_FUNCTION)
         os.environ['OPERATIONS'] = str(self.OPERATIONS)
 
-        # directory for output of results
-        if not os.path.isdir(self.OUTDIR):
-
-            os.mkdir(self.OUTDIR)
-
 
     @property
     def resource(self):
