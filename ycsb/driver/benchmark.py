@@ -2,6 +2,8 @@ import os
 import fire
 from helper import run
 
+MAX_THREADS = 1000
+MIN_THREADS = 1
 YCSB_VERSION = "0.17.0"
 JDBC_VERSION = "42.2.14"
 
@@ -14,17 +16,20 @@ class Benchmark(object):
         Check whether given input is a valid integer
         """
 
-        try:
-                if int(thread) > 1000:
-                    raise ValueError('Invalid input, threadcount exceeds maximum of 1000')
+        global MAX_THREADS
+        global MIN_THREADS
 
-                elif int(thread) < 1:
-                    raise ValueError('Invalid input, threadcount exceeds minimum of 1')
+        try:
+            if int(thread) > MAX_THREADS:
+                raise ValueError(f'Invalid input, threadcount exceeds maximum of {MAX_THREADS}')
+
+            elif int(thread) < MIN_THREADS:
+                raise ValueError(f'Invalid input, threadcount exceeds minimum of {MIN_THREADS}')
 
         except:
-                raise ValueError('Invalid input, please enter integers in format "300" or "300,400" if multiple threadcounts')
+            raise ValueError('Invalid input, please enter integers in format "300" or "300,400" if multiple threadcounts')
 
-        return (thread)
+        return thread
 
 
     def parse_threadcounts(self, thread_counts):
@@ -34,9 +39,8 @@ class Benchmark(object):
         """
 
         try:
-
             int(thread_counts)
-            return self.check_if_thread_is_int(thread_counts)
+            return (self.check_if_thread_is_int(thread_counts))
 
         except:
             return ','.join([str(self.check_if_thread_is_int(thread)) for thread in thread_counts])
