@@ -21,7 +21,7 @@ class Benchmark(object):
         except:
                 raise ValueError('Invalid input, please enter integers in format "300" or "300,400" if multiple threadcounts')
 
-        return thread
+        return (thread)
 
 
     def parse_threadcounts(self, thread_counts):
@@ -33,7 +33,7 @@ class Benchmark(object):
         try:
 
             int(thread_counts)
-            return self.check_if_thead_is_int(thread_counts)
+            return self.check_if_thread_is_int(thread_counts)
 
         except:
             return ','.join([str(self.check_if_thread_is_int(thread)) for thread in thread_counts])
@@ -131,9 +131,7 @@ class Benchmark(object):
 
             return ['./ycsb-load.sh']
 
-        else:
-
-            return ['./ycsb-run.sh']
+        return ['./ycsb-run.sh']
 
 
     def psql(self, command):
@@ -227,7 +225,7 @@ class Benchmark(object):
                 self.CURRENT_THREAD = thread
                 os.environ['THREADS'] = str(self.CURRENT_THREAD)
 
-                if workload.lower() is "workloade":
+                if workload.lower() == "workloade":
                     self.loade()
                 else:
                     self.loada()
