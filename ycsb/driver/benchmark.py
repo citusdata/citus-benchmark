@@ -2,6 +2,9 @@ import os
 import fire
 from helper import run
 
+YCSB_VERSION = "0.17.0"
+JDBC_VERSION = "42.2.14"
+
 class Benchmark(object):
 
 
@@ -53,25 +56,30 @@ class Benchmark(object):
 
         """ install YCSB """
 
+        global YCSB_VERSION
+
         # Check if ycsb directory exists
-        if os.path.isdir('ycsb-0.17.0'):
+        if os.path.isdir(f'ycsb-{YCSB_VERSION}'):
             return
 
         # get ycsb and unpack
-        run(['wget', 'https://github.com/brianfrankcooper/YCSB/releases/download/0.17.0/ycsb-0.17.0.tar.gz'], shell = False)
-        run(['tar', 'xfvz', 'ycsb-0.17.0.tar.gz'], shell = False)
+        run(['wget', f'https://github.com/brianfrankcooper/YCSB/releases/download/{YCSB_VERSION}/ycsb-{YCSB_VERSION}.tar.gz'], shell = False)
+        run(['tar', 'xfvz', f'ycsb-{YCSB_VERSION}.tar.gz'], shell = False)
 
 
     def install_jdbc(self):
 
         """ install JDBC PostgreSQL driver """
 
+        global YCSB_VERSION
+        global JDBC_VERSION
+
         # Check if postgresql jdbc driver exists
-        if os.path.isfile('ycsb-0.17.0/postgresql-42.2.14.jar'):
+        if os.path.isfile(f'ycsb-{YCSB_VERSION}/postgresql-{JDBC_VERSION}.jar'):
             return
 
-        os.chdir("ycsb-0.17.0")
-        run(['wget', 'https://jdbc.postgresql.org/download/postgresql-42.2.14.jar'], shell = False)
+        os.chdir(f"ycsb-{YCSB_VERSION}")
+        run(['wget', f'https://jdbc.postgresql.org/download/postgresql-{JDBC_VERSION}.jar'], shell = False)
         os.chdir(self.HOMEDIR)
 
 
