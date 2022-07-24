@@ -1,7 +1,12 @@
 import sys
 import subprocess
 import os
+import datetime
 import fire
+
+MAX_THREADS = 1000
+MIN_THREADS = 1
+CHECK_FREQUENCY_IN_SECONDS = 10
 
 def eprint(*args, **kwargs):
 
@@ -26,22 +31,24 @@ def run(command, *args, shell=True, **kwargs):
 
 class StartBenchmark(object):
 
-
-    def check_if_int(self, thread):
+    def check_if_thread_is_int(self, thread):
 
         """
         Check whether given input is a valid integer
         """
 
-        try:
-                if int(thread) > 1000:
-                    raise ValueError('Error: Invalid input, threadcount exceeds maximum of 1000')
+        global MAX_THREADS
+        global MIN_THREADS
 
-                elif int(thread) < 1:
-                    raise ValueError('Error: Invalid input, threadcount exceeds minimum of 1')
+        try:
+                if int(thread) > MAX_THREADS:
+                    raise ValueError(f'Invalid input, threadcount exceeds maximum of {MAX_THREADS}')
+
+                elif int(thread) < MIN_THREADS:
+                    raise ValueError(f'Invalid input, threadcount exceeds minimum of {MIN_THREADS}')
 
         except:
-                raise ValueError('Error: Invalid input, please enter integers in format "300" or "300;400" if multiple threadcounts')
+                raise ValueError('Invalid input, please enter integers in format "300" or "300,400" if multiple threadcounts')
 
         return thread
 
@@ -55,10 +62,10 @@ class StartBenchmark(object):
         try:
 
             int(thread_counts)
-            return self.check_if_int(thread_counts)
+            return self.check_if_thread_is_int(thread_counts)
 
         except:
-            return ','.join([str(self.check_if_int(thread)) for thread in thread_counts])
+            return ','.join([str(self.check_if_thread_is_int(thread)) for thread in thread_counts])
 
 
     def set_shard_count(self, workers, shards):
@@ -70,12 +77,11 @@ class StartBenchmark(object):
 
 
     def __init__(self, resource, threads = "248", records = 1000, operations = 10000, database = "citus",  workloads = "run_all_workloads",
-    iterations = 1, workers = "2", deployment = "hyperscale-ycsb", out = "results", shard_count = 0, autodelete = False):
+    iterations = 1, workers = "2", shard_count = 0, autodelete = False, deployment = "hyperscale-ycsb"):
 
         self.THREADS = self.parse_threadcounts(threads)
         self.RECORDS = records
         self.OPERATIONS = operations
-        self.OUTDIR = out
         self.ITERATIONS = iterations
         self.WORKERS = workers
         self.SHARD_COUNT = self.set_shard_count(workers, shard_count)
@@ -123,11 +129,15 @@ class StartBenchmark(object):
 
         """ initiates benchmark run and corresponding infrastructure """
 
+        global CHECK_FREQUENCY_IN_SECONDS
+
+        print(datetime.datetime.now())
+
         # start the benchmark
         run(['./start-benchmark-ycsb.sh', self.resource, self.deployment], shell = False)
 
         try:
-            run(['./wait-for-results-ycsb.sh', 'benchmarks.finished', '10'], shell = False)
+            run(['./wait-for-results-ycsb.sh', 'benchmarks.finished', str(CHECK_FREQUENCY_IN_SECONDS)], shell = False)
 
         except KeyboardInterrupt:
             run(['./get-file.sh', f'{self.resource}-results.csv'], shell = False)

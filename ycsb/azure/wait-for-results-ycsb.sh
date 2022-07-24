@@ -11,4 +11,5 @@ done
 ./get-file.sh ${RESOURCE}-results.csv
 
 rm $SIGN
+cat ${RESOURCE}-results.csv
 

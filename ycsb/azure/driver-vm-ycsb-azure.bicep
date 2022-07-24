@@ -53,6 +53,7 @@ echo export ITERATIONS={10} >> .bashrc
 echo export WORKERS={11} >> .bashrc
 echo export RESOURCE='{12}' >> .bashrc
 echo export FOLDER=$(pwd) >> .bashrc
+echo export WORKLOAD_FUNCTION='{13}' >> .bashrc
 
 # Use the same environment variables right now, sourcing bashrc doesn't work
 # since we are not in an interactive shell
@@ -85,8 +86,6 @@ sudo apt update -y
 sudo apt install python-is-python2 -y
 sudo apt-get install python3-pip -y
 pip3 install fire
-pip3 install pandas
-pip3 install matplotlib
 
 git clone https://github.com/citusdata/citus-benchmark.git --branch ccfelius/ycsb-azure
 cd citus-benchmark/ycsb/driver
