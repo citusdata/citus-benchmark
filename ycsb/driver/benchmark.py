@@ -212,7 +212,7 @@ class Benchmark(object):
     def create_csv(self):
         """ generates a csv from ycsb output """
 
-        run(['python3', 'generate_csv.py', f'{os.getenv("RESOURCE")}-results.csv'], shell = False)
+        run(['python3', 'output.py', f'{os.getenv("RESOURCE")}-results.csv'], shell = False)
 
 
     def loada(self):
