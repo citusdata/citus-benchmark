@@ -43,7 +43,7 @@ class Benchmark(object):
             return [self.check_if_thread_is_int(thread_counts)]
 
         except:
-            return ','.join([str(self.check_if_thread_is_int(thread)) for thread in thread_counts])
+            return [int(self.check_if_thread_is_int(thread)) for thread in thread_counts]
 
 
     def set_shard_count(self, workers, shards):
