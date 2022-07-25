@@ -40,7 +40,7 @@ class Benchmark(object):
 
         try:
             int(thread_counts)
-            return (self.check_if_thread_is_int(thread_counts))
+            return [self.check_if_thread_is_int(thread_counts)]
 
         except:
             return ','.join([str(self.check_if_thread_is_int(thread)) for thread in thread_counts])
@@ -102,7 +102,7 @@ class Benchmark(object):
         self.THREADS = self.parse_threadcounts(threads)
         self.RECORDS = records
         self.OPERATIONS = operations
-        self.SHARD_COUNT = self.set_shard_count(shard_count)
+        self.SHARD_COUNT = self.set_shard_count(workers, shard_count)
         self.PORT = str(port)
         self.WORKLOAD_NAME = "workloada"
         self.WORKLOAD_TYPE = "load"
