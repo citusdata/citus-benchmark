@@ -320,7 +320,7 @@ class Benchmark(object):
             print(f"Done with iteration {i}")
 
             # gather csv with all results
-            run(['python3', 'generate_csv.py', f'{os.getenv("RESOURCE")}results.csv'], shell = False)
+            run(['python3', 'output.py', f'{os.getenv("RESOURCE")}-results.csv'], shell = False)
 
 
 if __name__ == '__main__':
@@ -329,7 +329,7 @@ if __name__ == '__main__':
         fire.Fire(Benchmark)
 
     except KeyboardInterrupt:
-         run(['python3', 'generate_csv.py', f'{os.getenv("RESOURCE")}-results.csv'], shell = False)
+         run(['python3', 'output.py', f'{os.getenv("RESOURCE")}-results.csv'], shell = False)
 
     # if benchmarks are finished, create token
     run(['touch', 'benchmarks.finished'], shell = False)
