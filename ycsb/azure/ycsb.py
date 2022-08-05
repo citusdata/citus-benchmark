@@ -42,10 +42,10 @@ class StartBenchmark(object):
 
         try:
                 if int(thread) > MAX_THREADS:
-                    raise ValueError(f'Invalid input, threadcount exceeds maximum of {MAX_THREADS}')
+                    raise ValueError('Invalid input, threadcount exceeds maximum of {0}'.format(MAX_THREADS))
 
                 elif int(thread) < MIN_THREADS:
-                    raise ValueError(f'Invalid input, threadcount exceeds minimum of {MIN_THREADS}')
+                    raise ValueError('Invalid input, threadcount exceeds maximum of {0}'.format(MIN_THREADS))
 
         except:
                 raise ValueError('Invalid input, please enter integers in format "300" or "300,400" if multiple threadcounts')
@@ -76,7 +76,7 @@ class StartBenchmark(object):
         return shards
 
 
-    def __init__(self, resource, threads = "248", records = 1000, operations = 10000, database = "citus",  workloads = "run_all_workloads",
+    def __init__(self, resource, threads = "248", records = 1000, operations = 10000, database = "citus",  workload = "run_all_workloads",
     iterations = 1, workers = "2", shard_count = 0, autodelete = False, deployment = "hyperscale-ycsb"):
 
         self.THREADS = self.parse_threadcounts(threads)
@@ -89,7 +89,7 @@ class StartBenchmark(object):
         self.RG = resource
         self.DEPLOYMENT = deployment
         self.AUTO = autodelete
-        self.WORKLOAD_FUNCTION = workloads
+        self.WORKLOAD_FUNCTION = workload
 
         # Set environment variables
         os.environ['HOMEDIR'] = os.getcwd()

@@ -21,10 +21,10 @@ class Benchmark(object):
 
         try:
             if int(thread) > MAX_THREADS:
-                raise ValueError(f'Invalid input, threadcount exceeds maximum of {MAX_THREADS}')
+                raise ValueError(f'Invalid input, threadcount exceeds maximum of {MAX_THREADS}'), SystemExit
 
             elif int(thread) < MIN_THREADS:
-                raise ValueError(f'Invalid input, threadcount exceeds minimum of {MIN_THREADS}')
+                raise ValueError(f'Invalid input, threadcount exceeds minimum of {MIN_THREADS}'), SystemExit
 
         except:
             raise ValueError('Invalid input, please enter integers in format "300" or "300,400" if multiple threadcounts')

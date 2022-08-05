@@ -15,7 +15,6 @@ param iterations int = 1
 param workloads string = 'run_all_workloads'
 
 
-
 // Configuration of the postgres server group
 param pgVersion string = '14'
 param coordinatorVcores int = 16
