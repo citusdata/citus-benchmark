@@ -1,7 +1,6 @@
 
 import os
 import socket
-from _thread import Lock
 from _thread import *
 from helper import run
 import sys
