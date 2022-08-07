@@ -6,6 +6,10 @@ import time
 import socket
 import subprocess
 
+states = [0, 0, 0, 0]
+start = time.time()
+it = 0
+
 class Client(object):
 
 
@@ -129,6 +133,64 @@ class Client(object):
 
         time.sleep(seconds)
 
+    def wait_for_data(self, server):
+
+        global states
+        global start
+
+        while time.time() - start < 300:
+            data = server.recv(10)
+            start = time.time()
+
+            if not data:
+                break
+
+            states = data
+            return server
+
+        # maak morgen af, moet server om 5 min reconnecten.
+
+
+    def start_and_sent(self, logs, iteration, server):
+
+        """ starts monitoring and sends sign """
+
+        self.prepare_monitoring(logs, iteration, server)
+        server.send(bytearray(1))
+
+
+    def finish_and_sent(self, logs, server, homedir, bucket, iteration):
+
+        """ finishes monitoring and sends sign """
+
+        self.finish_monitoring(logs, server, homedir, bucket, iteration)
+        server.send(bytearray(3))
+
+
+    def manage_states(self, state, logs, server, homedir, bucket, iteration):
+
+        """ Checks status corresponding to state """
+
+        global states
+
+        if state == 0:
+            self.wait_for_data(server)
+            self.start_and_sent(logs, iteration, server)
+
+        if state == 1:
+            self.start_and_sent(logs, iteration, server)
+
+        if state == 2:
+            while True:
+                self.wait_for_data(server)
+                self.finish_and_sent(server, logs, server, homedir, bucket, iteration)
+
+        if state == 3:
+            self.finish_and_sent(server, logs, server, homedir, bucket, iteration)
+
+        elif state == 4:
+            raise Exception(f"States are being flushed by server")
+
 
     def create_socket(self):
 
@@ -145,8 +207,10 @@ class Client(object):
         """ try to connect to socket and wait for message from socket """
 
         server.connect((self.ip, int(self.port)))
-        msg = server.recv(1024)
-        print(msg.decode('UTF-8'))
+        _states = server.recv(10)
+
+        global states
+        states = _states
 
 
     def try_to_connect_with_socket(self):
@@ -168,7 +232,7 @@ class Client(object):
                 break
 
             except:
-                self.sleep(5)
+                self.sleep(10)
 
         return server
 
@@ -182,16 +246,10 @@ class Client(object):
         return logs
 
 
-    def prepare_monitoring(self, iteration, server):
+    def prepare_monitoring(self, logs, iteration, server):
 
 
         """ do preperations for monitoring a run """
-
-        # Create a logging instance
-        logs = self.get_logging_instance(iteration)
-
-        # wait to receive data from server to start monitoring
-        start_monitoring = server.recv(1024)
 
         self.print_current_time()
 
@@ -238,8 +296,18 @@ class Client(object):
         iterations = int(self.iterations)
 
         for iteration in range(iterations):
-                logs = self.prepare_monitoring(iteration, server)
-                print(self.finish_monitoring(logs, server, homedir, bucket, iteration))
+
+            start = time.time()
+
+            while time.time() < start:
+
+                global states
+                state = sum(states)
+
+                logs = self.get_logging_instance(iteration)
+
+                self.manage_states(state, logs, server, homedir, bucket, iteration)
+
 
 
 def collect_data(bucket):

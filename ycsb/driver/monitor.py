@@ -322,7 +322,7 @@ class Benchmark(object):
             print("Generating CSV")
 
             # gather csv with all results after each iteration
-            run(['python3', 'generate-csv.py', outputdir, f"{outputdir}.csv"], shell = False)
+            run(['python3', 'output.py', outputdir, f"{outputdir}.csv"], shell = False)
 
 
     def citus_workload(self):
@@ -356,7 +356,7 @@ class Benchmark(object):
 
             # gather csv with all results
             os.chdir(self.HOMEDIR)
-            run(['python3', 'generate-csv.py', "results.csv"], shell = False)
+            run(['python3', 'output.py', "results.csv"], shell = False)
 
 
     def connect_to_socket(self):
@@ -464,7 +464,7 @@ class Benchmark(object):
             print("Generating CSV")
 
             # gather csv with all results
-            run(['python3', 'generate-csv.py', "results.csv"], shell = False)
+            run(['python3', 'output.py', "results.csv"], shell = False)
 
 
     def run_all_workloads(self):
@@ -501,7 +501,7 @@ class Benchmark(object):
             print("Generating CSV")
 
             # gather csv with all results
-            run(['python3', 'generate-csv.py', "results.csv"], shell = False)
+            run(['python3', 'output.py', "results.csv"], shell = False)
 
 
 if __name__ == '__main__':
@@ -510,7 +510,7 @@ if __name__ == '__main__':
         fire.Fire(Benchmark)
 
     except KeyboardInterrupt:
-         run(['python3', 'generate-csv.py', "results.csv"], shell = False)
+         run(['python3', 'output.py', "results.csv"], shell = False)
 
 
 
