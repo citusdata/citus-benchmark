@@ -1,9 +1,25 @@
 import os
+from typing import Iterator
 import fire
-from helper import run, eprint
+from helper import run
 import datetime
+import threading
+
 
 class Logging(object):
+
+
+    def execute_threads(queue: list):
+
+        """ start all threads and wait for all threads to finish """
+
+        # Start all threads
+        for thread in queue:
+            thread.start()
+
+        # Wait for all of them to finish
+        for thread in queue:
+            thread.join()
 
 
     def get_worker_adresses(self):
@@ -118,8 +134,23 @@ class Logging(object):
 
         """ runs script in all workers from citus cluster """
 
-        for i, worker in enumerate(self.WORKERS):
+        # queue = []
+
+        # for worker in self.WORKERS:
+        #     thread = threading.Thread(target=self.connect_to_worker, args=([worker, script]))
+        #     queue.append(thread)
+
+        # self.execute_threads(queue)
+
+        for worker in self.WORKERS:
+
+            # threading.Thread(target=self.connect_to_worker, args=([worker, script]))
             self.connect_to_worker(worker, script)
+
+
+    def run_set_permissions(self, worker):
+
+        run(["./alter-user-on-worker.sh", self.PREFIX, worker, ">", "/dev/null"], shell = False)
 
 
     def set_permissions(self):
@@ -136,9 +167,19 @@ class Logging(object):
         # change permissions on coordinator node
         run(["./alter-user.sh", self.PREFIX, self.HOST, ">", "/dev/null"], shell = False)
 
-        # Also manually change on all workers
+        queue = []
+
         for worker in self.WORKERS:
-            run(["./alter-user-on-worker.sh", self.PREFIX, worker, ">", "/dev/null"], shell = False)
+            thread = threading.Thread(target=self.run_set_permissions, args=([worker]))
+            queue.append(thread)
+
+        self.execute_threads(queue)
+
+        # Also manually change on all workers
+        # for worker in self.WORKERS:
+
+        #     # threading.Thread(target=self.run_set_permissions, args=([worker]))
+        #     run(["./alter-user-on-worker.sh", self.PREFIX, worker, ">", "/dev/null"], shell = False)
 
         os.chdir(f"{self.HOMEDIR}/logs")
 
@@ -150,16 +191,37 @@ class Logging(object):
         return list(zip(self.get_worker_name(), self.WORKERS))
 
 
+    def run_get_pgsql(self, worker_host, worker_num):
+
+        run(["./get-pglog.sh", self.PREFIX, worker_host, worker_num, str(self.CURRENT_ITERATION)], shell = False)
+
+
     def get_postgresql(self):
 
         """ collects postgresql logs in /dat/14/data/pg_logs """
 
         os.chdir(f'{self.HOMEDIR}/logs/scripts')
 
+        # queue = []
+
+        # for worker_num, worker_host in self.workers_and_ids():
+        #     thread = threading.Thread(target=self.run_get_pgsql, args=([worker_host, worker_num]))
+        #     queue.append(thread)
+
+        # self.execute_threads(queue)
+
         for worker_num, worker_host in self.workers_and_ids():
+
+
+            # threading.Thread(target=self.run_get_pgsql, args=([worker_host, worker_num]))
             run(["./get-pglog.sh", self.PREFIX, worker_host, worker_num, str(self.CURRENT_ITERATION)], shell = False)
 
         os.chdir(f"{self.HOMEDIR}/logs")
+
+
+    def run_truncate_pgsql_log(self, worker_host):
+
+        run(["./truncate-pg_log.sh", self.PREFIX, worker_host, f"postgresql-{self.get_weekday()}.log"], shell = False)
 
 
     def truncate_pg_log(self):
@@ -172,6 +234,8 @@ class Logging(object):
         os.chdir(f'{self.HOMEDIR}/logs/scripts')
 
         for worker_host in self.WORKERS:
+
+            # threading.Thread(target=self.run_truncate_pgsql_log, args=([worker_host]))
             run(["./truncate-pg_log.sh", self.PREFIX, worker_host, f"postgresql-{self.get_weekday()}.log"], shell = False)
 
         os.chdir(f"{self.HOMEDIR}/logs")
@@ -185,12 +249,26 @@ class Logging(object):
         self.run_on_all_workers("tmux new -s cpu-usage -d; tmux send-keys -t cpu-usage 'nohup iostat -xmt 1 &' Enter")
 
 
+    def run_collect_iostat(self, i, worker):
+
+        run(["scp", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{worker}:nohup.out", f"{self.HOMEDIR}/logs/scripts/{self.RESOURCE}/general/worker-{i}-{self.CURRENT_ITERATION}.out"], shell = False)
+
+
     def collect_iostat(self):
 
         """ Collect iostat files from every worker and stores in resource_group/workername/general """
 
+        # queue = []
+
+        #  for i, worker in enumerate(self.WORKERS):
+        #     thread = threading.Thread(target=self.run_collect_iostat, args=([i, worker]))
+        #     queue.append(thread)
+
+        # self.execute_threads(queue)
+
         for i, worker in enumerate(self.WORKERS):
 
+            # threading.Thread(target=self.run_collect_iostat, args=([worker_host]))
             run(["scp", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{worker}:nohup.out", f"{self.HOMEDIR}/logs/scripts/{self.RESOURCE}/general/worker-{i}-{self.CURRENT_ITERATION}.out"], shell = False)
 
 
@@ -221,7 +299,6 @@ class Logging(object):
         self.collect_iostat()
         self.delete_iostat()
         self.get_postgresql()
-
 
 
 

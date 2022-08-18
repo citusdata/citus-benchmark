@@ -15,6 +15,136 @@ from helper import run
 import time
 from os.path import exists
 import socket
+import pickle
+import threading
+
+# global variables
+states = [0, 0, 0, 0]
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+
+def send_with_pickle():
+
+    """ sends pickled message to server """
+
+    global server
+    global states
+
+    try:
+        server.send(pickle.dumps(states))
+
+    except:
+        print("Sending package to server failed")
+
+
+def is_state_valid(states, index):
+
+    """ simple checksum to see if states are correct """
+
+    return sum(states) == index
+
+
+def print_current_time():
+
+    """ print current timestamp """
+
+    run(["date"], shell = False)
+
+
+def update_state(index):
+
+    """ updates state """
+
+    global states
+
+    if is_state_valid(states, index):
+
+        print(f"Updating state on index {index}")
+        states[index] = 1
+
+        send_with_pickle()
+
+    else:
+        print(f"WARNING: Invalid states '{states}' encountered")
+
+
+def check_state(frequency, index):
+
+    """" Checks for a certain state """
+
+    global states
+
+    while not states[index]:
+        time.sleep(frequency)
+
+    return True
+
+
+def connect_to_socket(server):
+
+    """ try to connect to local socket"""
+
+    IP = socket.gethostbyname(socket.gethostname())
+    PORT = int(os.getenv("SERVERPORT"))
+
+    server.connect((IP, PORT))
+
+
+def set_received_state(message):
+
+    global states
+    current_sum = sum(states)
+
+    try:
+
+        msg = pickle.loads(message)
+        _sum = sum(msg)
+
+        if  _sum > current_sum:
+
+            states = msg
+            print(f"States are updated: {msg}")
+
+        if _sum == 0 and current_sum == 4:
+            states = [0, 0, 0, 0]
+
+    except:
+
+        print(f"Exception: {pickle.loads(message)}")
+
+
+def monitor_states():
+
+    global server
+    global states
+
+    """
+    This thread connects with socket and waits for messages
+    Retries until connection can be established
+    """
+
+    while True:
+
+        print(f"Trying to connect with socket")
+
+        try:
+
+            connect_to_socket(server)
+
+            while True:
+
+                # Wait for messages while connected to server
+                message = server.recv(1024)
+
+                if not message:
+                    break
+
+                set_received_state(message)
+
+        except:
+
+            time.sleep(10)
+
 
 class Benchmark(object):
 
@@ -171,11 +301,6 @@ class Benchmark(object):
         os.environ['THREADS'] = str(self.CURRENT_THREAD)
         os.environ['HOMEDIR'] = self.HOMEDIR
         os.environ['PARALLEL'] = str(self.PARALLEL)
-
-        # start server in background process to communicate with client
-        # os.chdir('scripts')
-        # run(["./start-server.sh", self.HOMEDIR],  shell = False)
-        # os.chdir(self.HOMEDIR)
 
         # Install YCSB and JDBC PostgreSQL driver
         self.install_ycsb()
@@ -359,80 +484,30 @@ class Benchmark(object):
             run(['python3', 'output.py', "results.csv"], shell = False)
 
 
-    def connect_to_socket(self):
+    def update_and_check_state_change(self, update_index, check_index, frequency = 2):
 
-        """ Connect to local socket for communication with remote host """
+        """ updates the states and subsequently wait for a respons from the client if the client is ready """
 
-        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        IP = socket.gethostbyname(socket.gethostname())
-        PORT = int(os.getenv("SERVERPORT"))
-        server.connect((IP, PORT))
-
-        # Print if connected to server
-        msg = server.recv(1024)
-        print(f"Current states: '{msg}'")
-
-        return server
+        update_state(update_index)
+        check_state(frequency, check_index)
 
 
-    def communicate_with_host_pre_benchmark(selft, server, thread):
-
-        """
-        Communicate with socket
-        Send data to socket (ready to benchmark)
-        Receive data from socket (start benchmark)
-        """
-
-        # server.sendall(f"-{thread}-workloadc".encode('UTF-8'))
-        server.send(bytearray(1))
-        print("Waiting for Host...")
-
-        # receive data from host to start bench
-        while True:
-
-            start_bench = server.recv(100)
-            if sum(start_bench) == 2:
-                print("Starting Benchmark...")
-                break
-
-
-    def communicate_with_host_post_benchmark(selft, server, thread, i):
-
-        """
-        Communicate with socket after benchmark is ready
-        Send data to socket (Execution iteration x finished)
-        Receive data from socket (Wait for an acknowledge)
-        """
-
-        # If workloadc finished, send a message to the server
-        # server.sendall(f"Execution iteration {i} finished".encode('UTF-8'))
-        server.send(bytearray(3))
-
-        # Wait for host to all data collected
-        while True:
-            next_configuration = server.recv(100)
-
-            if sum(next_configuration) == 4:
-                server.send(bytearray(5))
-                print(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
-
-                break
-
-
-    def monitor_workload(self, workload, type, server, thread, i):
+    def monitor_workload(self, workload, type, thread, i):
 
         """
         Wrapper for monitoring any workload
         """
 
         # send data to server because ready to start benchmarks
-        self.communicate_with_host_pre_benchmark(server, thread)
+        self.update_and_check_state_change(0, 1, 1)
 
         self.set_insertcount_monitor()
         self.run_workload(workload, type, self.PARALLEL)
 
         # If workload finished, send a message to the server
-        self.communicate_with_host_post_benchmark(server, thread, i)
+        self.update_and_check_state_change(2, 1, 3)
+
+        print(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
 
 
     def execute_workloada_monitor_workloadc(self, server, thread, i):
@@ -504,12 +579,32 @@ class Benchmark(object):
             run(['python3', 'output.py', "results.csv"], shell = False)
 
 
+
+def initiate_benchmarks():
+
+    fire.Fire(Benchmark)
+
+
 if __name__ == '__main__':
 
     try:
-        fire.Fire(Benchmark)
+
+        # State Thread
+        states_thread = threading.Thread(target = monitor_states)
+
+        # Benchmark Thread
+        benchmark_thread = threading.Thread(target = initiate_benchmarks)
+
+        # Start Threads
+        states_thread.start()
+        benchmark_thread.start()
+
+        # wait until benchmarks are finished
+        benchmark_thread.join()
+
 
     except KeyboardInterrupt:
+
          run(['python3', 'output.py', "results.csv"], shell = False)
 
 

@@ -31,25 +31,25 @@ def metadata():
     # print("Metadata already stored")
     os.chdir(homedir)
 
-metadata()
 
-# Create a logging instance
-logs = Logging(resource = cluster['resource'], prefix = cluster['prefix'], host = cluster['host'], password = cluster['pgpassword'], port = cluster['port'], shard_count = ycsb['shard_count'])
+if __name__=="__main__":
 
-# create output directories w/ resource name
-logs.create_output_directories()
+    metadata()
 
-# worker adresses
-logs.print_workers()
+    # Create a logging instance
+    logs = Logging(resource = cluster['resource'], prefix = cluster['prefix'], host = cluster['host'], password = cluster['pgpassword'], port = cluster['port'], shard_count = ycsb['shard_count'])
 
-# create schema for YCSB benchmarks (usertable)
-logs.prepare_postgresql_table()
+    # create output directories w/ resource name
+    logs.create_output_directories()
 
-# # Alter user permissions for user monitor
-logs.set_permissions()
+    # create schema for YCSB benchmarks (usertable)
+    logs.prepare_postgresql_table()
 
-# Subsequently second command is executed on internal repo
-print("Cluster Prepared")
+    # # Alter user permissions for user monitor
+    logs.set_permissions()
+
+    # Subsequently second command is executed on internal repo
+    print("Cluster Prepared")
 
 
 

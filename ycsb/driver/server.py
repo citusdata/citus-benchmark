@@ -5,12 +5,15 @@ from _thread import *
 from helper import run
 import sys
 import pickle
+import threading
 
 
 # states:
 # ready to benchmark (start), prepared monitoring (prepared), finished bench finish, done collecting data (done)
+
 states = [0, 0, 0, 0]
-lock = allocate_lock()
+
+lock = threading.lock()
 
 def flush():
 
@@ -18,6 +21,7 @@ def flush():
 
     global states
     states = [0, 0, 0, 0]
+    broadcast(states, conn)
 
 
 def is_state_valid(states, index):
@@ -40,50 +44,56 @@ def update_state(index):
 
     global states
 
-    states[index - 1] = 1
-    print("<" + addr[0] + f"> adjusted state at index {index - 1}")
+    print(f"Updating state on index {index}")
+    states[index] = 1
+    print(states)
+
+    broadcast(states, conn)
 
 
 def clientthread(conn, addr):
 
     global states
-    data = pickle.dumps(states)
+    print("New thread")
 
-    # sends current states to client
-    conn.send(data)
+    # sends current states to client if connection has been made
+    conn.send(pickle.dumps(states))
 
     while True:
 
+        try:
+
+            message = conn.recv(1024)
+
             try:
-                message = conn.recv(10)
-
-                if not message:
-                    conn.close()
-
-                index = len(message)
-
-                if index < 1:
-                    continue
-
-                if index == 5:
-                    flush()
-                    print("RESET STATES")
-                    continue
-
-                if not is_state_valid(states, index):
-                    raise Exception(f"Invalid states encountered: {states}")
-
-                lock.acquire()
-                update_state(index)
-                lock.release()
-
-
-                # Calls broadcast function to send updated states
-                message_to_send = pickle.dumps(states)
-                broadcast(message_to_send, conn)
+                msg = pickle.loads(message)
+                _sum = sum(msg)
 
             except:
+                print(f"Exception: {msg}")
+
+            print(f"received states in phase: {msg}, {_sum}")
+
+            if _sum == 4:
+
+                flush()
+                print("RESET STATES")
+                broadcast(states, conn)
                 continue
+
+            if not is_state_valid(states, _sum):
+                raise Exception(f"Invalid states encountered: {states}")
+
+
+        except Exception as e:
+
+            print(f"Removing connection: {conn}")
+            conn.close()
+            remove(conn)
+
+            global list_of_clients
+            print(f"Remaining connections: {list_of_clients}")
+            break
 
 """ Using the below function, we broadcast the message to all
 clients who's object is not the same as the one sending
@@ -94,6 +104,7 @@ def broadcast(message, connection):
     """ broadcast message to other connected clients """
 
     for clients in list_of_clients:
+
         if clients != connection:
             try:
                 clients.sendall(message)
@@ -165,7 +176,7 @@ if __name__ == "__main__":
         print(addr[0] + " connected")
 
         # If local connection, make do work for benchmark.py
-        start_new_thread(clientthread, (conn,addr))
+        start_new_thread(clientthread, (conn, addr))
 
         if not list_of_clients:
             conn.close()
