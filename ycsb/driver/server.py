@@ -86,11 +86,13 @@ def clientthread(conn, addr):
         current_sum = sum(states)
 
         if _sum <= current_sum:
+            print(f"Sending states back")
             conn.send(pickle.dumps(states))
             continue
 
         if _sum > current_sum:
             states = msg
+            print(f"Broadcasting states")
             broadcast_with_pickle(conn, states)
             continue
 
