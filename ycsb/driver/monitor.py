@@ -143,7 +143,8 @@ def monitor_states(event: Event):
 
                 set_received_state(message)
 
-        except:
+        except Exception as e:
+            print(f"Exception: e")
 
             time.sleep(10)
 

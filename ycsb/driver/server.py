@@ -19,7 +19,17 @@ def flush():
 
     global states
     states = [0, 0, 0, 0]
-    broadcast(states, conn)
+
+
+def broadcast_with_pickle(conn, message):
+
+    """ sends pickled message to server """
+
+    try:
+        broadcast(pickle.dumps(message), conn)
+
+    except:
+        print("Sending package to server failed")
 
 
 def is_state_valid(states, index):
@@ -52,49 +62,58 @@ def update_state(index):
 def clientthread(conn, addr):
 
     global states
-
     print("New thread")
 
     # sends current states to client if connection has been made
-    conn.send(pickle.dumps(states))
+    broadcast_with_pickle(conn, states)
 
     while True:
 
+        message = conn.recv(1024)
+
+        if not message:
+            break
+
         try:
 
-            message = conn.recv(1024)
+            msg = pickle.loads(message)
+            _sum = sum(msg)
 
-            try:
-                msg = pickle.loads(message)
-                _sum = sum(msg)
+        except:
+            print(f"Exception: {msg}")
 
-            except:
-                print(f"Exception: {msg}")
+        print(f"received states in phase: {msg}, {_sum}")
+        current_sum = sum(states)
 
-            print(f"received states in phase: {msg}, {_sum}")
+        if _sum <= current_sum:
+            conn.send(pickle.dumps(states))
+            continue
 
-            if _sum == 4:
-                flush()
-                print("RESET STATES")
-                broadcast(states, conn)
-                continue
+        if _sum > current_sum:
+            states = msg
+            broadcast_with_pickle(conn, states)
+            continue
 
-            if not is_state_valid(states, _sum):
-                raise Exception(f"Invalid states encountered: {states}")
+        if _sum == 4:
+            flush()
+            print("RESET STATES")
+            broadcast_with_pickle(conn, states)
+            continue
 
-            print(f"Forwarding states")
-            broadcast(msg, conn)
+        if not is_state_valid(states, _sum):
+            raise Exception(f"Invalid states encountered: {states}")
+
+        print(f"Forwarding states")
+        broadcast(msg, conn)
 
 
-        except Exception as e:
+    print(f"Removing connection: {conn}")
+    conn.close()
+    remove(conn)
 
-            print(f"Removing connection: {conn}")
-            conn.close()
-            remove(conn)
+    global list_of_clients
+    print(f"Remaining connections: {list_of_clients}")
 
-            global list_of_clients
-            print(f"Remaining connections: {list_of_clients}")
-            break
 
 """ Using the below function, we broadcast the message to all
 clients who's object is not the same as the one sending
@@ -107,7 +126,9 @@ def broadcast(message, connection):
     for clients in list_of_clients:
 
         if clients != connection:
+
             try:
+                print(f"forwarding to: {clients}")
                 clients.sendall(message)
 
             except:

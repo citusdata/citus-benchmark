@@ -104,6 +104,16 @@ def check_state(frequency, index):
     return True
 
 
+def open_port():
+
+    """ opens port on azure VM """
+
+    global cluster
+    global port
+
+    run(['./port.sh', cluster['resource'], port['port'], '>/dev/null', '2>&1'], shell = False)
+
+
 def connect_to_socket(server):
 
     """ try to connect to local socket"""
@@ -148,6 +158,8 @@ def monitor_states(event: Event):
     This thread connects with socket and waits for messages
     Retries until connection can be established
     """
+
+    open_port()
 
     while not event.is_set():
 
@@ -246,13 +258,6 @@ class Client(object):
     @property
     def iterations(self):
         return self.ITERATIONS
-
-
-    def open_port(self):
-
-        """ opens port on azure VM """
-
-        run(['./port.sh', self.resource, self.port, '>/dev/null', '2>&1'], shell = False)
 
 
     def print_current_time(self):
@@ -397,23 +402,26 @@ class Client(object):
     #     # self.get_data(server)
 
 
-    def try_to_connect_with_socket(self, message = "Connecting with socket"):
+    # def try_to_connect_with_socket(self, message = "Connecting with socket"):
 
-        """
-        Connect with socket
-        Retries until connection can be established
-        """
+    #     """
+    #     Connect with socket
+    #     Retries until connection can be established
+    #     """
 
-        self.open_port()
-        server = self.create_socket()
+    #     self.open_port()
+    #     server = self.create_socket()
 
-        while True:
 
-            try:
-                self.connect_to_socket(server)
+    #     while True:
 
-            except:
-                time.sleep(10)
+    #         print("trying to connect with socket")
+
+    #         try:
+    #             self.connect_to_socket(server)
+
+    #         except:
+    #             time.sleep(10)
 
 
     def get_logging_instance(self, iteration):
