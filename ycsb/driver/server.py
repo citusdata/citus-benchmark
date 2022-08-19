@@ -13,8 +13,6 @@ import threading
 
 states = [0, 0, 0, 0]
 
-lock = threading.lock()
-
 def flush():
 
     """ if all states are 1 then flush """
@@ -54,6 +52,7 @@ def update_state(index):
 def clientthread(conn, addr):
 
     global states
+
     print("New thread")
 
     # sends current states to client if connection has been made
@@ -75,7 +74,6 @@ def clientthread(conn, addr):
             print(f"received states in phase: {msg}, {_sum}")
 
             if _sum == 4:
-
                 flush()
                 print("RESET STATES")
                 broadcast(states, conn)
@@ -83,6 +81,9 @@ def clientthread(conn, addr):
 
             if not is_state_valid(states, _sum):
                 raise Exception(f"Invalid states encountered: {states}")
+
+            print(f"Forwarding states")
+            broadcast(msg, conn)
 
 
         except Exception as e:
