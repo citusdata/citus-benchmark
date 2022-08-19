@@ -10,6 +10,7 @@
 ### No config file needed as this script is executed on the driver VM on Azure
 
 import os
+from sys import excepthook
 import fire
 from helper import run
 import time
@@ -17,6 +18,7 @@ from os.path import exists
 import socket
 import pickle
 import threading
+from threading import Event
 
 # global variables
 states = [0, 0, 0, 0]
@@ -113,7 +115,7 @@ def set_received_state(message):
         print(f"Exception: {pickle.loads(message)}")
 
 
-def monitor_states():
+def monitor_states(event: Event):
 
     global server
     global states
@@ -123,7 +125,7 @@ def monitor_states():
     Retries until connection can be established
     """
 
-    while True:
+    while not event.is_set():
 
         print(f"Trying to connect with socket")
 
@@ -577,26 +579,37 @@ class Benchmark(object):
 
 
 
-def initiate_benchmarks():
+def initiate_benchmarks(event: Event):
 
-    fire.Fire(Benchmark)
+    try:
+
+        fire.Fire(Benchmark)
+
+        # finish threads
+        event.set()
+
+    except:
+        event.set()
 
 
 if __name__ == '__main__':
 
     try:
+        # Set event
+        event = Event()
 
         # State Thread
-        states_thread = threading.Thread(target = monitor_states)
+        states_thread = threading.Thread(target = monitor_states, args=([event]))
 
         # Benchmark Thread
-        benchmark_thread = threading.Thread(target = initiate_benchmarks)
+        benchmark_thread = threading.Thread(target = initiate_benchmarks, args=([event]))
 
         # Start Threads
         states_thread.start()
         benchmark_thread.start()
 
         # wait until benchmarks are finished
+        states_thread.join()
         benchmark_thread.join()
 
 

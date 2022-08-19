@@ -7,6 +7,7 @@ import socket
 import subprocess
 import pickle
 import threading
+from threading import Event
 
 CONFIGFILE = "config.yml"
 states = [0, 0, 0, 0]
@@ -138,7 +139,7 @@ def set_received_state(message):
         print(f"Exception: {pickle.loads(message)}")
 
 
-def monitor_states():
+def monitor_states(event: Event):
 
     global server
     global states
@@ -148,7 +149,7 @@ def monitor_states():
     Retries until connection can be established
     """
 
-    while True:
+    while not event.is_set():
 
         print(f"Trying to connect with socket")
 
@@ -489,21 +490,31 @@ class Client(object):
             print(f"Monitoring finished for iteration {iteration}")
 
 
-def client_thread(bucket, homedir):
+def client_thread(bucket, homedir, event: Event):
 
     """ thread that monitors the benchmark """
+    try:
 
-    client = Client('config.yml')
+        client = Client('config.yml')
 
-    time.sleep(90)
+        time.sleep(90)
 
-    # monitor iterations
-    client.monitor_iteration(homedir, bucket)
+        # monitor iterations
+        client.monitor_iteration(homedir, bucket)
 
-    # Collect data after iterations are finised
-    os.chdir(homedir)
+        # Collect data after iterations are finised
+        os.chdir(homedir)
 
-    collect_data(bucket)
+        collect_data(bucket)
+
+        # set event so other thread will terminate
+        event.set()
+
+    except Exception as e:
+        print(f"Exception: {e}")
+
+        # end all threads
+        event.set()
 
 
 def collect_data(bucket):
@@ -520,17 +531,20 @@ if __name__ == "__main__":
 
     try:
 
+        event = Event()
+
         # State Thread
-        states_thread = threading.Thread(target = monitor_states)
+        states_thread = threading.Thread(target = monitor_states, args=([event]))
 
         # Client Thread
-        c_thread = threading.Thread(target = client_thread, args = ([bucket, homedir]))
+        c_thread = threading.Thread(target = client_thread, args = ([bucket, homedir, event]))
 
         # Start Threads
         states_thread.start()
         c_thread.start()
 
         # wait until benchmarks are finished
+        states_thread.join()
         c_thread.join()
 
 
