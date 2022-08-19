@@ -9,7 +9,7 @@ import threading
 class Logging(object):
 
 
-    def execute_threads(queue: list):
+    def execute_threads(self, queue):
 
         """ start all threads and wait for all threads to finish """
 
@@ -134,18 +134,18 @@ class Logging(object):
 
         """ runs script in all workers from citus cluster """
 
-        # queue = []
-
-        # for worker in self.WORKERS:
-        #     thread = threading.Thread(target=self.connect_to_worker, args=([worker, script]))
-        #     queue.append(thread)
-
-        # self.execute_threads(queue)
+        queue = []
 
         for worker in self.WORKERS:
+            thread = threading.Thread(target=self.connect_to_worker, args=([worker, script]))
+            queue.append(thread)
 
-            # threading.Thread(target=self.connect_to_worker, args=([worker, script]))
-            self.connect_to_worker(worker, script)
+        self.execute_threads(queue)
+
+        # for worker in self.WORKERS:
+
+        #     # threading.Thread(target=self.connect_to_worker, args=([worker, script]))
+        #     self.connect_to_worker(worker, script)
 
 
     def run_set_permissions(self, worker):
@@ -202,19 +202,19 @@ class Logging(object):
 
         os.chdir(f'{self.HOMEDIR}/logs/scripts')
 
-        # queue = []
-
-        # for worker_num, worker_host in self.workers_and_ids():
-        #     thread = threading.Thread(target=self.run_get_pgsql, args=([worker_host, worker_num]))
-        #     queue.append(thread)
-
-        # self.execute_threads(queue)
+        queue = []
 
         for worker_num, worker_host in self.workers_and_ids():
+            thread = threading.Thread(target=self.run_get_pgsql, args=([worker_host, worker_num]))
+            queue.append(thread)
+
+        self.execute_threads(queue)
+
+        # for worker_num, worker_host in self.workers_and_ids():
 
 
-            # threading.Thread(target=self.run_get_pgsql, args=([worker_host, worker_num]))
-            run(["./get-pglog.sh", self.PREFIX, worker_host, worker_num, str(self.CURRENT_ITERATION)], shell = False)
+        #     # threading.Thread(target=self.run_get_pgsql, args=([worker_host, worker_num]))
+        #     run(["./get-pglog.sh", self.PREFIX, worker_host, worker_num, str(self.CURRENT_ITERATION)], shell = False)
 
         os.chdir(f"{self.HOMEDIR}/logs")
 
@@ -258,18 +258,18 @@ class Logging(object):
 
         """ Collect iostat files from every worker and stores in resource_group/workername/general """
 
-        # queue = []
-
-        #  for i, worker in enumerate(self.WORKERS):
-        #     thread = threading.Thread(target=self.run_collect_iostat, args=([i, worker]))
-        #     queue.append(thread)
-
-        # self.execute_threads(queue)
+        queue = []
 
         for i, worker in enumerate(self.WORKERS):
+            thread = threading.Thread(target=self.run_collect_iostat, args=([i, worker]))
+            queue.append(thread)
 
-            # threading.Thread(target=self.run_collect_iostat, args=([worker_host]))
-            run(["scp", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{worker}:nohup.out", f"{self.HOMEDIR}/logs/scripts/{self.RESOURCE}/general/worker-{i}-{self.CURRENT_ITERATION}.out"], shell = False)
+        self.execute_threads(queue)
+
+        # for i, worker in enumerate(self.WORKERS):
+
+        #     # threading.Thread(target=self.run_collect_iostat, args=([worker_host]))
+        #     run(["scp", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{worker}:nohup.out", f"{self.HOMEDIR}/logs/scripts/{self.RESOURCE}/general/worker-{i}-{self.CURRENT_ITERATION}.out"], shell = False)
 
 
     def delete_iostat(self):

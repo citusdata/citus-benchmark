@@ -510,12 +510,12 @@ class Benchmark(object):
         print(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
 
 
-    def execute_workloada_monitor_workloadc(self, server, thread, i):
+    def execute_workloada_monitor_workloadc(self, thread, i):
 
         """ Loads data with workload a, monitors workload c """
 
         self.run_workload("workloada", "load")
-        self.monitor_workload("workloadc",  "run", server, thread, i)
+        self.monitor_workload("workloadc",  "run", thread, i)
 
 
     def monitor_workloadc(self):
@@ -525,15 +525,12 @@ class Benchmark(object):
         Monitors workload c
         """
 
-        # Connect with server running in background
-        server = self.connect_to_socket()
-
         for i in range(self.ITERATIONS):
             self.set_iterations(i)
 
             for thread in self.THREADS:
                 self.set_current_thread(thread)
-                self.execute_workloada_monitor_workloadc(server, thread, i)
+                self.execute_workloada_monitor_workloadc(thread, i)
 
             print(f"Done running workloadc for iteration {i}")
             print("Generating CSV")
