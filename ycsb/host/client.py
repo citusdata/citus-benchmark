@@ -12,7 +12,6 @@ from threading import Event
 CONFIGFILE = "config.yml"
 states = [0, 0, 0, 0]
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-it = 0
 
 
 def read_config_file(configfile):
@@ -106,22 +105,31 @@ def check_state(frequency, index):
 
 def open_port():
 
-    """ opens port on azure VM """
+    """ opens port on azure VM in seperate process"""
 
     global cluster
     global port
 
-    run(['./port.sh', cluster['resource'], port['port'], '>/dev/null', '2>&1'], shell = False)
+    # run(['./port.sh', cluster['resource'], port['port'], '>/dev/null', '2>&1'], shell = False)
+    run(["./open-port.sh", cluster['resource'], port['port']], shell = False)
 
 
-def connect_to_socket(server):
+def connect_to_socket():
 
     """ try to connect to local socket"""
 
-    IP = socket.gethostbyname(socket.gethostname())
-    PORT = int(os.getenv("SERVERPORT"))
+    global server
+    global ip
+    global port
 
-    server.connect((IP, PORT))
+    PORT = int(port['port'])
+
+    print(f"Trying to connect with PORT: {PORT} and IP: {ip}")
+
+    # connect to the server
+    server.connect((ip, PORT))
+
+    print('Connecting succeeded')
 
 
 def set_received_state(message):
@@ -151,23 +159,27 @@ def set_received_state(message):
 
 def monitor_states(event: Event):
 
-    global server
+    time.sleep(90)
+
     global states
+    global server
 
     """
     This thread connects with socket and waits for messages
     Retries until connection can be established
     """
 
-    open_port()
-
     while not event.is_set():
 
-        print(f"Trying to connect with socket")
+        # open port for ip in the background
+        open_port()
+        print(f'Port is open')
 
         try:
 
-            connect_to_socket(server)
+            run(['echo', 'Trying to connect to socket'], shell = False)
+            connect_to_socket()
+            run(['echo', 'Connected to socket'], shell = False)
 
             while True:
 
@@ -179,8 +191,9 @@ def monitor_states(event: Event):
 
                 set_received_state(message)
 
-        except:
+        except Exception as e:
 
+            print(f'Exception: {e}')
             time.sleep(10)
 
 
@@ -277,153 +290,6 @@ class Client(object):
         time.sleep(seconds)
 
 
-    # def manage_states(self, state, logs, server, homedir, bucket, iteration):
-
-    #     """ Checks status corresponding to state """
-
-    #     global states
-
-    #     if state == 0:
-    #         self.wait_for_data(server)
-
-    #     if state == 1:
-    #         self.start_and_sent(logs, iteration, server)
-
-    #     if state == 2:
-    #         while True:
-    #             self.wait_for_data(server)
-    #             self.finish_and_sent(server, logs, server, homedir, bucket, iteration)
-
-    #     if state == 3:
-    #         self.finish_and_sent(server, logs, server, homedir, bucket, iteration)
-
-    #     elif state == 4:
-    #         raise Exception(f"States are being flushed by server")
-
-    # def manage_state(self, state, server):
-
-    #     """Testing method: Checks states """
-
-    #     global states
-
-    #     print(f"Current state {state}")
-
-    #     if state < sum(states):
-    #         # if states are further then received from server
-    #         # update states on server side
-    #         self.send_with_pickle(server)
-
-    #     if state == 1:
-    #         print("initiating monitoring")
-    #         #sb
-    #         self.update_state(1, server)
-
-    #     elif state == 2:
-    #         print("do nothing")
-
-    #     elif state == 3:
-    #         print("Collect data")
-    #         #sb
-    #         self.update_state(3, server)
-
-    #     else:
-    #         print("do nothing")
-    #         self.send_with_pickle(server)
-
-
-    # def get_data(self, server):
-
-    #     while True:
-
-    #         message = server.recv(1024)
-
-    #         if not message:
-    #             break
-
-    #         try:
-
-    #             msg = pickle.loads(message)
-    #             _sum = sum(msg)
-    #             print(msg)
-
-    #             global states
-
-    #             if  _sum >= sum(states):
-    #                 states = msg
-    #                 print(f"New states: {msg}")
-    #                 self.manage_state(_sum, server)
-    #                 continue
-
-    #             if _sum == 0 and sum(states) == 4:
-    #                 states = msg
-    #                 print("RESETTING STATES")
-    #                 continue
-
-    #         except:
-    #             print(f"Message: {pickle.loads(message)}")
-
-    #     self.try_to_connect_with_socket(server, "Reconnecting ... ")
-
-
-    # def start_and_sent(self, logs, iteration, server):
-
-    #     """ starts monitoring and sends sign """
-
-    #     self.prepare_monitoring(logs, iteration, server)
-
-
-    # def finish_and_sent(self, logs, server, homedir, bucket, iteration):
-
-    #     """ finishes monitoring and sends sign """
-
-    #     self.finish_monitoring(logs, server, homedir, bucket, iteration)
-
-
-    # def create_socket(self):
-
-    #     """ creates socket """
-
-    #     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #     server.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-
-    #     return server
-
-
-    # def connect_to_socket(self, server):
-
-    #     """ try to connect to socket and wait for message from socket """
-
-    #     server.connect((self.ip, int(self.port)))
-    #     # _states = server.recv(10)
-
-    #     # # global states
-    #     # # states = _states
-
-    #     # self.get_data(server)
-
-
-    # def try_to_connect_with_socket(self, message = "Connecting with socket"):
-
-    #     """
-    #     Connect with socket
-    #     Retries until connection can be established
-    #     """
-
-    #     self.open_port()
-    #     server = self.create_socket()
-
-
-    #     while True:
-
-    #         print("trying to connect with socket")
-
-    #         try:
-    #             self.connect_to_socket(server)
-
-    #         except:
-    #             time.sleep(10)
-
-
     def get_logging_instance(self, iteration):
 
         """ generates a logging instance (from class Logging) """
@@ -460,10 +326,10 @@ class Client(object):
         - initiate postprocessing
         """
 
-        # Wait for state to be stopped  (checks every 30 secs if index 3 contains a 1)
+        # Wait for state to be stopped  (checks every 30 secs if index 2 contains a 1)
         check_state(30, 2)
 
-        #### Get data from this iteration ####
+        # Get data from current iteration
         logs.stop_monitoring()
 
         os.chdir(homedir + "/storage")
@@ -473,7 +339,7 @@ class Client(object):
         run(["./push-to-blob.sh", f"{path}/pglogs/", bucket, f"{self.RESOURCE}/pglogs"], shell = False)
         run(["./push-to-blob.sh", f"{path}/general/", bucket, f"{self.RESOURCE}/general"], shell = False)
 
-        # Monitoring finished
+        # Monitoring finished, update state 0 to 1 on index 3
         update_state(3)
 
         return f"Iteration {iteration} finished"
@@ -501,11 +367,10 @@ class Client(object):
 def client_thread(bucket, homedir, event: Event):
 
     """ thread that monitors the benchmark """
+
     try:
 
         client = Client('config.yml')
-
-        time.sleep(90)
 
         # monitor iterations
         client.monitor_iteration(homedir, bucket)
@@ -515,10 +380,11 @@ def client_thread(bucket, homedir, event: Event):
 
         collect_data(bucket)
 
-        # set event so other thread will terminate
+        # set event so other thread will terminate if the deamon thread is finished
         event.set()
 
     except Exception as e:
+
         print(f"Exception: {e}")
 
         # end all threads
@@ -545,7 +411,7 @@ if __name__ == "__main__":
         states_thread = threading.Thread(target = monitor_states, args=([event]))
 
         # Client Thread
-        c_thread = threading.Thread(target = client_thread, args = ([bucket, homedir, event]))
+        c_thread = threading.Thread(target = client_thread, args = ([bucket, homedir, event]), daemon = True)
 
         # Start Threads
         states_thread.start()

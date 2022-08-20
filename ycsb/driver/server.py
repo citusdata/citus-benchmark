@@ -139,9 +139,6 @@ def broadcast(message, connection):
                 # if the link is broken, we remove the client
                 remove(clients)
 
-"""The following function simply removes the object
-from the list that was created at the beginning of
-the program"""
 
 def remove(connection):
 
@@ -203,6 +200,8 @@ if __name__ == "__main__":
         start_new_thread(clientthread, (conn, addr))
 
         if not list_of_clients:
+
             conn.close()
             server.close()
+
             sys.exit("No open connections...\nClosing Server")

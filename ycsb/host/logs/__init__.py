@@ -21,6 +21,8 @@ class Logging(object):
         for thread in queue:
             thread.join()
 
+        print("Threads finished")
+
 
     def get_worker_adresses(self):
 
@@ -134,18 +136,18 @@ class Logging(object):
 
         """ runs script in all workers from citus cluster """
 
-        queue = []
-
-        for worker in self.WORKERS:
-            thread = threading.Thread(target=self.connect_to_worker, args=([worker, script]))
-            queue.append(thread)
-
-        self.execute_threads(queue)
+        # queue = []
 
         # for worker in self.WORKERS:
+        #     thread = threading.Thread(target=self.connect_to_worker, args=([worker, script]))
+        #     queue.append(thread)
+
+        # self.execute_threads(queue)
+
+        for worker in self.WORKERS:
 
         #     # threading.Thread(target=self.connect_to_worker, args=([worker, script]))
-        #     self.connect_to_worker(worker, script)
+            self.connect_to_worker(worker, script)
 
 
     def run_set_permissions(self, worker):
@@ -167,19 +169,19 @@ class Logging(object):
         # change permissions on coordinator node
         run(["./alter-user.sh", self.PREFIX, self.HOST, ">", "/dev/null"], shell = False)
 
-        queue = []
+        # queue = []
 
-        for worker in self.WORKERS:
-            thread = threading.Thread(target=self.run_set_permissions, args=([worker]))
-            queue.append(thread)
+        # for worker in self.WORKERS:
+        #     thread = threading.Thread(target=self.run_set_permissions, args=([worker]))
+        #     queue.append(thread)
 
-        self.execute_threads(queue)
+        # self.execute_threads(queue)
 
         # Also manually change on all workers
-        # for worker in self.WORKERS:
+        for worker in self.WORKERS:
 
         #     # threading.Thread(target=self.run_set_permissions, args=([worker]))
-        #     run(["./alter-user-on-worker.sh", self.PREFIX, worker, ">", "/dev/null"], shell = False)
+            run(["./alter-user-on-worker.sh", self.PREFIX, worker, ">", "/dev/null"], shell = False)
 
         os.chdir(f"{self.HOMEDIR}/logs")
 
@@ -233,12 +235,20 @@ class Logging(object):
 
         os.chdir(f'{self.HOMEDIR}/logs/scripts')
 
+        queue = []
+
         for worker_host in self.WORKERS:
+            thread = threading.Thread(target=self.run_truncate_pgsql_log, args=([worker_host]))
+            queue.append(thread)
 
-            # threading.Thread(target=self.run_truncate_pgsql_log, args=([worker_host]))
-            run(["./truncate-pg_log.sh", self.PREFIX, worker_host, f"postgresql-{self.get_weekday()}.log"], shell = False)
+        self.execute_threads(queue)
 
-        os.chdir(f"{self.HOMEDIR}/logs")
+        # for worker_host in self.WORKERS:
+
+        #     # threading.Thread(target=self.run_truncate_pgsql_log, args=([worker_host]))
+        #     run(["./truncate-pg_log.sh", self.PREFIX, worker_host, f"postgresql-{self.get_weekday()}.log"], shell = False)
+
+        # os.chdir(f"{self.HOMEDIR}/logs")
 
 
     def start_iostat(self):

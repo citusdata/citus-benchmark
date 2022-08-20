@@ -596,14 +596,15 @@ def initiate_benchmarks(event: Event):
 if __name__ == '__main__':
 
     try:
+
         # Set event
         event = Event()
 
-        # State Thread
+        # State Thread, monitors state and communicates with socket
         states_thread = threading.Thread(target = monitor_states, args=([event]))
 
         # Benchmark Thread
-        benchmark_thread = threading.Thread(target = initiate_benchmarks, args=([event]))
+        benchmark_thread = threading.Thread(target = initiate_benchmarks, args=([event]), daemon = True)
 
         # Start Threads
         states_thread.start()
