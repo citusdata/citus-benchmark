@@ -601,10 +601,10 @@ if __name__ == '__main__':
         event = Event()
 
         # State Thread, monitors state and communicates with socket
-        states_thread = threading.Thread(target = monitor_states, args=([event]))
+        states_thread = threading.Thread(target = monitor_states, args=([event]),  daemon = True)
 
         # Benchmark Thread
-        benchmark_thread = threading.Thread(target = initiate_benchmarks, args=([event]), daemon = True)
+        benchmark_thread = threading.Thread(target = initiate_benchmarks, args=([event]))
 
         # Start Threads
         states_thread.start()

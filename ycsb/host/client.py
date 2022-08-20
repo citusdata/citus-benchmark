@@ -306,8 +306,8 @@ class Client(object):
 
         self.print_current_time()
 
-        # Wait for monitoring to be started (checks every 5 secs if index 0 contains a 1)
-        check_state(5, 0)
+        # Wait for monitoring to be started (checks every 10 secs if index 0 contains a 1)
+        check_state(10, 0)
 
         # truncate pg_log on every worker to reduce data size
         logs.prepare_monitor_run()
@@ -326,8 +326,8 @@ class Client(object):
         - initiate postprocessing
         """
 
-        # Wait for state to be stopped  (checks every 30 secs if index 2 contains a 1)
-        check_state(30, 2)
+        # Wait for state to be stopped  (checks every 1 secs if index 2 contains a 1)
+        check_state(1, 2)
 
         # Get data from current iteration
         logs.stop_monitoring()
@@ -408,10 +408,10 @@ if __name__ == "__main__":
         event = Event()
 
         # State Thread
-        states_thread = threading.Thread(target = monitor_states, args=([event]))
+        states_thread = threading.Thread(target = monitor_states, args=([event]),  daemon = True)
 
         # Client Thread
-        c_thread = threading.Thread(target = client_thread, args = ([bucket, homedir, event]), daemon = True)
+        c_thread = threading.Thread(target = client_thread, args = ([bucket, homedir, event]))
 
         # Start Threads
         states_thread.start()
