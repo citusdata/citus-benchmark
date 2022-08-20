@@ -169,19 +169,19 @@ class Logging(object):
         # change permissions on coordinator node
         run(["./alter-user.sh", self.PREFIX, self.HOST, ">", "/dev/null"], shell = False)
 
-        # queue = []
+        queue = []
 
-        # for worker in self.WORKERS:
-        #     thread = threading.Thread(target=self.run_set_permissions, args=([worker]))
-        #     queue.append(thread)
+        for worker in self.WORKERS:
+            thread = threading.Thread(target=self.run_set_permissions, args=([worker]))
+            queue.append(thread)
 
-        # self.execute_threads(queue)
+        self.execute_threads(queue)
 
         # Also manually change on all workers
-        for worker in self.WORKERS:
+        # for worker in self.WORKERS:
 
-        #     # threading.Thread(target=self.run_set_permissions, args=([worker]))
-            run(["./alter-user-on-worker.sh", self.PREFIX, worker, ">", "/dev/null"], shell = False)
+        # #     # threading.Thread(target=self.run_set_permissions, args=([worker]))
+        #     run(["./alter-user-on-worker.sh", self.PREFIX, worker, ">", "/dev/null"], shell = False)
 
         os.chdir(f"{self.HOMEDIR}/logs")
 
