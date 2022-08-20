@@ -1,12 +1,12 @@
 
 import os
 import socket
-from _thread import *
+# from _thread import *
 from helper import run
 import sys
 import pickle
 import threading
-
+import time
 
 # states:
 # ready to benchmark (start), prepared monitoring (prepared), finished bench finish, done collecting data (done)
@@ -145,6 +145,7 @@ def remove(connection):
     """ remove connection if client unconnects """
 
     if connection in list_of_clients:
+
         list_of_clients.remove(connection)
 
 
@@ -169,35 +170,68 @@ def bind_and_listen(server, ip, port, listen = 10):
     server.listen(listen)
 
 
+def keep_connections_alive(seconds = 60):
+
+    """ send heartbeat messages to keep connections alive """
+
+    global list_of_clients
+
+    while True:
+
+        if not list_of_clients:
+            continue
+
+        try:
+
+            for client in list_of_clients:
+
+                print(f"Sending heartbeat to {client}")
+                client.send('\x0a')
+
+        except Exception as e:
+
+            print(f'Exception: {e}')
+
+        time.sleep(seconds)
+
+
+
 if __name__ == "__main__":
+
+    """
+    Accepts a connection request and stores two parameters,
+    conn which is a socket object for that user, and addr
+    which contains the IP address of the client that just
+    connected
+    """
+
+    list_of_clients = []
+    list_of_threads = []
 
     IP = "0.0.0.0"
     PORT = int(os.getenv("SERVERPORT"))
 
     server = create_server()
     bind_and_listen(server, IP, PORT, 10)
-    list_of_clients = []
 
+    heartbeat = threading.Thread(target = keep_connections_alive, daemon = True)
+    heartbeat.start()
 
     while True:
-
-        """
-        Accepts a connection request and stores two parameters,
-        conn which is a socket object for that user, and addr
-        which contains the IP address of the client that just
-        connected
-        """
 
         conn, addr = server.accept()
 
         """ Maintains a list of clients for ease of forwarding messages """
+
         list_of_clients.append(conn)
 
         # prints the address of the user that just connected
         print(addr[0] + " connected")
 
         # If local connection, make do work for benchmark.py
-        start_new_thread(clientthread, (conn, addr))
+        # start_new_thread(clientthread, (conn, addr))
+        connection = threading.Thread(target = clientthread, args=([conn, addr])).start()
+        connection.start()
 
         if not list_of_clients:
 
