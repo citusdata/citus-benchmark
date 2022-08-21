@@ -1,7 +1,7 @@
 
 import os
 import socket
-# from _thread import *
+from _thread import *
 from helper import run
 import sys
 import pickle
@@ -206,7 +206,6 @@ if __name__ == "__main__":
     """
 
     list_of_clients = []
-    list_of_threads = []
 
     IP = "0.0.0.0"
     PORT = int(os.getenv("SERVERPORT"))
@@ -214,8 +213,7 @@ if __name__ == "__main__":
     server = create_server()
     bind_and_listen(server, IP, PORT, 10)
 
-    heartbeat = threading.Thread(target = keep_connections_alive, daemon = True)
-    heartbeat.start()
+    start_new_thread(keep_connections_alive)
 
     while True:
 
@@ -229,9 +227,7 @@ if __name__ == "__main__":
         print(addr[0] + " connected")
 
         # If local connection, make do work for benchmark.py
-        # start_new_thread(clientthread, (conn, addr))
-        connection = threading.Thread(target = clientthread, args=([conn, addr])).start()
-        connection.start()
+        start_new_thread(clientthread, (conn, addr))
 
         if not list_of_clients:
 
