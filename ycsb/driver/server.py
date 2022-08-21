@@ -12,6 +12,7 @@ import time
 # ready to benchmark (start), prepared monitoring (prepared), finished bench finish, done collecting data (done)
 
 states = [0, 0, 0, 0]
+ip = socket.gethostbyname(socket.gethostname())
 
 def flush():
 
@@ -62,7 +63,6 @@ def update_state(index):
 def clientthread(conn, addr):
 
     global states
-    print("New thread")
 
     # sends current states to client if connection has been made
     broadcast_with_pickle(conn, states)
@@ -175,6 +175,7 @@ def keep_connections_alive(seconds = 60, msg = b'\x0a'):
     """ send heartbeat messages to keep connections alive """
 
     global list_of_clients
+    global ip
 
     while True:
 
@@ -184,6 +185,9 @@ def keep_connections_alive(seconds = 60, msg = b'\x0a'):
         try:
 
             for client in list_of_clients:
+
+                if client.getpeername()[0] == ip:
+                    continue
 
                 print(f"Sending heartbeat to {client}")
                 client.send(msg)
@@ -212,7 +216,6 @@ if __name__ == "__main__":
 
     server = create_server()
     bind_and_listen(server, IP, PORT, 10)
-
     start_new_thread(keep_connections_alive, (60, b'\x0a'))
 
     while True:

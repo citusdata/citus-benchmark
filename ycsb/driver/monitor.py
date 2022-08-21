@@ -112,7 +112,7 @@ def set_received_state(message):
 
     except:
 
-        print(f"Exception: {pickle.loads(message)}")
+        print(f"Exception: {message}")
 
 
 def monitor_states(event: Event):
@@ -144,7 +144,8 @@ def monitor_states(event: Event):
                 set_received_state(message)
 
         except Exception as e:
-            print(f"Exception: e")
+
+            print(f"Exception: {e}")
 
             time.sleep(10)
 
