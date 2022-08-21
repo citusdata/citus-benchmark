@@ -154,26 +154,30 @@ def set_received_state(message):
 
     except:
 
-        print(f"Exception: {pickle.loads(message)}")
+        if message == b'\x0a':
+            print("Heartbeat from server")
+
+        else:
+            print(f"Exception: {message}")
 
 
 def monitor_states(event: Event):
-
-    time.sleep(90)
-
-    global states
-    global server
 
     """
     This thread connects with socket and waits for messages
     Retries until connection can be established
     """
 
-    while not event.is_set():
+    time.sleep(90)
 
-        # open port for ip in the background
-        open_port()
-        print(f'Port is open')
+    global states
+    global server
+
+    # open port for ip in the background
+    open_port()
+    print(f'Port is open')
+
+    while not event.is_set():
 
         try:
 

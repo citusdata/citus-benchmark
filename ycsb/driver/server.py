@@ -170,7 +170,7 @@ def bind_and_listen(server, ip, port, listen = 10):
     server.listen(listen)
 
 
-def keep_connections_alive(seconds = 60):
+def keep_connections_alive(seconds = 60, msg = b'\x0a'):
 
     """ send heartbeat messages to keep connections alive """
 
@@ -186,7 +186,7 @@ def keep_connections_alive(seconds = 60):
             for client in list_of_clients:
 
                 print(f"Sending heartbeat to {client}")
-                client.send('\x0a')
+                client.send(msg)
 
         except Exception as e:
 
@@ -213,7 +213,7 @@ if __name__ == "__main__":
     server = create_server()
     bind_and_listen(server, IP, PORT, 10)
 
-    start_new_thread(keep_connections_alive)
+    start_new_thread(keep_connections_alive, (60, b'\x0a'))
 
     while True:
 
