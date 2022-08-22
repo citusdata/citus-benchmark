@@ -39,6 +39,15 @@ def send_with_pickle():
         print("Sending package to server failed")
 
 
+def flush():
+
+    """ if all states are 1 then flush """
+
+    global states
+    states = [0, 0, 0, 0]
+    send_with_pickle()
+
+
 def is_state_valid(states, index):
 
     """ simple checksum to see if states are correct """
@@ -513,6 +522,8 @@ class Benchmark(object):
 
         print(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
 
+        # set states to [0, 0, 0, 0]
+        flush()
 
     def execute_workloada_monitor_workloadc(self, thread, i):
 
@@ -520,6 +531,7 @@ class Benchmark(object):
 
         self.run_workload("workloada", "load")
         self.monitor_workload("workloadc",  "run", thread, i)
+
 
 
     def monitor_workloadc(self):
@@ -535,6 +547,26 @@ class Benchmark(object):
             for thread in self.THREADS:
                 self.set_current_thread(thread)
                 self.execute_workloada_monitor_workloadc(thread, i)
+
+            print(f"Done running workloadc for iteration {i}")
+            print("Generating CSV")
+
+            # gather csv with all results
+            run(['python3', 'output.py', "results.csv"], shell = False)
+
+
+    def monitor_workloada(self):
+
+        """
+        Monitors workload a
+        """
+
+        for i in range(self.ITERATIONS):
+            self.set_iterations(i)
+
+            for thread in self.THREADS:
+                self.set_current_thread(thread)
+                self.monitor_workload("workloada", "load", thread, i)
 
             print(f"Done running workloadc for iteration {i}")
             print("Generating CSV")
