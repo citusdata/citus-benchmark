@@ -119,6 +119,9 @@ def set_received_state(message):
         if _sum == 0 and current_sum == 4:
             states = [0, 0, 0, 0]
 
+        if _sum < current_sum:
+            send_with_pickle()
+
     except:
 
         print(f"Exception: {message}")

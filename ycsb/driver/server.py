@@ -85,7 +85,7 @@ def clientthread(conn, addr):
         print(f"received states in phase: {msg}, {_sum}")
         current_sum = sum(states)
 
-        if _sum <= current_sum:
+        if _sum < current_sum:
             print(f"Sending states back")
             conn.send(pickle.dumps(states))
             continue
@@ -176,6 +176,7 @@ def keep_connections_alive(seconds = 60, msg = b'\x0a'):
 
     global list_of_clients
     global ip
+    global states
 
     while True:
 
@@ -189,8 +190,8 @@ def keep_connections_alive(seconds = 60, msg = b'\x0a'):
                 if client.getpeername()[0] == ip:
                     continue
 
-                print(f"Sending heartbeat to {client}")
-                client.send(msg)
+                print(f"Sending {states} as heartbeat to {client.getpeername()[0]}")
+                client.send(pickle.dumps(states), conn)
 
         except Exception as e:
 
