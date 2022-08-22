@@ -183,15 +183,17 @@ def keep_connections_alive(seconds = 60, msg = b'\x0a'):
         if not list_of_clients:
             continue
 
+
+        for client in list_of_clients:
+
+            if client.getpeername()[0] == ip:
+                continue
+
+            print(f"Sending {states} as heartbeat to {client.getpeername()[0]}")
+
         try:
 
-            for client in list_of_clients:
-
-                if client.getpeername()[0] == ip:
-                    continue
-
-                print(f"Sending {states} as heartbeat to {client.getpeername()[0]}")
-                client.send(pickle.dumps(states), conn)
+            client.send(pickle.dumps(states))
 
         except Exception as e:
 
