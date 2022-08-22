@@ -96,7 +96,7 @@ def clientthread(conn, addr):
             broadcast_with_pickle(conn, states)
             continue
 
-        if _sum == 4:
+        if _sum == 4 or current_sum == 4:
             flush()
             print("RESET STATES")
             broadcast_with_pickle(conn, states)
