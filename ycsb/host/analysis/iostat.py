@@ -99,14 +99,14 @@ def process_values_from_iostat(filename):
 
         except Exception as e:
 
-            print(f"Exception occured: {e}")
+            # print(f"Exception occured: {e}")
             return pd.DataFrame()
 
     # create pandas pd
     df = pd.DataFrame(list(zip(timestep, user, nice, system, iowait, steal, idle, cpu)),
                columns =['timestep', 'user', 'nice', 'system', 'iowait', 'steal', 'idle', 'cpu'])\
 
-    print(df)
+    # print(df)
 
     return df
 
@@ -122,6 +122,15 @@ def batch_process_iostat_output(path, output_csv = True, suffix = '.out'):
 
         if result.empty:
             continue
+
+        print(f"Filename: {file}")
+        print(f"max CPU usage: {result['cpu'].max()}")
+        print(f"max user: {result['user'].max()}")
+        print(f"max nice: {result['nice'].max()}")
+        print(f"max system: {result['system'].max()}")
+        print(f"max iowait: {result['iowait'].max()}")
+        print(f"max steal: {result['steal'].max()}")
+        # print(f"min idle: {result['idle'].min()}")
 
         if output_csv:
             output_suffix = ".csv"

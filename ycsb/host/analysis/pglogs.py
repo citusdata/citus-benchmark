@@ -108,17 +108,19 @@ def print_output(anchor_mean, anchor_stdev, external_mean, external_stdev, inter
 
 
 
-def remove_txt():
+def remove_txt(cleanup):
 
     """
     removes ALL .txt files in current folder
     !!! MAY unwantedly remove relevant txt files !!!
     """
 
-    run(['./remove.sh'], shell = False)
+    if cleanup:
+
+        run(['./remove.sh'], shell = False)
 
 
-def batch_process_pglogs(path, suffix = '.log'):
+def batch_process_pglogs(path, suffix = '.log', cleanup = True):
 
     """ batch processes all files ending with suffix in one folder """
 
@@ -162,7 +164,7 @@ def batch_process_pglogs(path, suffix = '.log'):
     latency_mean = anchor_mean - internal_mean
 
     print_output(anchor_mean, anchor_stdev, external_mean, external_stdev, internal_mean, internal_stdev, latency_mean)
-    remove_txt()
+    remove_txt(cleanup)
 
 if __name__=="__main__":
 
