@@ -26,7 +26,7 @@ python3 ycsb.py --help
 Example usage:
 
 ```
-python3 ycsb.py --resource=yourname --records=10000 --operations=10000 --threads=100,200,300 --iterations=2 --workers=2 --workloads="run_all_workloads" start_benchmark
+python3 ycsb.py --resource=yourname --records=10000 --operations=10000 --threads=100,200,300 --iterations=2 --workers=2 --workload="run_all_workloads" start_benchmark
 ```
 
 ##### Parameters explained
