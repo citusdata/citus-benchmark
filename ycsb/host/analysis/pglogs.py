@@ -232,7 +232,7 @@ def remove_txt(cleanup):
 
     if cleanup:
 
-        run(['./remove.sh'], shell = False)
+        run(['./remove.sh', '.txt', os.getcwd()], shell = False)
 
 
 def calculate_mean_per_worker(node, internal, external, anchor, output_internal, output_external, output_shard):

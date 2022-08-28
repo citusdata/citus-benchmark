@@ -21,9 +21,19 @@ def run(command, *args, shell=True, **kwargs):
     run runs the given command and prints it to stderr
     """
 
-    eprint(f"+ {command} ")
+    # eprint(f"+ {command} ")
 
     return subprocess.run(command, *args, check=True, shell=shell, **kwargs)
+
+def remove_out(path, cleanup = True):
+
+    """
+    removes ALL .out files in current folder
+    !!! MAY unwantedly remove relevant txt files !!!
+    """
+
+    if cleanup:
+        run(['./remove.sh', '-reduced.out', path], shell = False)
 
 
 def reduce_output(filename):
@@ -108,8 +118,8 @@ def batch_process_iostat_output(path, output_csv = True, suffix = '.out'):
 
     for file in [filename for filename in os.listdir(path) if filename.endswith(suffix)]:
 
-        reduce_output(file)
-        result = process_values_from_iostat(file)
+        reduce_output(path + "/" + file)
+        result = process_values_from_iostat(path + "/" + file)
 
         if result.empty:
             continue
@@ -130,7 +140,10 @@ def batch_process_iostat_output(path, output_csv = True, suffix = '.out'):
         output_name = file.split('.')[0] + output_suffix
 
         # convert pandas dataframe to csv-format
-        result.to_csv(output_name)
+        result.to_csv(path + "/" + output_name)
+
+    # remove files
+    remove_out(path)
 
 
 def process_iostat_output(filename):

@@ -1,3 +1,8 @@
 #!/bin/bash
 
-rm *.txt
+suffix=$1
+path=$2
+
+cd $path
+
+rm *$1
