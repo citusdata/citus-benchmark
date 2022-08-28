@@ -5,7 +5,6 @@ import sys
 import pandas as pd
 
 path = sys.argv[1]
-# fn = sys.argv[1]
 
 def eprint(*args, **kwargs):
 
@@ -23,9 +22,8 @@ def run(command, *args, shell=True, **kwargs):
     """
 
     eprint(f"+ {command} ")
-    result = subprocess.run(command, *args, check=True, shell=shell, **kwargs)
 
-    return
+    return subprocess.run(command, *args, check=True, shell=shell, **kwargs)
 
 
 def reduce_output(filename):
@@ -64,10 +62,7 @@ def process_values_from_iostat(filename):
         ts = 0
 
         try:
-
             for value in lines:
-
-
                     counter += 1
 
                     if counter == 1:
@@ -98,15 +93,11 @@ def process_values_from_iostat(filename):
                     counter = 0
 
         except Exception as e:
-
-            # print(f"Exception occured: {e}")
             return pd.DataFrame()
 
     # create pandas pd
     df = pd.DataFrame(list(zip(timestep, user, nice, system, iowait, steal, idle, cpu)),
                columns =['timestep', 'user', 'nice', 'system', 'iowait', 'steal', 'idle', 'cpu'])\
-
-    # print(df)
 
     return df
 
@@ -124,13 +115,14 @@ def batch_process_iostat_output(path, output_csv = True, suffix = '.out'):
             continue
 
         print(f"Filename: {file}")
-        print(f"max CPU usage: {result['cpu'].max()}")
+
+        print(f"max CPU usage: {result['cpu'].max()}, mean CPU usage: {result['cpu'].mean()}, stddev CPU usage: {result['cpu'].std()}")
         print(f"max user: {result['user'].max()}")
         print(f"max nice: {result['nice'].max()}")
         print(f"max system: {result['system'].max()}")
         print(f"max iowait: {result['iowait'].max()}")
         print(f"max steal: {result['steal'].max()}")
-        # print(f"min idle: {result['idle'].min()}")
+        print(f"min idle: {result['idle'].min()}")
 
         if output_csv:
             output_suffix = ".csv"
