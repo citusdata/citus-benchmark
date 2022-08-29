@@ -264,8 +264,7 @@ class Benchmark(object):
         """ calculate amount of records for sampling """
 
         if adaptive:
-
-            self.INSERTCOUNT_CITUS = int(self.WORKERS / self.CURRENT_THREAD * 0.5 * self.RECORDS)
+            self.INSERTCOUNT_CITUS = int((1 - (self.WORKERS / self.CURRENT_THREAD * 0.5)) * self.RECORDS)
 
         else:
             self.INSERTCOUNT_CITUS = int(0.999 * self.RECORDS)
