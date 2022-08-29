@@ -14,12 +14,46 @@ import time
 states = [0, 0, 0, 0]
 ip = socket.gethostbyname(socket.gethostname())
 
+
 def flush():
 
     """ if all states are 1 then flush """
 
     global states
+
     states = [0, 0, 0, 0]
+
+
+def remove(connection):
+
+    """ remove connection if client unconnects """
+
+    if connection in list_of_clients:
+
+        list_of_clients.remove(connection)
+
+
+""" Using the below function, we broadcast the message to all
+clients who's object is not the same as the one sending
+the message """
+
+def broadcast(message, connection):
+
+    """ broadcast message to other connected clients """
+
+    for clients in list_of_clients:
+
+        if clients != connection:
+
+            try:
+                print(f"forwarding to: {clients}")
+                clients.sendall(message)
+
+            except:
+                clients.close()
+
+                # if the link is broken, we remove the client
+                remove(clients)
 
 
 def broadcast_with_pickle(conn, message):
@@ -47,7 +81,7 @@ def print_current_time():
     run(["date"], shell = False)
 
 
-def update_state(index):
+def update_state(index, conn):
 
     """ updates state """
 
@@ -80,7 +114,7 @@ def clientthread(conn, addr):
             _sum = sum(msg)
 
         except:
-            print(f"Exception: {msg}")
+            print(f"Exception: {message}")
 
         print(f"received states in phase: {msg}, {_sum}")
         current_sum = sum(states)
@@ -97,8 +131,7 @@ def clientthread(conn, addr):
             continue
 
         if _sum == 4 or current_sum == 4:
-            flush()
-            print("RESET STATES")
+            states = [0, 0, 0, 0]
             broadcast_with_pickle(conn, states)
             continue
 
@@ -115,38 +148,6 @@ def clientthread(conn, addr):
 
     global list_of_clients
     print(f"Remaining connections: {list_of_clients}")
-
-
-""" Using the below function, we broadcast the message to all
-clients who's object is not the same as the one sending
-the message """
-
-def broadcast(message, connection):
-
-    """ broadcast message to other connected clients """
-
-    for clients in list_of_clients:
-
-        if clients != connection:
-
-            try:
-                print(f"forwarding to: {clients}")
-                clients.sendall(message)
-
-            except:
-                clients.close()
-
-                # if the link is broken, we remove the client
-                remove(clients)
-
-
-def remove(connection):
-
-    """ remove connection if client unconnects """
-
-    if connection in list_of_clients:
-
-        list_of_clients.remove(connection)
 
 
 def create_server():

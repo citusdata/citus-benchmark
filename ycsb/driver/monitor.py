@@ -259,9 +259,17 @@ class Benchmark(object):
         os.chdir(self.HOMEDIR)
 
 
-    def calculate_records(self):
+    def calculate_records(self, adaptive = True):
 
-        self.INSERTCOUNT_CITUS = int(0.999 * self.RECORDS)
+        """ calculate amount of records for sampling """
+
+        if adaptive:
+
+            self.INSERTCOUNT_CITUS = int(self.WORKERS / self.CURRENT_THREAD * 0.5 * self.RECORDS)
+
+        else:
+            self.INSERTCOUNT_CITUS = int(0.999 * self.RECORDS)
+
         self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT_CITUS
         self.INSERTSTART = self.INSERTCOUNT_CITUS
 
