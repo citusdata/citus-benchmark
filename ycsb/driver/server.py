@@ -119,6 +119,11 @@ def clientthread(conn, addr):
         print(f"received states in phase: {msg}, {_sum}")
         current_sum = sum(states)
 
+        if _sum == 4 or current_sum == 4:
+            flush()
+            broadcast_with_pickle(conn, states)
+            continue
+
         if _sum < current_sum:
             print(f"Sending states back")
             conn.send(pickle.dumps(states))
@@ -127,11 +132,6 @@ def clientthread(conn, addr):
         if _sum > current_sum:
             states = msg
             print(f"Broadcasting states")
-            broadcast_with_pickle(conn, states)
-            continue
-
-        if _sum == 4 or current_sum == 4:
-            states = [0, 0, 0, 0]
             broadcast_with_pickle(conn, states)
             continue
 
