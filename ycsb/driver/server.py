@@ -22,6 +22,7 @@ def flush():
     global states
 
     states = [0, 0, 0, 0]
+    print(f"States are flushed\nNew states: {states}")
 
 
 def remove(connection):
@@ -124,16 +125,19 @@ def clientthread(conn, addr):
             broadcast_with_pickle(conn, states)
             continue
 
-        if _sum < current_sum:
+        elif _sum < current_sum:
             print(f"Sending states back")
             conn.send(pickle.dumps(states))
             continue
 
-        if _sum > current_sum:
+        elif _sum > current_sum:
             states = msg
             print(f"Broadcasting states")
             broadcast_with_pickle(conn, states)
             continue
+
+        elif _sum == current_sum:
+            print(f"Received current states {states} from connection {conn}\nNothing to do")
 
         if not is_state_valid(states, _sum):
             raise Exception(f"Invalid states encountered: {states}")
