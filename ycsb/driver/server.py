@@ -120,12 +120,12 @@ def clientthread(conn, addr):
         print(f"received states in phase: {msg}, {_sum}")
         current_sum = sum(states)
 
-        if _sum == 4 or current_sum == 4:
-            flush()
+        if _sum == 0 and current_sum == 4:
+            states = [0, 0, 0, 0]
             broadcast_with_pickle(conn, states)
             continue
 
-        elif _sum < current_sum:
+        elif (current_sum - _sum) == 1:
             print(f"Sending states back")
             conn.send(pickle.dumps(states))
             continue
