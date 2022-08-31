@@ -121,7 +121,6 @@ def clientthread(conn, addr):
         current_sum = sum(states)
 
         if _sum == 0 and current_sum == 4:
-            global states
             states = [0, 0, 0, 0]
             broadcast_with_pickle(conn, states)
             continue
