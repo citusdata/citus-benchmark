@@ -121,6 +121,7 @@ def clientthread(conn, addr):
         current_sum = sum(states)
 
         if _sum == 0 and current_sum == 4:
+            global states
             states = [0, 0, 0, 0]
             broadcast_with_pickle(conn, states)
             continue
@@ -138,12 +139,10 @@ def clientthread(conn, addr):
 
         elif _sum == current_sum:
             print(f"Received current states {states} from connection {conn}\nNothing to do")
+            continue
 
-        if not is_state_valid(states, _sum):
-            raise Exception(f"Invalid states encountered: {states}")
-
-        print(f"Forwarding states")
-        broadcast(msg, conn)
+        # print(f"Forwarding states")
+        # broadcast(msg, conn)
 
 
     print(f"Removing connection: {conn}")
