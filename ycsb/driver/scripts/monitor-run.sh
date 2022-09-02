@@ -1,11 +1,13 @@
 #!/bin/bash
 cd $HOMEDIR/ycsb-0.17.0
 
+MONITOR_THREADS=$(echo $((WORKERS / DRIVERS)))
+
 bin/ycsb run jdbc \
      -P workloads/$WORKLOAD \
     -p db.driver=org.postgresql.Driver \
     -p recordcount=$RECORDS \
-    -p threadcount=$WORKERS \
+    -p threadcount=$MONITOR_THREADS \
     -p insertstart=$INSERTSTART \
     -p insertcount=$INSERTCOUNT_MONITOR \
     -p operationcount=$INSERTCOUNT_MONITOR \
