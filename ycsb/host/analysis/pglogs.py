@@ -2,6 +2,8 @@ import statistics as stats
 import os
 import sys
 import subprocess
+import csv
+import numpy as np
 
 def eprint(*args, **kwargs):
 
@@ -23,14 +25,16 @@ def run(command, *args, shell=True, **kwargs):
     return subprocess.run(command, *args, check=True, shell=shell, **kwargs)
 
 
-def skip_k_first_queries(lines, k, shard = False):
+def skip_k_first_queries(lines, k, filetype):
 
     """ returns the resulting lines from a file by skipping the k first queries """
 
     # execution time of 1 query is a summation of 3 rows (parse, bind, execute)
     # therefore multiply k with 3
 
-    if not shard:
+    if filetype == 0:
+        k = k * 2
+    elif filetype == 1:
         k = k * 3
 
     index = 0
@@ -53,7 +57,7 @@ def skip_k_first_queries(lines, k, shard = False):
     return lines[index:]
 
 
-def read_file(filename, k = 0, shard = False):
+def read_file(filename, k = 0, filetype = 0):
 
     """ reads a file and returns file contents and length of file """
 
@@ -63,7 +67,7 @@ def read_file(filename, k = 0, shard = False):
         lines = f.readlines()
 
         if k > 0:
-            lines = skip_k_first_queries(lines, k, shard)
+            lines = skip_k_first_queries(lines, k, filetype)
 
         return lines, len(lines)
 
@@ -149,17 +153,24 @@ def get_valid_numbers(lines):
     return result
 
 
-def sum_3_values(result):
+def sum_values(result, count = 2, filetype = 0):
 
     """ sums parse, bind and execute per query and returns a list """
 
     compute = []
 
     # sum every 3 results (parse, bind, execute)
-    for i in range(0, len(result), 3):
+    for i in range(0, len(result), count):
 
         try:
-            compute.append(sum(result[i:i+3]))
+            value = sum(result[i:i+count])
+            if not filetype:
+
+                # do not include queries that are done actually on shards that reside on same coordinator node
+                if value < float(0.5):
+                    continue
+
+            compute.append(value)
 
         except Exception as e:
 
@@ -168,23 +179,36 @@ def sum_3_values(result):
     return compute
 
 
-def collect_execution_times(filename, k = 30, shard = False):
+def collect_execution_times(filename, query_type, k = 30, filetype = 0):
 
-    """ returns list with all execution times """
+    """
+    returns list with all execution times
+    filetype -> parent = 0, citus_internal = 1, anchor shard = 2
+    """
 
     # read file
-    lines, length = read_file(filename, k, shard)
+    lines, length = read_file(filename, k, filetype)
 
     # only extract valid entries from file
     result = get_valid_numbers(lines)
 
     # if anchor shard, no summing is necessary
     # thus directly return result
-    if shard:
-        return [val / 1000 for val in result]
+    if filetype == 0:
 
-    # sum parse, bind, execute per query and return list
-    return sum_3_values(result)
+        # if query is an insert, sum 2 values
+        if not query_type:
+            return sum_values(result, 2, filetype)
+
+        # query logging is quite inconsistent...
+        # if query is a select, sum 3 values
+        return sum_values(result, 2, filetype)
+
+    elif filetype == 1:
+        return sum_values(result, 3, filetype)
+
+    elif filetype == 2:
+        return [val / 1000 for val in result]
 
 
 def calculate_avg_executiontime(filename):
@@ -259,7 +283,43 @@ def calculate_mean_per_worker(node, internal, external, anchor, output_internal,
     return internal, external, anchor
 
 
-def batch_process_pglogs(path, suffix = '.log', cleanup = True, mean = False):
+def calculate_percentiles(list_of_execution_times, to_print = True):
+
+    """ prints and calculates percentiles """
+
+    print("PERCENTILES OF TOTAL QUERY TIME")
+    print("----------------------------------------------------------------------------------------------")
+    p50 = np.percentile(np.array(list_of_execution_times), 50)
+    p75 = np.percentile(np.array(list_of_execution_times), 75)
+    p90 = np.percentile(np.array(list_of_execution_times), 90)
+    p95 = np.percentile(np.array(list_of_execution_times), 95)
+    p99 = np.percentile(np.array(list_of_execution_times), 99)
+
+    if to_print:
+        print(f"50th Percentile: {p50} ms\n75th Percentile: {p75} ms\n90th Percentile: {p90} ms\n95th Percentile: {p95} ms\n99th Percentile: {p99} ms")
+
+    return [p50, p75, p90, p95, p99]
+
+# def write_to_csv(internal, external, anchor):
+
+    # df = pd.DataFrame(
+    #     'TotalExecutionTime': ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
+    #                'InternalExecutionTime': [18, 22, 19, 14, 14, 11, 20, 28],
+    #                'Latency': [5, 7, 7, 9, 12, 9, 9, 4])
+
+    # """ Writes output to csv """
+
+    # print(f"Write to CSV: {csvname}")
+    # print("----------------------------------------------------------------------------------------------")
+
+    # with open(csvname + '.csv', 'w') as f:
+
+    #     write = csv.writer(f)
+    #     write.writerow(['ExecutionTime'])
+    #     write.writerows([[value] for value in external])
+
+
+def batch_process_pglogs(path, csvname, query_type, suffix = '.log', cleanup = True, mean = False):
 
     """ batch processes all files ending with suffix in one folder """
 
@@ -284,9 +344,10 @@ def batch_process_pglogs(path, suffix = '.log', cleanup = True, mean = False):
             internal, external, anchor = calculate_mean_per_worker(node, internal, external, anchor, output_internal, output_external, output_shard)
 
         else:
-            internal.extend(collect_execution_times(output_internal, k = 100))
-            external.extend(collect_execution_times(output_external, k = 100))
-            anchor.extend(collect_execution_times(output_shard, k = 100, shard = True))
+            # filetype -> parent/coordinator node = 0, citus_internal = 1, anchor shard = 2
+            internal.extend(collect_execution_times(output_internal, query_type, k = 1000, filetype = 1))
+            external.extend(collect_execution_times(output_external, query_type, k = 1000, filetype = 0))
+            anchor.extend(collect_execution_times(output_shard, query_type, k = 1000, filetype = 2))
 
     anchor_mean, anchor_stdev = stats.mean(anchor), stats.stdev(anchor)
     external_mean, external_stdev = stats.mean(external), stats.stdev(external)
@@ -294,6 +355,7 @@ def batch_process_pglogs(path, suffix = '.log', cleanup = True, mean = False):
     latency_mean = anchor_mean - internal_mean
     parent_mean = external_mean - anchor_mean
 
+    calculate_percentiles(external)
     print_output(anchor_mean, anchor_stdev, external_mean, external_stdev, internal_mean, internal_stdev, latency_mean, parent_mean)
     remove_txt(cleanup)
 
@@ -302,8 +364,25 @@ def batch_process_pglogs(path, suffix = '.log', cleanup = True, mean = False):
     print("----------------------------------------------------------------------------------------------")
     print(f"Total lengths: parent: {len(external)}, child: {len(internal)}, shard: {len(anchor)}")
 
+    # print()
+    # Uncomment if you want to write to csv
+    print(f"Write to CSV: {csvname}")
+    print("----------------------------------------------------------------------------------------------")
+
+    with open(csvname + '.csv', 'w') as f:
+
+        write = csv.writer(f)
+        write.writerow(['ExecutionTime'])
+        write.writerows([[value] for value in external])
+
 
 if __name__=="__main__":
 
     path = sys.argv[1]
-    batch_process_pglogs(path, suffix = '.log')
+    csvname = sys.argv[2]
+    query_type = sys.argv[3]
+
+    if query_type not in [str(0), str(1)]:
+        raise Exception("last argument is either 0 (inserts) or 1 (reads)")
+
+    batch_process_pglogs(path, csvname, query_type, suffix = '.log')
