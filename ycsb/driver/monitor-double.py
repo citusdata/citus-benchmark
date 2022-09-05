@@ -144,6 +144,7 @@ def monitor_states(event: Event):
 
             connect_to_socket(server)
             print("connected with socket")
+            send_with_pickle()
 
             while True:
 

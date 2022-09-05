@@ -132,7 +132,7 @@ def clientthread(conn, addr):
 
         elif _sum > current_sum:
             print(f"Current states are: {states}")
-            states = msg
+            states = [x + y for x, y in zip(states, msg)]
             print(f"Setting states to: {states}")
             print(f"Broadcasting states")
             broadcast_with_pickle(conn, states)

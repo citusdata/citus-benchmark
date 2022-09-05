@@ -114,7 +114,7 @@ def connect_to_socket(server):
     try:
         server.connect((IP, PORT))
     except:
-        IP = calculate_server_ip(2)
+        IP = calculate_server_ip(1)
         server.connect((IP, PORT))
 
 
@@ -162,6 +162,7 @@ def monitor_states(event: Event):
 
             connect_to_socket(server)
             print(f"Connected with socket")
+            send_with_pickle()
 
             while True:
 
