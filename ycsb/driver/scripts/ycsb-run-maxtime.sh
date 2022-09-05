@@ -8,7 +8,7 @@ bin/ycsb run jdbc \
     -P workloads/$WORKLOAD \
     -p db.driver=org.postgresql.Driver \
     -p recordcount=$RECORDS\
-    -p insertstart=0 \
+    -p insertstart=$INSERTSTART \
     -p insertcount=$INSERTCOUNT_CITUS \
     -p operationcount=$OPERATIONS \
     -p threadcount=$THREADS \

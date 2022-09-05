@@ -20,6 +20,7 @@ import pickle
 import threading
 from threading import Event
 import math
+import sys
 
 # global variables
 states = [0, 0, 0, 0]
@@ -280,6 +281,7 @@ class Benchmark(object):
         """ Calculate how many connections this driver should have to the cluster """
 
         connections = math.floor(self.CURRENT_THREAD / self.DRIVERS)
+        print(f"new connections calculated {connections}")
 
         if int(self.DRIVER_ID) + 1 == int(self.DRIVERS):
             return connections + (self.CURRENT_THREAD % connections)
@@ -293,12 +295,15 @@ class Benchmark(object):
 
         self.INSERTCOUNT_CITUS = int(0.999 * self.RECORDS)
         self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT_CITUS
-        self.INSERTSTART = self.INSERTCOUNT_CITUS
+        self.INSERTSTART_MONITOR = self.INSERTCOUNT_CITUS
 
 
     def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", database = "citus",
     workloadtype = "load", workloads="workloada", iterations = 1, outputfile = "results.csv", shard_count = 16,
-    workers = "2", resource = "custom", host = "localhost", parallel = False, monitorpw = "monitor", maxtime = 600, drivers = 1, driver_id = 0):
+    workers = "2", resource = "custom", host = "localhost", parallel = False, monitorpw = "monitor", maxtime = 600, drivers = 1, id = 0):
+
+        print("DRIVER, DRIVER_ID")
+        print(drivers, id)
 
         self.HOMEDIR = os.getcwd()
         self.PARALLEL = parallel
@@ -324,24 +329,26 @@ class Benchmark(object):
         self.MAXTIME = maxtime
         self.INSERTCOUNT_CITUS = 0
         self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT_CITUS
-        self.INSERTSTART = self.INSERTCOUNT_CITUS
-        self.DRIVERS = int(drivers)
-        self.DRIVER_ID = int(driver_id)
+        self.INSERTSTART = 0
+        self.INSERTSTART_MONITOR = 0
+        self.DRIVERS = drivers
+        self.DRIVER_ID = id
 
+        self.shard_workload()
         print(f'Start records: {self.RECORDS}, {self.CURRENT_THREAD}')
 
         # reduce self.RECORDS to the amount of the sharded workload
         self.RECORDS = self.shard_workload()
+        print(f"new records calculated: {self.RECORDS}")
 
         # Divide threads across drivers
-        self.CURRENT_THREAD = self.calculate_connections(driver_id)
-
+        self.CURRENT_THREAD = self.calculate_connections()
         print(f'mediate records: {self.RECORDS}, {self.CURRENT_THREAD}')
 
         # Calculate records for monitor
         self.calculate_records()
 
-        print(f'Start records: {self.RECORDS}, {self.CURRENT_THREAD}')
+        print(f'finish records: {self.RECORDS}, {self.CURRENT_THREAD}')
 
         # Set environment variables
         os.environ['DATABASE'] = self.DATABASE
@@ -358,6 +365,7 @@ class Benchmark(object):
         os.environ['MAXTIME'] = str(self.MAXTIME)
         os.environ['INSERTCOUNT_CITUS'] = str(self.INSERTCOUNT_CITUS)
         os.environ['INSERTCOUNT_MONITOR'] = str(self.INSERTCOUNT_MONITOR)
+        os.environ['INSERTSTART_MONITOR'] = str(self.INSERTSTART_MONITOR)
         os.environ['INSERTSTART'] = str(self.INSERTSTART)
         os.environ['THREADS'] = str(self.CURRENT_THREAD)
         os.environ['HOMEDIR'] = self.HOMEDIR
@@ -687,7 +695,11 @@ if __name__ == '__main__':
         states_thread = threading.Thread(target = monitor_states, args=([event]),  daemon = True)
 
         # Benchmark Thread
-        benchmark_thread = threading.Thread(target = initiate_benchmarks, args=([event]))
+        try:
+            benchmark_thread = threading.Thread(target = initiate_benchmarks, args=([event]))
+        except Exception as e:
+            print(f"Exception {e}")
+            sys.exit(1)
 
         # Start Threads
         states_thread.start()
@@ -701,9 +713,3 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
 
          run(['python3', 'output.py', "results.csv"], shell = False)
-
-
-
-
-
-

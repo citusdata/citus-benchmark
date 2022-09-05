@@ -8,7 +8,7 @@ bin/ycsb load jdbc \
     -p db.driver=org.postgresql.Driver \
     -p recordcount=$RECORDS \
     -p threadcount=$THREADS \
-    -p insertstart=0 \
+    -p insertstart=$INSERTSTART  \
     -p insertcount=$INSERTCOUNT_CITUS \
     -p maxexecutiontime=$MAXTIME \
     -cp ./postgresql-42.2.14.jar \
