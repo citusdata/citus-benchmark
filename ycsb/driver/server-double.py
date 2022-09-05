@@ -19,7 +19,7 @@ def bitwise_or(a, b):
     """ returns new list of states with bitwise or operation executed """
 
     if len(a) != len(b):
-        raise Exception("lengt of lists are not equal")
+        raise Exception(f"length of lists are not equal\na {a} ({len(a)}), b: {b} ({len(b)})")
 
     result = []
 
@@ -112,9 +112,11 @@ def update_state(index, conn):
 def clientthread(conn, addr):
 
     global states
+    global list_of_clients
 
-    # sends current states to client if connection has been made
-    broadcast_with_pickle(conn, states)
+    # sends current states to clients if connection has been made
+    for client in list_of_clients:
+        client.sendall(pickle.dumps(states))
 
     while True:
 
