@@ -140,7 +140,8 @@ def clientthread(conn, addr):
             continue
 
         states = bitwise_or(states, msg)
-        print(f"States updated to {states}")
+        print(f"States updated to {states}\nBroadcasting")
+        broadcast_with_pickle(conn, states)
 
         # elif _sum != 0 and current_sum > _sum:
         #     print(f"Sending states back")
