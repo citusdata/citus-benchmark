@@ -131,7 +131,7 @@ def clientthread(conn, addr):
         except:
             print(f"Exception: {message}")
 
-        print(f"received states in phase: {msg}, {_sum}")
+        print(f"Received states in phase: {msg}, {_sum}")
         current_sum = sum(states)
 
         if _sum == 0 and current_sum == 6:
@@ -139,7 +139,8 @@ def clientthread(conn, addr):
             broadcast_with_pickle(conn, states)
             continue
 
-        bitwise_or(states, msg)
+        states = bitwise_or(states, msg)
+        print(f"States updated to {states}")
 
         # elif _sum != 0 and current_sum > _sum:
         #     print(f"Sending states back")
