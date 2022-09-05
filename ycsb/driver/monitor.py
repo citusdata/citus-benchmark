@@ -270,7 +270,7 @@ class Benchmark(object):
             self.INSERTCOUNT_CITUS = int(0.999 * self.RECORDS)
 
         self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT_CITUS
-        self.INSERTSTART = self.INSERTCOUNT_CITUS
+        self.INSERTSTART_MONITOR = self.INSERTCOUNT_CITUS
 
 
     def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", database = "citus",
@@ -301,7 +301,8 @@ class Benchmark(object):
         self.MAXTIME = maxtime
         self.INSERTCOUNT_CITUS = 0
         self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT_CITUS
-        self.INSERTSTART = self.INSERTCOUNT_CITUS
+        self.INSERTSTART = 0
+        self.INSERTSTART_MONITOR = 0
 
         self.calculate_records()
 
@@ -324,6 +325,7 @@ class Benchmark(object):
         os.environ['THREADS'] = str(self.CURRENT_THREAD)
         os.environ['HOMEDIR'] = self.HOMEDIR
         os.environ['PARALLEL'] = str(self.PARALLEL)
+        os.environ['INSERTSTART_MONITOR'] = str(self.INSERTSTART_MONITOR)
 
         # Install YCSB and JDBC PostgreSQL driver
         self.install_ycsb()
