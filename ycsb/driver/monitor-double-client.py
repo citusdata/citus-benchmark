@@ -267,10 +267,12 @@ class Benchmark(object):
 
         if int(self.DRIVER_ID) + 1 == int(self.DRIVERS):
             self.INSERTCOUNT = shardsize + (self.RECORDS % shardsize)
+        else:
+            self.INSERTCOUNT = shardsize
 
-        self.INSERTCOUNT = shardsize
+        self.RECORDS = self.INSERTCOUNT
 
-        return self.INSERTCOUNT
+        return self.RECORDS
 
 
     def calculate_connections(self):
@@ -323,8 +325,10 @@ class Benchmark(object):
         self.INSERTCOUNT_CITUS = 0
         self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT_CITUS
         self.INSERTSTART = self.INSERTCOUNT_CITUS
-        self.DRIVERS = drivers
-        self.DRIVER_ID = driver_id
+        self.DRIVERS = int(drivers)
+        self.DRIVER_ID = int(driver_id)
+
+        print(f'Start records: {self.RECORDS}, {self.CURRENT_THREAD}')
 
         # reduce self.RECORDS to the amount of the sharded workload
         self.RECORDS = self.shard_workload()
@@ -332,8 +336,12 @@ class Benchmark(object):
         # Divide threads across drivers
         self.CURRENT_THREAD = self.calculate_connections(driver_id)
 
+        print(f'mediate records: {self.RECORDS}, {self.CURRENT_THREAD}')
+
         # Calculate records for monitor
         self.calculate_records()
+
+        print(f'Start records: {self.RECORDS}, {self.CURRENT_THREAD}')
 
         # Set environment variables
         os.environ['DATABASE'] = self.DATABASE
@@ -354,6 +362,8 @@ class Benchmark(object):
         os.environ['THREADS'] = str(self.CURRENT_THREAD)
         os.environ['HOMEDIR'] = self.HOMEDIR
         os.environ['PARALLEL'] = str(self.PARALLEL)
+        os.environ['PART'] = str(self.DRIVER_ID)
+        os.environ['DRIVERS'] = str(self.DRIVERS)
 
         # Install YCSB and JDBC PostgreSQL driver
         self.install_ycsb()
