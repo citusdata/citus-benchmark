@@ -39,7 +39,7 @@ def calculate_server_ip():
     # substract 1 from last value of own ip adress
     ip[-1] = str(int(ip[-1]) - 1)
 
-    return ''.join(ip)
+    return str(''.join(ip))
 
 
 def send_with_pickle():
@@ -107,7 +107,7 @@ def connect_to_socket(server):
 
     """ try to connect to local socket"""
 
-    IP = calculate_server_ip
+    IP = calculate_server_ip()
     PORT = int(os.getenv("SERVERPORT"))
 
     server.connect((IP, PORT))
@@ -156,6 +156,7 @@ def monitor_states(event: Event):
         try:
 
             connect_to_socket(server)
+            print(f"Connected with socket")
 
             while True:
 
