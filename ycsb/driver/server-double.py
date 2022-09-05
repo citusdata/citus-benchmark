@@ -14,6 +14,20 @@ import time
 states = [0, 0, 0, 0, 0, 0]
 ip = socket.gethostbyname(socket.gethostname())
 
+def bitwise_or(a, b):
+
+    """ returns new list of states with bitwise or operation executed """
+
+    if len(a) != len(b):
+        raise Exception("lengt of lists are not equal")
+
+    result = []
+
+    for i in range(len(a)):
+        result.append(a[i] + b[i] - (a[i] * b[i]))
+
+    return result
+
 
 def flush():
 
@@ -125,22 +139,27 @@ def clientthread(conn, addr):
             broadcast_with_pickle(conn, states)
             continue
 
-        elif _sum != 0 and current_sum > _sum:
-            print(f"Sending states back")
-            conn.send(pickle.dumps(states))
-            continue
+        bitwise_or(states, msg)
 
-        elif _sum > current_sum:
-            print(f"Current states are: {states}")
-            states = msg
-            print(f"Setting states to: {states}")
-            print(f"Broadcasting states")
-            broadcast_with_pickle(conn, states)
-            continue
+        # elif _sum != 0 and current_sum > _sum:
+        #     print(f"Sending states back")
+        #     conn.send(pickle.dumps(states))
+        #     continue
 
-        elif _sum == current_sum:
-            print(f"Received current states {states} from connection {conn}\nNothing to do")
-            continue
+
+        # elif _sum > current_sum:
+        #     print(f"Current states are: {states}")
+        #     states = bitwise_or(states, msg)
+        #     print(f"Setting states to: {states}")
+        #     print(f"Broadcasting states")
+        #     broadcast_with_pickle(conn, states)
+        #     continue
+
+        # elif _sum == current_sum:
+        #     print(f"Received current states {states} from connection {conn}\nNothing to do")
+
+        #     if msg !=
+        #     continue
 
         # print(f"Forwarding states")
         # broadcast(msg, conn)
