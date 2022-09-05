@@ -27,7 +27,7 @@ states = [0, 0, 0, 0]
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
-def calculate_server_ip():
+def calculate_server_ip(to_sum):
 
     """
     returns ip from server to connect to
@@ -38,7 +38,7 @@ def calculate_server_ip():
     ip = list(socket.gethostbyname(socket.gethostname()))
 
     # substract 1 from last value of own ip adress
-    ip[-1] = str(int(ip[-1]) - 1)
+    ip[-1] = str(int(ip[-1]) + to_sum)
 
     return str(''.join(ip))
 
@@ -108,10 +108,14 @@ def connect_to_socket(server):
 
     """ try to connect to local socket"""
 
-    IP = calculate_server_ip()
+    IP = calculate_server_ip(-1)
     PORT = int(os.getenv("SERVERPORT"))
 
-    server.connect((IP, PORT))
+    try:
+        server.connect((IP, PORT))
+    except:
+        IP = calculate_server_ip(2)
+        server.connect((IP, PORT))
 
 
 def set_received_state(message):
