@@ -295,7 +295,7 @@ class Benchmark(object):
 
         self.INSERTCOUNT_CITUS = int(0.999 * self.RECORDS)
         self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT_CITUS
-        self.INSERTSTART_MONITOR = self.INSERTCOUNT_CITUS
+        self.INSERTSTART_MONITOR = self.INSERTCOUNT_CITUS + (self.RECORDS * self.DRIVERS)
 
 
     def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", database = "citus",
