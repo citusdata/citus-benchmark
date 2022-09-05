@@ -11,7 +11,7 @@ import time
 # states:
 # ready to benchmark (start), prepared monitoring (prepared), finished bench finish, done collecting data (done)
 
-states = [0, 0, 0, 0]
+states = [0, 0, 0, 0, 0, 0]
 ip = socket.gethostbyname(socket.gethostname())
 
 
@@ -21,7 +21,7 @@ def flush():
 
     global states
 
-    states = [0, 0, 0, 0]
+    states = [0, 0, 0, 0, 0, 0]
     print(f"States are flushed\nNew states: {states}")
 
 
@@ -121,7 +121,7 @@ def clientthread(conn, addr):
         current_sum = sum(states)
 
         if _sum == 0 and current_sum == 6:
-            states = [0, 0, 0, 0]
+            states = [0, 0, 0, 0, 0, 0]
             broadcast_with_pickle(conn, states)
             continue
 
@@ -132,7 +132,7 @@ def clientthread(conn, addr):
 
         elif _sum > current_sum:
             print(f"Current states are: {states}")
-            states = [x + y for x, y in zip(states, msg)]
+            states = msg
             print(f"Setting states to: {states}")
             print(f"Broadcasting states")
             broadcast_with_pickle(conn, states)

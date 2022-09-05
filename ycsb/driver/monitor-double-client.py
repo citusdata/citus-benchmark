@@ -23,7 +23,7 @@ import math
 import sys
 
 # global variables
-states = [0, 0, 0, 0]
+states = [0, 0, 0, 0, 0, 0]
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
@@ -62,7 +62,7 @@ def flush():
     """ if all states are 1 then flush """
 
     global states
-    states = [0, 0, 0, 0]
+    states = [0, 0, 0, 0, 0, 0]
     send_with_pickle()
 
 
@@ -87,7 +87,7 @@ def update_state(index):
     global states
 
     print(f"Updating state on index {index}")
-    states[index] += 1
+    states[index] = 1
 
     send_with_pickle()
 
@@ -134,7 +134,7 @@ def set_received_state(message):
             print(f"States are updated: {msg}")
 
         if _sum == 0 and current_sum == 6:
-            states = [0, 0, 0, 0]
+            states = [0, 0, 0, 0, 0, 0]
 
         if _sum < current_sum:
             send_with_pickle()
@@ -575,13 +575,13 @@ class Benchmark(object):
         """
 
         # send data to server because ready to start benchmarks
-        self.update_and_check_state_change(0, 1, 1)
+        self.update_and_check_state_change(1, 2, 1)
 
         self.set_insertcount_monitor()
         self.run_workload(workload, type, self.PARALLEL)
 
         # If workload finished, send a message to the server
-        self.update_and_check_state_change(2, 1, 3)
+        self.update_and_check_state_change(4, 5, 3)
 
         print(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
 
