@@ -38,10 +38,12 @@ param subnetPrefix string = '10.13.0.0/24'
 
 // names for all resources, based on resourcegroup name by default
 // usually should not need to be changed
+
 param namePrefix string = resourceGroup().name
 param driverVmName string = '${namePrefix}-driver'
 param SecondDriverVmName string = '${namePrefix}-SecondDriver'
 param driverNicName string = '${driverVmName}-nic'
+param SecondDriverNicName string = '${SecondDriverVmName}-nic'
 param driverIpName string = '${driverVmName}-ip'
 param SecondDriverIpName string = '${SecondDriverVmName}-ip'
 param nsgName string = '${driverVmName}-nsg'
@@ -96,9 +98,6 @@ module driverVm 'double-driver-ycsb.bicep' = {
   }
 }
 
-
-output driverPublicIp string = driverVm.outputs.publicIp
-
 module SecondDriverVm 'double-driver-ycsb.bicep' = {
     name: SecondDriverVmName
     params: {
@@ -108,8 +107,8 @@ module SecondDriverVm 'double-driver-ycsb.bicep' = {
       location: location
       zone: zone
       size: SecondDriverSize
-      vmName: driverVmName
-      nicName: driverNicName
+      vmName: SecondDriverVmName
+      nicName: SecondDriverNicName
       ipName: SecondDriverIpName
       nsgName: nsgName
       vnetName: vnetName
@@ -134,4 +133,5 @@ module SecondDriverVm 'double-driver-ycsb.bicep' = {
     }
   }
 
+output driverPublicIp string = driverVm.outputs.publicIp
 output SeconddriverPublicIp string = SecondDriverVm.outputs.publicIp

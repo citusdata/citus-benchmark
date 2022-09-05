@@ -25,6 +25,23 @@ import math
 states = [0, 0, 0, 0]
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+
+def calculate_server_ip():
+
+    """
+    returns ip from server to connect to
+    Server resides on the main benchmark driver (id = 0)
+    """
+
+    # get IP of current VM
+    ip = list(socket.gethostbyname(socket.gethostname()))
+
+    # substract 1 from last value of own ip adress
+    ip[-1] = str(int(ip[-1]) - 1)
+
+    return ''.join(ip)
+
+
 def send_with_pickle():
 
     """ sends pickled message to server """
@@ -44,10 +61,8 @@ def flush():
     """ if all states are 1 then flush """
 
     global states
-
-    if states == [2, 1, 2, 1]:
-        states = [0, 0, 0, 0]
-        send_with_pickle()
+    states = [0, 0, 0, 0]
+    send_with_pickle()
 
 
 def is_state_valid(states, index):
@@ -70,12 +85,10 @@ def update_state(index):
 
     global states
 
-
     print(f"Updating state on index {index}")
     states[index] += 1
 
     send_with_pickle()
-
 
 
 def check_state(frequency, index):
@@ -94,7 +107,7 @@ def connect_to_socket(server):
 
     """ try to connect to local socket"""
 
-    IP = socket.gethostbyname(socket.gethostname())
+    IP = calculate_server_ip
     PORT = int(os.getenv("SERVERPORT"))
 
     server.connect((IP, PORT))
@@ -244,20 +257,6 @@ class Benchmark(object):
         os.chdir(self.HOMEDIR)
 
 
-    def create_sign(self, filename = "run.start", iteration = 0):
-
-        """ create start file containing the current time in UTC if ready to run ycsb benchmarks """
-
-        os.chdir('scripts')
-
-        if not iteration:
-            run(['./timestamp.sh', filename, self.HOMEDIR], shell = False)
-        else:
-            run(['./timestamp.sh', filename + f'-{iteration}', self.HOMEDIR], shell = False)
-
-        os.chdir(self.HOMEDIR)
-
-
     def shard_workload(self):
 
         """ Calculate size of shards for each driver """
@@ -358,7 +357,6 @@ class Benchmark(object):
         # Install YCSB and JDBC PostgreSQL driver
         self.install_ycsb()
         self.install_jdbc()
-
 
 
     def get_workload(self, wtype):
