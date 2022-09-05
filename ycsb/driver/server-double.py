@@ -112,7 +112,6 @@ def update_state(index, conn):
 def clientthread(conn, addr):
 
     global states
-    global list_of_clients
 
     # sends current states to clients if connection has been made
     for client in list_of_clients:
@@ -173,7 +172,6 @@ def clientthread(conn, addr):
     conn.close()
     remove(conn)
 
-    global list_of_clients
     print(f"Remaining connections: {list_of_clients}")
 
 
