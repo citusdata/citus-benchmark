@@ -399,13 +399,14 @@ def collect_data(bucket):
 
     """ collect resulting data after all runs are finished """
 
-    run(['python3', 'collect_data.py', bucket], shell = False)
+    run(['python3', 'collect_data.py', bucket, drivers], shell = False)
 
 
 if __name__ == "__main__":
 
     homedir = os.getcwd()
     bucket = sys.argv[1]
+    drivers = sys.argv[2]
 
     try:
 

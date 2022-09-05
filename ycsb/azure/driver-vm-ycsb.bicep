@@ -10,6 +10,8 @@ param monitorpw string
 param maxtime int
 param parallel bool
 param serverport int
+param drivers int
+param part int
 
 param zone string
 param location string
@@ -60,6 +62,9 @@ echo export MAXTIME={14} >> .bashrc
 echo export PARALLEL={15} >> .bashrc
 echo export FOLDER=$(pwd) >> .bashrc
 echo export SERVERPORT={16} >> .bashrc
+echo export DRIVERS={17} >> .bashrc
+echo export PART={18} >> .bashrc
+
 # Use the same environment variables right now, sourcing bashrc doesn't work
 # since we are not in an interactive shell
 export PGHOST='{0}'
@@ -79,6 +84,9 @@ export MAXTIME={14}
 export PARALLEL={15}
 export FOLDER=$(pwd)
 export SERVERPORT={16}
+export DRIVERS={17}
+export PART={18}
+
 # Make sure we can open enough connections
 echo 'ulimit -n "$(ulimit -Hn)"' >> .bashrc
 cat >> .bashrc << '__ssh_connection_bashrc__'
@@ -92,13 +100,13 @@ sudo apt-get install python3-pip -y
 pip3 install fire
 pip3 install pandas
 pip3 install matplotlib
-git clone https://github.com/citusdata/citus-benchmark.git --branch ccfelius/ycsb
+git clone https://github.com/citusdata/citus-benchmark.git --branch ccfelius/ycsb-azure
 cd citus-benchmark/ycsb/driver
 while ! psql -c 'select 1'; do  echo failed; sleep 1; done
 tmux new-session -d -t main -s init-bench \; send-keys './build-and-run-ycsb.sh' Enter
 '''
 
-var driverBootScript = format(driverBootTemplate, pgHost, pgUser, pgPassword, pgPort, bashrcTmuxAutoAttach, pgVersion, records, operations, shard_count, thread_counts, iterations, workers, rg, monitorpw, maxtime, parallel, serverport)
+var driverBootScript = format(driverBootTemplate, pgHost, pgUser, pgPassword, pgPort, bashrcTmuxAutoAttach, pgVersion, records, operations, shard_count, thread_counts, iterations, workers, rg, monitorpw, maxtime, parallel, serverport, drivers, part)
 
 module vm 'vm.bicep' = {
   name: '${vmName}-driver-module'

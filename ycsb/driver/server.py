@@ -131,7 +131,7 @@ def clientthread(conn, addr):
             continue
 
         elif _sum > current_sum:
-            states = msg
+            states = [x + y for x, y in zip(states, msg)]
             print(f"Broadcasting states")
             broadcast_with_pickle(conn, states)
             continue

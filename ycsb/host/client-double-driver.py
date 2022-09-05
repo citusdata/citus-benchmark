@@ -1,4 +1,5 @@
 import os
+from tabnanny import check
 from helper import *
 import yaml
 from logs import Logging
@@ -60,13 +61,6 @@ def send_with_pickle():
         print("Sending package to server failed")
 
 
-def is_state_valid(states, index):
-
-    """ simple checksum to see if states are correct """
-
-    return sum(states) == index
-
-
 def print_current_time():
 
     """ print current timestamp """
@@ -80,15 +74,10 @@ def update_state(index):
 
     global states
 
-    if is_state_valid(states, index):
+    print(f"Updating state on index {index}")
+    states[index] = 1
 
-        print(f"Updating state on index {index}")
-        states[index] = 1
-
-        send_with_pickle()
-
-    else:
-        print(f"WARNING: Invalid states '{states}' encountered")
+    send_with_pickle()
 
 
 def check_state(frequency, index):
@@ -97,7 +86,7 @@ def check_state(frequency, index):
 
     global states
 
-    while states[index] < 2:
+    while not states[index]:
         time.sleep(frequency)
 
     return True
@@ -311,13 +300,14 @@ class Client(object):
         self.print_current_time()
 
         # Wait for monitoring to be started (checks every 10 secs if index 0 contains a 2)
-        check_state(10, 0)
+        if check_state(10, 0) and check_state(10, 1):
+            print("start monitoring")
 
         # truncate pg_log on every worker to reduce data size
         logs.prepare_monitor_run()
 
         # Send to server when monitoring started
-        update_state(1)
+        update_state(2)
 
         return logs
 
@@ -330,8 +320,9 @@ class Client(object):
         - initiate postprocessing
         """
 
-        # Wait for state to be stopped  (checks every 1 secs if index 2 contains a 2)
-        check_state(1, 2)
+        # Wait for state to be stopped  (checks every 1 secs if index 3 and 4 contains a 1)
+        if check_state(1, 3) and check_state(1, 4):
+            print("finish monitoring")
 
         # Get data from current iteration
         logs.stop_monitoring()
@@ -344,7 +335,7 @@ class Client(object):
         run(["./push-to-blob.sh", f"{path}/general/", bucket, f"{self.RESOURCE}/general"], shell = False)
 
         # Monitoring finished, update state 0 to 1 on index 3
-        update_state(3)
+        update_state(5)
 
         return f"Iteration {iteration} finished"
 
@@ -399,13 +390,14 @@ def collect_data(bucket):
 
     """ collect resulting data after all runs are finished """
 
-    run(['python3', 'collect_data.py', bucket], shell = False)
+    run(['python3', 'collect_data.py', bucket, drivers], shell = False)
 
 
 if __name__ == "__main__":
 
     homedir = os.getcwd()
     bucket = sys.argv[1]
+    drivers = sys.argv[2]
 
     try:
 

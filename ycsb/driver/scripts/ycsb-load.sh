@@ -12,4 +12,4 @@ bin/ycsb load jdbc \
     -cp ./postgresql-42.2.14.jar \
     -p db.user=$PGUSER \
     -p db.passwd=$PGPASSWORD \
-    -p db.url="jdbc:postgresql://$CITUS_HOST/$PGDATABASE?loadBalanceHosts=true" | tee ${HOMEDIR}/${OUTDIR}/load_${WORKLOAD}_${THREAD}_${RECORDS}_${ITERATION}_${WORKERS}_${RESOURCE}.log
+    -p db.url="jdbc:postgresql://$CITUS_HOST/$PGDATABASE?loadBalanceHosts=true" | tee ${HOMEDIR}/${OUTDIR}/load_${WORKLOAD}_${THREAD}_${RECORDS}_${ITERATION}_${WORKERS}_${RESOURCE}_${DRIVERS}_${PART}.log

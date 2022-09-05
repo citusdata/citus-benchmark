@@ -11,6 +11,7 @@ import time
 
 homedir = os.getcwd()
 bucket = sys.argv[1]
+drivers = sys.argv[2]
 
 # read config file
 with open('config.yml', 'r') as f:
@@ -32,7 +33,10 @@ counter = 0
 while True:
 
     try:
-        logs.get_csv_and_ycbs_logs()
+        if drivers == 1:
+            logs.get_csv_and_ycbs_logs()
+        else:
+            logs.get_csv_and_ycsb_logs_second()
         break
 
     except Exception as e:

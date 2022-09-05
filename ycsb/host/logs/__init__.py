@@ -117,6 +117,16 @@ class Logging(object):
         os.chdir(f"{self.HOMEDIR}")
 
 
+    def get_csv_and_ycbs_logs_second(self, outdir = "results"):
+
+        """ connects with VM and gets generated csv's """
+
+        os.chdir(f'{self.HOMEDIR}/logs/scripts')
+        run(["./get-csv-from-drivers.sh", self.RESOURCE, f"{self.RESOURCE}/YCSB/results"], shell = False)
+        run(["./get-ycsb-logs-from-drivers.sh", self.RESOURCE, f"{self.RESOURCE}/YCSB/raw"], shell = False)
+        os.chdir(f"{self.HOMEDIR}")
+
+
     def print_workers(self):
 
         """ prints all host of workers """
@@ -204,6 +214,24 @@ class Logging(object):
 
 
         os.chdir(f"{self.HOMEDIR}/logs")
+
+
+    def run_collect_pglogs(self, i, worker):
+
+        run(["scp", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", f"{self.PREFIX}@{worker}:nohup.out", f"{self.HOMEDIR}/logs/scripts/{self.RESOURCE}/pglogs/worker-{i}-{self.CURRENT_ITERATION}.out"], shell = False)
+
+
+    def collect_pglogs(self):
+
+        """ Collect pglogs files from every worker and stores in resource_group/pglogs """
+
+        queue = []
+
+        for i, worker in enumerate(self.WORKERS):
+            thread = threading.Thread(target=self.run_collect_pglogs, args=([i, worker]))
+            queue.append(thread)
+
+        self.execute_threads(queue)
 
 
     def run_truncate_pgsql_log(self, worker_host):
