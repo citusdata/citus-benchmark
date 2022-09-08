@@ -505,7 +505,7 @@ class Benchmark(object):
             print("Generating CSV")
 
             # gather csv with all results after each iteration
-            run(['python3', 'output.py', outputdir, f"results-{self.id}.csv"], shell = False)
+            run(['python3', 'output.py', outputdir, f"results"], shell = False)
 
 
     def citus_workload(self):
@@ -539,7 +539,7 @@ class Benchmark(object):
 
             # gather csv with all results
             os.chdir(self.HOMEDIR)
-            run(['python3', 'output.py', f"results-{self.id}.csv"], shell = False)
+            run(['python3', 'output.py', f"results"], shell = False)
 
 
     def update_and_check_state_change(self, update_index, check_index, frequency = 2):
@@ -563,9 +563,11 @@ class Benchmark(object):
         self.run_workload(workload, type, self.PARALLEL)
 
         # If workload finished, send a message to the server
+        # update csv after every workload
         self.update_and_check_state_change(3, 5, 3)
 
         print(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
+        run(['python3', 'output.py', f"results"], shell = False)
 
         # set states to [0, 0, 0, 0]
         flush()
@@ -597,7 +599,7 @@ class Benchmark(object):
             print("Generating CSV")
 
             # gather csv with all results
-            run(['python3', 'output.py', f"results-{self.id}.csv"], shell = False)
+            run(['python3', 'output.py', f"results"], shell = False)
 
 
     def monitor_workloada(self):
@@ -617,7 +619,7 @@ class Benchmark(object):
             print("Generating CSV")
 
             # gather csv with all results
-            run(['python3', 'output.py', f"results-{self.id}.csv"], shell = False)
+            run(['python3', 'output.py', f"results"], shell = False)
 
 
     def run_all_workloads(self):
@@ -654,7 +656,7 @@ class Benchmark(object):
             print("Generating CSV")
 
             # gather csv with all results
-            run(['python3', 'output.py', f"results-{self.id}.csv"], shell = False)
+            run(['python3', 'output.py', f"results"], shell = False)
 
 
 
@@ -695,7 +697,7 @@ if __name__ == '__main__':
 
     except KeyboardInterrupt:
 
-         run(['python3', 'output.py', f"results-single.csv"], shell = False)
+         run(['python3', 'output.py', f"results"], shell = False)
          sys.exit(1)
 
 

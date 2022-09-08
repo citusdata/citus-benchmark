@@ -303,7 +303,7 @@ class Benchmark(object):
 
 
     def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", database = "citus",
-    workloadtype = "load", workloads="workloada", iterations = 1, outputfile = "results.csv", shard_count = 16,
+    workloadtype = "load", workloads="workloada", iterations = 1, outputfile = "results ", shard_count = 16,
     workers = "2", resource = "custom", host = "localhost", parallel = False, monitorpw = "monitor", maxtime = 600, drivers = 1, id = 0):
 
 
@@ -523,7 +523,7 @@ class Benchmark(object):
             print("Generating CSV")
 
             # gather csv with all results after each iteration
-            run(['python3', 'output.py', outputdir, f"{outputdir}.csv"], shell = False)
+            run(['python3', 'output.py', 'results'], shell = False)
 
 
     def citus_workload(self):
@@ -557,7 +557,7 @@ class Benchmark(object):
 
             # gather csv with all results
             os.chdir(self.HOMEDIR)
-            run(['python3', 'output.py', "results.csv"], shell = False)
+            run(['python3', 'output.py', "results"], shell = False)
 
 
     def update_and_check_state_change(self, update_index, check_index, frequency = 2):
@@ -584,6 +584,8 @@ class Benchmark(object):
         self.update_and_check_state_change(4, 5, 3)
 
         print(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
+        run(['python3', 'output.py', f"results"], shell = False)
+
 
         # set states to [0, 0, 0, 0]
         flush()
@@ -615,7 +617,7 @@ class Benchmark(object):
             print("Generating CSV")
 
             # gather csv with all results
-            run(['python3', 'output.py', f"results-{self.id}.csv"], shell = False)
+            run(['python3', 'output.py', f"results"], shell = False)
 
 
     def monitor_workloada(self):
@@ -635,7 +637,7 @@ class Benchmark(object):
             print("Generating CSV")
 
             # gather csv with all results
-            run(['python3', 'output.py', f"results-{self.id}.csv"], shell = False)
+            run(['python3', 'output.py', f"results"], shell = False)
 
 
     def run_all_workloads(self):
@@ -672,7 +674,7 @@ class Benchmark(object):
             print("Generating CSV")
 
             # gather csv with all results
-            run(['python3', 'output.py', f"results-{self.id}.csv"], shell = False)
+            run(['python3', 'output.py', f"results"], shell = False)
 
 
 
@@ -717,5 +719,5 @@ if __name__ == '__main__':
 
     except KeyboardInterrupt:
 
-         run(['python3', 'output.py', "results-double.csv"], shell = False)
+         run(['python3', 'output.py', "results-double"], shell = False)
          sys.exit(1)
