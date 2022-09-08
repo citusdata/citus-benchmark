@@ -359,6 +359,7 @@ class Benchmark(object):
         os.environ['PARALLEL'] = str(self.PARALLEL)
         os.environ['PART'] = str(self.DRIVER_ID)
         os.environ['DRIVERS'] = str(self.DRIVERS)
+        os.environ['MONITOR_THREADS'] = str(self.MONITOR_THREADS)
 
         # Install YCSB and JDBC PostgreSQL driver
         self.install_ycsb()

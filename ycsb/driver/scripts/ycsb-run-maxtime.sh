@@ -9,7 +9,7 @@ bin/ycsb run jdbc \
     -p db.driver=org.postgresql.Driver \
     -p recordcount=$RECORDS\
     -p insertstart=$INSERTSTART \
-    -p insertcount=$INSERTCOUNT_CITUS \
+    -p insertcount=$INSERTCOUNT \
     -p operationcount=$OPERATIONS \
     -p threadcount=$THREADS \
     -cp ./postgresql-42.2.14.jar \

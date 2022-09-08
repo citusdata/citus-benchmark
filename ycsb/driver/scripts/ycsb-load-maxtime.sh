@@ -9,7 +9,7 @@ bin/ycsb load jdbc \
     -p recordcount=$RECORDS \
     -p threadcount=$THREADS \
     -p insertstart=$INSERTSTART  \
-    -p insertcount=$INSERTCOUNT_CITUS \
+    -p insertcount=$INSERTCOUNT \
     -p maxexecutiontime=$MAXTIME \
     -cp ./postgresql-42.2.14.jar \
     -p db.user=$PGUSER \
