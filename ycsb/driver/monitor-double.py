@@ -258,9 +258,7 @@ class Benchmark(object):
         else:
             self.INSERTCOUNT = shardsize
 
-        self.RECORDS = self.INSERTCOUNT
-
-        return self.RECORDS
+        return self.INSERTCOUNT
 
 
     def calculate_connections(self):
@@ -277,12 +275,12 @@ class Benchmark(object):
         return connections
 
 
-    def calculate_records(self):
+    def calculate_records(self, shardsize):
 
         """ calculates records for user monitor """
 
-        self.INSERTCOUNT = int(0.999 * self.RECORDS)
-        self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT
+        self.INSERTCOUNT = int(0.999 * shardsize)
+        self.INSERTCOUNT_MONITOR = shardsize - self.INSERTCOUNT
         self.INSERTSTART_MONITOR = self.INSERTSTART + self.INSERTCOUNT
 
         print(f"Insertcount Monitor: {self.INSERTCOUNT_MONITOR}, Insertstart Monitor: {self.INSERTSTART_MONITOR}")
@@ -326,13 +324,13 @@ class Benchmark(object):
         self.DRIVER_ID = id
 
         # reduce self.RECORDS to the amount of the sharded workload
-        self.RECORDS = self.shard_workload()
+        shardsize = self.shard_workload()
 
         # Divide threads across drivers
         self.CURRENT_THREAD = self.calculate_connections()
 
         # Calculate records for monitor
-        self.calculate_records()
+        self.calculate_records(shardsize)
 
         print(f'FINAL VALUES: \n INSERTSTART {self.INSERTSTART}, INSERTCOUNT {self.INSERTCOUNT}, THREADS {self.CURRENT_THREAD}')
         print(f'FINAL MONITOR VALUES: \n INSERTSTART {self.INSERTSTART_MONITOR}, INSERTCOUNT {self.INSERTCOUNT_MONITOR}, THREADS {self.MONITOR_THREADS}')
