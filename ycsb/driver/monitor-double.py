@@ -350,7 +350,7 @@ class Benchmark(object):
         os.environ['RESOURCE'] = str(self.RG)
         os.environ['MONITORPW'] = str(self.MONITORPW)
         os.environ['MAXTIME'] = str(self.MAXTIME)
-        os.environ['INSERTCOUNT_CITUS'] = str(self.INSERTCOUNT_CITUS)
+        os.environ['INSERTCOUNT'] = str(self.INSERTCOUNT)
         os.environ['INSERTCOUNT_MONITOR'] = str(self.INSERTCOUNT_MONITOR)
         os.environ['INSERTSTART_MONITOR'] = str(self.INSERTSTART_MONITOR)
         os.environ['INSERTSTART'] = str(self.INSERTSTART)
