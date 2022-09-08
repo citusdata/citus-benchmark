@@ -11,6 +11,7 @@ param maxtime int
 param parallel bool
 param serverport int
 param part int
+param monitor_threads int
 
 param zone string
 param location string
@@ -64,6 +65,7 @@ echo export FOLDER=$(pwd) >> .bashrc
 echo export SERVERPORT={16} >> .bashrc
 echo export PART={17} >> .bashrc
 echo export DRIVERS={18} >> .bashrc
+echo export MONITOR_THREADS={19} >> .bashrc
 
 # Use the same environment variables right now, sourcing bashrc doesn't work
 # since we are not in an interactive shell
@@ -86,6 +88,7 @@ export FOLDER=$(pwd)
 export SERVERPORT={16}
 export PART={17}
 export DRIVERS={18}
+export MONITOR_THREADS={19}
 
 # Make sure we can open enough connections
 echo 'ulimit -n "$(ulimit -Hn)"' >> .bashrc
@@ -106,7 +109,7 @@ while ! psql -c 'select 1'; do  echo failed; sleep 1; done
 tmux new-session -d -t main -s init-bench \; send-keys './build-and-run-ycsb-double-driver.sh' Enter
 '''
 
-var driverBootScript = format(driverBootTemplate, pgHost, pgUser, pgPassword, pgPort, bashrcTmuxAutoAttach, pgVersion, records, operations, shard_count, thread_counts, iterations, workers, rg, monitorpw, maxtime, parallel, serverport, part, drivers)
+var driverBootScript = format(driverBootTemplate, pgHost, pgUser, pgPassword, pgPort, bashrcTmuxAutoAttach, pgVersion, records, operations, shard_count, thread_counts, iterations, workers, rg, monitorpw, maxtime, parallel, serverport, part, drivers, monitor_threads)
 
 module vm 'vm.bicep' = {
   name: '${vmName}-driver-module'

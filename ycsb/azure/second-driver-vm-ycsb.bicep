@@ -60,8 +60,10 @@ echo export MAXTIME={14} >> .bashrc
 echo export PARALLEL={15} >> .bashrc
 echo export FOLDER=$(pwd) >> .bashrc
 echo export SERVERPORT={16} >> .bashrc
+
 # Use the same environment variables right now, sourcing bashrc doesn't work
 # since we are not in an interactive shell
+
 export PGHOST='{0}'
 export PGUSER={1}
 export PGPASSWORD='{2}'

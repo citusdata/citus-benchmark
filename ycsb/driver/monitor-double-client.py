@@ -267,8 +267,10 @@ class Benchmark(object):
     def shard_workload(self):
 
         """ Calculate size of shards for each driver """
+        print(f"Before\nInsertcount: {self.INSERTCOUNT}, Records: {self.RECORDS}")
 
         shardsize = math.floor(self.RECORDS / self.DRIVERS)
+        print(f"shardsize = {shardsize}")
         self.INSERTSTART = self.DRIVER_ID * shardsize
 
         if int(self.DRIVER_ID) + 1 == int(self.DRIVERS):
@@ -277,6 +279,8 @@ class Benchmark(object):
             self.INSERTCOUNT = shardsize
 
         self.RECORDS = self.INSERTCOUNT
+
+        print(f"After\nInsertcount: {self.INSERTCOUNT}, Records: {self.RECORDS}")
 
         return self.RECORDS
 
@@ -291,6 +295,8 @@ class Benchmark(object):
         if int(self.DRIVER_ID) + 1 == int(self.DRIVERS):
             return connections + (self.CURRENT_THREAD % connections)
 
+        print(f"Calculated connections: {connections}")
+
         return connections
 
 
@@ -301,6 +307,8 @@ class Benchmark(object):
         self.INSERTCOUNT_CITUS = int(0.999 * self.RECORDS)
         self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT_CITUS
         self.INSERTSTART_MONITOR = self.INSERTCOUNT_CITUS + (self.RECORDS * self.DRIVERS)
+
+        print(f"Insertcount Monitor: {self.INSERTCOUNT_MONITOR}, Insertstart Monitor: {self.INSERTSTART_MONITOR}")
 
 
     def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", database = "citus",
@@ -335,6 +343,7 @@ class Benchmark(object):
         self.INSERTCOUNT_CITUS = 0
         self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT_CITUS
         self.INSERTSTART = 0
+        self.MONITOR_THREADS = math.floor(workers / drivers)
         self.INSERTSTART_MONITOR = 0
         self.DRIVERS = drivers
         self.DRIVER_ID = id
@@ -377,6 +386,7 @@ class Benchmark(object):
         os.environ['PARALLEL'] = str(self.PARALLEL)
         os.environ['PART'] = str(self.DRIVER_ID)
         os.environ['DRIVERS'] = str(self.DRIVERS)
+        os.environ['MONITOR_THREADS'] = self.MONITOR_THREADS
 
         # Install YCSB and JDBC PostgreSQL driver
         self.install_ycsb()

@@ -7,6 +7,7 @@ param pgHost string
 param pgPort int = 5432
 param monitorpw string
 param drivers int
+param  monitor_threads int
 
 
 param location string = resourceGroup().location
@@ -95,6 +96,7 @@ module driverVm 'double-driver-ycsb.bicep' = {
     serverport: serverport
     part: 0
     drivers: drivers
+    monitor_threads:  monitor_threads
   }
 }
 
@@ -130,6 +132,7 @@ module SecondDriverVm 'double-driver-ycsb.bicep' = {
       serverport: serverport
       part: 1
       drivers: drivers
+      monitor_threads:  monitor_threads
     }
   }
 

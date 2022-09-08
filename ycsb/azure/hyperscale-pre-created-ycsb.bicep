@@ -7,7 +7,6 @@ param pgHost string
 param pgPort int = 5432
 param monitorpw string
 
-
 param location string = resourceGroup().location
 param zone string = '1'
 param records string = '10000'
@@ -19,6 +18,8 @@ param workers int = 1
 param maxtime int = 600
 param parallel bool = false
 param serverport int = 9999
+param drivers int
+param part int
 
 // Configuration of the postgres server group
 param pgVersion string = '14'
@@ -87,6 +88,8 @@ module driverVm 'driver-vm-ycsb.bicep' = {
     maxtime: maxtime
     parallel: parallel
     serverport: serverport
+    part: part
+    drivers: drivers
   }
 }
 
