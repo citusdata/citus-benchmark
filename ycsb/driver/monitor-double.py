@@ -246,20 +246,6 @@ class Benchmark(object):
         os.chdir(self.HOMEDIR)
 
 
-    def create_sign(self, filename = "run.start", iteration = 0):
-
-        """ create start file containing the current time in UTC if ready to run ycsb benchmarks """
-
-        os.chdir('scripts')
-
-        if not iteration:
-            run(['./timestamp.sh', filename, self.HOMEDIR], shell = False)
-        else:
-            run(['./timestamp.sh', filename + f'-{iteration}', self.HOMEDIR], shell = False)
-
-        os.chdir(self.HOMEDIR)
-
-
     def shard_workload(self):
 
         """ Calculate size of shards for each driver """
@@ -282,10 +268,11 @@ class Benchmark(object):
         """ Calculate how many connections this driver should have to the cluster """
 
         connections = math.floor(self.CURRENT_THREAD / self.DRIVERS)
-        print(f"new connections calculated {connections}")
 
         if int(self.DRIVER_ID) + 1 == int(self.DRIVERS):
             return connections + (self.CURRENT_THREAD % connections)
+
+        print(f"Calculated connections: {connections}")
 
         return connections
 
@@ -294,9 +281,11 @@ class Benchmark(object):
 
         """ calculates records for user monitor """
 
-        self.INSERTCOUNT_CITUS = int(0.999 * self.RECORDS)
-        self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT_CITUS
-        self.INSERTSTART_MONITOR = self.INSERTCOUNT_CITUS
+        self.INSERTCOUNT = int(0.999 * self.RECORDS)
+        self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT
+        self.INSERTSTART_MONITOR = self.INSERTSTART + self.INSERTCOUNT
+
+        print(f"Insertcount Monitor: {self.INSERTCOUNT_MONITOR}, Insertstart Monitor: {self.INSERTSTART_MONITOR}")
 
 
     def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", database = "citus",
@@ -331,25 +320,22 @@ class Benchmark(object):
         self.INSERTCOUNT_CITUS = 0
         self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT_CITUS
         self.INSERTSTART = 0
+        self.MONITOR_THREADS = math.floor(workers / drivers)
         self.INSERTSTART_MONITOR = 0
         self.DRIVERS = drivers
         self.DRIVER_ID = id
 
-        self.shard_workload()
-        print(f'Start records: {self.RECORDS}, {self.CURRENT_THREAD}')
-
         # reduce self.RECORDS to the amount of the sharded workload
         self.RECORDS = self.shard_workload()
-        print(f"new records calculated: {self.RECORDS}")
 
         # Divide threads across drivers
         self.CURRENT_THREAD = self.calculate_connections()
-        print(f'mediate records: {self.RECORDS}, {self.CURRENT_THREAD}')
 
         # Calculate records for monitor
         self.calculate_records()
 
-        print(f'finish records: {self.RECORDS}, {self.CURRENT_THREAD}')
+        print(f'FINAL VALUES: \n INSERTSTART {self.INSERTSTART}, INSERTCOUNT {self.INSERTCOUNT}, THREADS {self.CURRENT_THREAD}')
+        print(f'FINAL MONITOR VALUES: \n INSERTSTART {self.INSERTSTART_MONITOR}, INSERTCOUNT {self.INSERTCOUNT_MONITOR}, THREADS {self.MONITOR_THREADS}')
 
         # Set environment variables
         os.environ['DATABASE'] = self.DATABASE
@@ -377,7 +363,6 @@ class Benchmark(object):
         # Install YCSB and JDBC PostgreSQL driver
         self.install_ycsb()
         self.install_jdbc()
-
 
 
     def get_workload(self, wtype):

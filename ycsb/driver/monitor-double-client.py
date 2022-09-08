@@ -267,10 +267,8 @@ class Benchmark(object):
     def shard_workload(self):
 
         """ Calculate size of shards for each driver """
-        print(f"Before\nInsertcount: {self.INSERTCOUNT}, Records: {self.RECORDS}")
 
         shardsize = math.floor(self.RECORDS / self.DRIVERS)
-        print(f"shardsize = {shardsize}")
         self.INSERTSTART = self.DRIVER_ID * shardsize
 
         if int(self.DRIVER_ID) + 1 == int(self.DRIVERS):
@@ -280,8 +278,6 @@ class Benchmark(object):
 
         self.RECORDS = self.INSERTCOUNT
 
-        print(f"After\nInsertcount: {self.INSERTCOUNT}, Records: {self.RECORDS}")
-
         return self.RECORDS
 
 
@@ -290,7 +286,6 @@ class Benchmark(object):
         """ Calculate how many connections this driver should have to the cluster """
 
         connections = math.floor(self.CURRENT_THREAD / self.DRIVERS)
-        print(f"new connections calculated {connections}")
 
         if int(self.DRIVER_ID) + 1 == int(self.DRIVERS):
             return connections + (self.CURRENT_THREAD % connections)
@@ -304,9 +299,9 @@ class Benchmark(object):
 
         """ calculates records for user monitor """
 
-        self.INSERTCOUNT_CITUS = int(0.999 * self.RECORDS)
-        self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT_CITUS
-        self.INSERTSTART_MONITOR = self.INSERTCOUNT_CITUS + (self.RECORDS * self.DRIVERS)
+        self.INSERTCOUNT = int(0.999 * self.RECORDS)
+        self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT
+        self.INSERTSTART_MONITOR = self.INSERTSTART + self.INSERTCOUNT
 
         print(f"Insertcount Monitor: {self.INSERTCOUNT_MONITOR}, Insertstart Monitor: {self.INSERTSTART_MONITOR}")
 
@@ -348,21 +343,17 @@ class Benchmark(object):
         self.DRIVERS = drivers
         self.DRIVER_ID = id
 
-        self.shard_workload()
-        print(f'Start records: {self.RECORDS}, {self.CURRENT_THREAD}')
-
         # reduce self.RECORDS to the amount of the sharded workload
         self.RECORDS = self.shard_workload()
-        print(f"new records calculated: {self.RECORDS}")
 
         # Divide threads across drivers
         self.CURRENT_THREAD = self.calculate_connections()
-        print(f'mediate records: {self.RECORDS}, {self.CURRENT_THREAD}')
 
         # Calculate records for monitor
         self.calculate_records()
 
-        print(f'finish records: {self.RECORDS}, {self.CURRENT_THREAD}')
+        print(f'FINAL VALUES: \n INSERTSTART {self.INSERTSTART}, INSERTCOUNT {self.INSERTCOUNT}, THREADS {self.CURRENT_THREAD}')
+        print(f'FINAL MONITOR VALUES: \n INSERTSTART {self.INSERTSTART_MONITOR}, INSERTCOUNT {self.INSERTCOUNT_MONITOR}, THREADS {self.MONITOR_THREADS}')
 
         # Set environment variables
         os.environ['DATABASE'] = self.DATABASE
