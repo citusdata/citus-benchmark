@@ -2,7 +2,7 @@
 # This is the driver script ‘benchmark.py’ which is run in a tmux session (session-name = init-bench)
 # Downloads and installs YCSB and JDBC driver
 # Could start two parallel YCSB clients. First one runs 99.9% of records via user 'citus'
-# Second client runs 0.1% of records via user 'monitor', these records are logged
+# Second client runs 0.001% of records via user 'monitor', these records are logged
 # Runs specified workloads (default = workload a and c), iterates multiple times through workloads
 # Stores all raw YCSB output for every workload
 # Generates csv’s from every benchmark iteration
@@ -504,7 +504,7 @@ class Benchmark(object):
             print("Generating CSV")
 
             # gather csv with all results after each iteration
-            run(['python3', 'output.py', outputdir, f"{outputdir}.csv"], shell = False)
+            run(['python3', 'output.py', outputdir, f"results-{self.id}.csv"], shell = False)
 
 
     def citus_workload(self):
@@ -538,7 +538,7 @@ class Benchmark(object):
 
             # gather csv with all results
             os.chdir(self.HOMEDIR)
-            run(['python3', 'output.py', "results.csv"], shell = False)
+            run(['python3', 'output.py', f"results-{self.id}.csv"], shell = False)
 
 
     def update_and_check_state_change(self, update_index, check_index, frequency = 2):
@@ -596,7 +596,7 @@ class Benchmark(object):
             print("Generating CSV")
 
             # gather csv with all results
-            run(['python3', 'output.py', "results.csv"], shell = False)
+            run(['python3', 'output.py', f"results-{self.id}.csv"], shell = False)
 
 
     def monitor_workloada(self):
@@ -616,7 +616,7 @@ class Benchmark(object):
             print("Generating CSV")
 
             # gather csv with all results
-            run(['python3', 'output.py', "results.csv"], shell = False)
+            run(['python3', 'output.py', f"results-{self.id}.csv"], shell = False)
 
 
     def run_all_workloads(self):
@@ -653,7 +653,7 @@ class Benchmark(object):
             print("Generating CSV")
 
             # gather csv with all results
-            run(['python3', 'output.py', "results.csv"], shell = False)
+            run(['python3', 'output.py', f"results-{self.id}.csv"], shell = False)
 
 
 
@@ -694,7 +694,7 @@ if __name__ == '__main__':
 
     except KeyboardInterrupt:
 
-         run(['python3', 'output.py', "results.csv"], shell = False)
+         run(['python3', 'output.py', f"results-single.csv"], shell = False)
 
 
 

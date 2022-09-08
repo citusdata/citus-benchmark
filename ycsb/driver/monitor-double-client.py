@@ -301,15 +301,11 @@ class Benchmark(object):
         self.INSERTCOUNT_MONITOR = shardsize - self.INSERTCOUNT
         self.INSERTSTART_MONITOR = self.INSERTSTART + self.INSERTCOUNT
 
-        print(f"Insertcount Monitor: {self.INSERTCOUNT_MONITOR}, Insertstart Monitor: {self.INSERTSTART_MONITOR}")
-
 
     def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", database = "citus",
     workloadtype = "load", workloads="workloada", iterations = 1, outputfile = "results.csv", shard_count = 16,
     workers = "2", resource = "custom", host = "localhost", parallel = False, monitorpw = "monitor", maxtime = 600, drivers = 1, id = 0):
 
-        print("DRIVER, DRIVER_ID")
-        print(drivers, id)
 
         self.HOMEDIR = os.getcwd()
         self.PARALLEL = parallel
@@ -380,6 +376,11 @@ class Benchmark(object):
         # Install YCSB and JDBC PostgreSQL driver
         self.install_ycsb()
         self.install_jdbc()
+
+    @property
+
+    def id(self):
+        return self.DRIVER_ID
 
 
     def get_workload(self, wtype):
@@ -614,7 +615,7 @@ class Benchmark(object):
             print("Generating CSV")
 
             # gather csv with all results
-            run(['python3', 'output.py', "results.csv"], shell = False)
+            run(['python3', 'output.py', f"results-{self.id}.csv"], shell = False)
 
 
     def monitor_workloada(self):
@@ -634,7 +635,7 @@ class Benchmark(object):
             print("Generating CSV")
 
             # gather csv with all results
-            run(['python3', 'output.py', "results.csv"], shell = False)
+            run(['python3', 'output.py', f"results-{self.id}.csv"], shell = False)
 
 
     def run_all_workloads(self):
@@ -671,7 +672,7 @@ class Benchmark(object):
             print("Generating CSV")
 
             # gather csv with all results
-            run(['python3', 'output.py', "results.csv"], shell = False)
+            run(['python3', 'output.py', f"results-{self.id}.csv"], shell = False)
 
 
 
@@ -716,4 +717,4 @@ if __name__ == '__main__':
 
     except KeyboardInterrupt:
 
-         run(['python3', 'output.py', "results.csv"], shell = False)
+         run(['python3', 'output.py', "results-double.csv"], shell = False)
