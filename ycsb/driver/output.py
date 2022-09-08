@@ -6,6 +6,7 @@ import random, string
 homedir = os.getcwd()
 
 
+
 def search_file(filename, substring):
 
     """ Searches for a substring in the output file and returns the value corresponding to the substring """
@@ -61,6 +62,7 @@ def return_csv(csvname="output.csv"):
     """
     generates a csv with format:
     id, workers, iteration, workloadtype, workloadname, threads, records, operations, throughput, runtime
+    structure: ${HOMEDIR}/${OUTDIR}/run_${WORKLOAD}_${THREAD}_${RECORDS}_${OPERATIONS}_${ITERATION}_${WORKERS}_${RESOURCE}_${DRIVERS}_${PART}.log
     """
 
     results = [["id", "workers", "iteration", "workloadtype", "workloadname", "threads", "records", "operations", "throughput", "runtime (s)"]]
@@ -77,16 +79,18 @@ def return_csv(csvname="output.csv"):
         if values[0] == "load":
 
             # resource_group, workers, iteration, workloadtype, workloadname, threads, records, operations, throughput, runtime
-            row = [values[-1].split('.')[0], values[-2], values[-3], values[0], values[1], values[2], values[3], 0, get_throughput(output_file), get_runtime(output_file)]
+            row = [values[-3], values[-4], values[-5], values[0], values[1], values[2], values[3], 0, get_throughput(output_file), get_runtime(output_file)]
             results.append(row)
             continue
 
         # resource_group, workers, iteration, workloadtype, workloadname, threads, records, operations, throughput, runtime
-        row = [values[-1].split('.')[0], values[-2], values[-3], values[0], values[1], values[2], values[3], values[4], get_throughput(output_file), get_runtime(output_file)]
+        row = [values[-3].split('.')[0], values[-4], values[-5], values[0], values[1], values[2], values[3], values[4], get_throughput(output_file), get_runtime(output_file)]
         results.append(row)
 
     # write results to csv file
-    f = open(homedir + "/" + csvname, 'w')
+    # values[-1].split(.) -> part (driver id)
+    # values[-2] -> drivers
+    f = open(homedir + "/" + csvname + "-" + values[-1].split('.')[0] + "-" + values[-2], 'w')
     writer = csv.writer(f)
 
     for row in results:

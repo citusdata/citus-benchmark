@@ -718,3 +718,4 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
 
          run(['python3', 'output.py', "results-double.csv"], shell = False)
+         sys.exit(1)

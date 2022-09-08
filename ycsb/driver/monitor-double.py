@@ -20,6 +20,7 @@ import pickle
 import threading
 from threading import Event
 import math
+import sys
 
 # global variables
 states = [0, 0, 0, 0, 0, 0]
@@ -695,6 +696,7 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
 
          run(['python3', 'output.py', f"results-single.csv"], shell = False)
+         sys.exit(1)
 
 
 
