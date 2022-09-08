@@ -564,10 +564,10 @@ class Benchmark(object):
 
         # If workload finished, send a message to the server
         # update csv after every workload
+        run(['python3', 'output.py', f"results"], shell = False)
         self.update_and_check_state_change(3, 5, 3)
 
         print(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
-        run(['python3', 'output.py', f"results"], shell = False)
 
         # set states to [0, 0, 0, 0]
         flush()

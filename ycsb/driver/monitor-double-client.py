@@ -581,10 +581,10 @@ class Benchmark(object):
         self.run_workload(workload, type, self.PARALLEL)
 
         # If workload finished, send a message to the server
+        run(['python3', 'output.py', f"results"], shell = False)
         self.update_and_check_state_change(4, 5, 3)
 
         print(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
-        run(['python3', 'output.py', f"results"], shell = False)
 
 
         # set states to [0, 0, 0, 0]
