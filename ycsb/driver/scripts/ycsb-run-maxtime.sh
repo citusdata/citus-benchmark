@@ -16,4 +16,4 @@ bin/ycsb run jdbc \
     -p db.user=$PGUSER \
     -p db.passwd=$PGPASSWORD \
     -p maxexecutiontime=$MAXTIME \
-    -p db.url="jdbc:postgresql://$CITUS_HOST/$PGDATABASE?loadBalanceHosts=false" | tee ${HOMEDIR}/run_${WORKLOAD}_${THREAD}_${RECORDS}_${OPERATIONS}_${ITERATION}_${WORKERS}_${RESOURCE}_${DRIVERS}_${PART}.log
+    -p db.url="jdbc:postgresql://$CITUS_HOST/$PGDATABASE?loadBalanceHosts=true" | tee ${HOMEDIR}/run_${WORKLOAD}_${THREAD}_${RECORDS}_${OPERATIONS}_${ITERATION}_${WORKERS}_${RESOURCE}_${DRIVERS}_${PART}.log
