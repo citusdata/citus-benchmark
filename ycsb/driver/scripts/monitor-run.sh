@@ -15,4 +15,4 @@ bin/ycsb run jdbc \
     -p db.user=monitor \
     -p db.passwd=$MONITORPW \
     -p maxexecutiontime=$MAXTIME \
-    -p db.url="jdbc:postgresql://$CITUS_HOST/$PGDATABASE?loadBalanceHosts=true" | tee ${HOMEDIR}/run_${WORKLOAD}_${MONITOR_THREADS}_${INSERTCOUNT_MONITOR}_${RECORDS}_${ITERATION}_${WORKERS}_${RESOURCE}_${DRIVERS}_${PART}.mlog
+    -p db.url="jdbc:postgresql://$CITUS_HOST/$PGDATABASE?loadBalanceHosts=false" | tee ${HOMEDIR}/run_${WORKLOAD}_${MONITOR_THREADS}_${INSERTCOUNT_MONITOR}_${RECORDS}_${ITERATION}_${WORKERS}_${RESOURCE}_${DRIVERS}_${PART}.mlog
