@@ -21,10 +21,26 @@ import threading
 from threading import Event
 import math
 import sys
+import logging
 
 # global variables
 states = [0, 0, 0, 0, 0, 0]
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+
+def bitwise_or(a, b):
+
+    """ returns new list of states with bitwise or operation executed """
+
+    if len(a) != len(b):
+        raise Exception(f"length of lists are not equal\na {a} ({len(a)}), b: {b} ({len(b)})")
+
+    result = []
+
+    for i in range(len(a)):
+        result.append(a[i] + b[i] - (a[i] * b[i]))
+
+    return result
 
 
 def calculate_server_ip(to_sum):
@@ -124,24 +140,23 @@ def set_received_state(message):
     current_sum = sum(states)
 
     try:
-
         msg = pickle.loads(message)
         _sum = sum(msg)
 
-        if  _sum > current_sum:
-
-            states = msg
-            print(f"States are updated: {msg}")
-
         if _sum == 0 and current_sum == 6:
             states = [0, 0, 0, 0, 0, 0]
+            return
 
-        if _sum < current_sum:
-            send_with_pickle()
+        states = bitwise_or(msg, states)
 
-    except:
+    except Exception as e:
+        logging.warning(e)
 
-        print(f"Exception: {message}")
+        if message == b'\x0a':
+            logging.info("Heartbeat from server")
+
+        else:
+            logging.warning(f"Exception: {message}")
 
 
 def monitor_states(event: Event):
@@ -378,7 +393,6 @@ class Benchmark(object):
         self.install_jdbc()
 
     @property
-
     def id(self):
         return self.DRIVER_ID
 
@@ -586,9 +600,6 @@ class Benchmark(object):
 
         print(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
 
-
-        # set states to [0, 0, 0, 0]
-        flush()
 
     def execute_workloada_monitor_workloadc(self, thread, i):
 

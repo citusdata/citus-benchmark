@@ -20,6 +20,7 @@ import pickle
 import threading
 from threading import Event
 import math
+import logging
 import sys
 
 # global variables
@@ -49,6 +50,21 @@ def flush():
     if states == [1, 1, 1, 1, 1, 1]:
         states = [0, 0, 0, 0, 0, 0]
         send_with_pickle()
+
+
+def bitwise_or(a, b):
+
+    """ returns new list of states with bitwise or operation executed """
+
+    if len(a) != len(b):
+        raise Exception(f"length of lists are not equal\na {a} ({len(a)}), b: {b} ({len(b)})")
+
+    result = []
+
+    for i in range(len(a)):
+        result.append(a[i] + b[i] - (a[i] * b[i]))
+
+    return result
 
 
 def is_state_valid(states, index):
@@ -107,20 +123,23 @@ def set_received_state(message):
     current_sum = sum(states)
 
     try:
-
         msg = pickle.loads(message)
         _sum = sum(msg)
 
-        if  _sum > current_sum:
-
-            states = msg
-            print(f"States are updated: {msg}")
-
         if _sum == 0 and current_sum == 6:
             states = [0, 0, 0, 0, 0, 0]
+            return
 
-        if _sum < current_sum:
-            send_with_pickle()
+        states = bitwise_or(msg, states)
+
+    except Exception as e:
+        logging.warning(e)
+
+        if message == b'\x0a':
+            logging.info("Heartbeat from server")
+
+        else:
+            logging.warning(f"Exception: {message}")
 
     except:
 

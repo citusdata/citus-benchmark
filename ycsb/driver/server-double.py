@@ -14,6 +14,7 @@ import time
 states = [0, 0, 0, 0, 0, 0]
 ip = socket.gethostbyname(socket.gethostname())
 
+
 def bitwise_or(a, b):
 
     """ returns new list of states with bitwise or operation executed """
@@ -31,7 +32,7 @@ def bitwise_or(a, b):
 
 def flush():
 
-    """ if all states are 2, 1 then flush """
+    """ if all states are  1 then flush """
 
     global states
 
@@ -143,30 +144,6 @@ def clientthread(conn, addr):
         states = bitwise_or(states, msg)
         print(f"States updated to {states}\nBroadcasting")
         broadcast_with_pickle(conn, states)
-
-        # elif _sum != 0 and current_sum > _sum:
-        #     print(f"Sending states back")
-        #     conn.send(pickle.dumps(states))
-        #     continue
-
-
-        # elif _sum > current_sum:
-        #     print(f"Current states are: {states}")
-        #     states = bitwise_or(states, msg)
-        #     print(f"Setting states to: {states}")
-        #     print(f"Broadcasting states")
-        #     broadcast_with_pickle(conn, states)
-        #     continue
-
-        # elif _sum == current_sum:
-        #     print(f"Received current states {states} from connection {conn}\nNothing to do")
-
-        #     if msg !=
-        #     continue
-
-        # print(f"Forwarding states")
-        # broadcast(msg, conn)
-
 
     print(f"Removing connection: {conn}")
     conn.close()
