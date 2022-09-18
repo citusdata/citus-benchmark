@@ -18,12 +18,14 @@ from os.path import exists
 import socket
 import pickle
 import threading
-from threading import Event
+from threading import Event, Lock
 import math
-import logging
 import sys
+import logging
+
 
 logging.basicConfig(level=logging.NOTSET)
+lock = Lock()
 
 # global variables
 states = [0, 0, 0, 0, 0, 0]
@@ -43,13 +45,15 @@ def send_with_pickle():
         print("Sending package to server failed")
 
 
-def flush():
+def flush(lock):
 
     """ if all states are 1 then flush """
 
     global states
 
+    lock.acquire()
     states = [0, 0, 0, 0, 0, 0]
+    lock.release()
     logging.debug('states flushed')
 
 
@@ -82,7 +86,7 @@ def print_current_time():
     run(["date"], shell = False)
 
 
-def update_state(index):
+def update_state(index, lock):
 
     """ updates state """
 
@@ -90,7 +94,9 @@ def update_state(index):
 
 
     print(f"Updating state on index {index}")
+    lock.acquire()
     states[index] = 1
+    lock.release()
 
     send_with_pickle()
 
@@ -118,7 +124,7 @@ def connect_to_socket(server):
     server.connect((IP, PORT))
 
 
-def set_received_state(message):
+def set_received_state(message, lock):
 
     global states
     current_sum = sum(states)
@@ -127,9 +133,13 @@ def set_received_state(message):
         msg = pickle.loads(message)
 
         if current_sum == 6:
+            lock.acquire()
             states = [0, 0, 0, 0, 0, 0]
+            lock.release()
 
+        lock.acquire()
         states = bitwise_or(msg, states)
+        lock.release()
 
     except Exception as e:
         logging.warning(e)
@@ -145,7 +155,7 @@ def set_received_state(message):
         print(f"Exception: {message}")
 
 
-def monitor_states(event: Event):
+def monitor_states(event: Event, lock):
 
     global server
     global states
@@ -173,7 +183,7 @@ def monitor_states(event: Event):
                 if not message:
                     break
 
-                set_received_state(message)
+                set_received_state(message, lock)
 
         except Exception as e:
 
@@ -560,22 +570,22 @@ class Benchmark(object):
             run(['python3', 'output.py', f"results"], shell = False)
 
 
-    def update_and_check_state_change(self, update_index, check_index, frequency = 2):
+    def update_and_check_state_change(self, update_index, check_index, lock, frequency = 2):
 
         """ updates the states and subsequently wait for a respons from the client if the client is ready """
 
-        update_state(update_index)
+        update_state(update_index, lock)
         check_state(frequency, check_index)
 
 
-    def monitor_workload(self, workload, type, thread, i):
+    def monitor_workload(self, workload, type, thread, i, lock):
 
         """
         Wrapper for monitoring any workload
         """
 
         # send data to server because ready to start benchmarks
-        self.update_and_check_state_change(0, 2, 1)
+        self.update_and_check_state_change(0, 2, 1, lock)
 
         self.set_insertcount_monitor()
         self.run_workload(workload, type, self.PARALLEL)
@@ -583,19 +593,19 @@ class Benchmark(object):
         # If workload finished, send a message to the server
         # update csv after every workload
         run(['python3', 'output.py', f"results"], shell = False)
-        self.update_and_check_state_change(3, 5, 3)
-        flush()
+        self.update_and_check_state_change(3, 5, 3, lock)
+        flush(lock)
 
         print(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
 
         # set states to [0, 0, 0, 0]
 
-    def execute_workloada_monitor_workloadc(self, thread, i):
+    def execute_workloada_monitor_workloadc(self, thread, i, lock):
 
         """ Loads data with workload a, monitors workload c """
 
         self.run_workload("workloada", "load")
-        self.monitor_workload("workloadc",  "run", thread, i)
+        self.monitor_workload("workloadc",  "run", thread, i, lock)
 
 
 
@@ -605,13 +615,14 @@ class Benchmark(object):
         Executes loading with workloada in a regular fashion
         Monitors workload c
         """
+        global lock
 
         for i in range(self.ITERATIONS):
             self.set_iterations(i)
 
             for thread in self.THREADS:
                 self.set_current_thread(thread)
-                self.execute_workloada_monitor_workloadc(thread, i)
+                self.execute_workloada_monitor_workloadc(thread, i, lock)
 
             print(f"Done running workloadc for iteration {i}")
             print("Generating CSV")
@@ -626,12 +637,14 @@ class Benchmark(object):
         Monitors workload a
         """
 
+        global lock
+
         for i in range(self.ITERATIONS):
             self.set_iterations(i)
 
             for thread in self.THREADS:
                 self.set_current_thread(thread)
-                self.monitor_workload("workloada", "load", thread, i)
+                self.monitor_workload("workloada", "load", thread, i, lock)
 
             print(f"Done running workloadc for iteration {i}")
             print("Generating CSV")
@@ -699,10 +712,10 @@ if __name__ == '__main__':
         event = Event()
 
         # State Thread, monitors state and communicates with socket
-        states_thread = threading.Thread(target = monitor_states, args=([event]),  daemon = True)
+        states_thread = threading.Thread(target = monitor_states, args=([event, lock]),  daemon = True)
 
         # Benchmark Thread
-        benchmark_thread = threading.Thread(target = initiate_benchmarks, args=([event]))
+        benchmark_thread = threading.Thread(target = initiate_benchmarks, args=([event, lock]))
 
         # Start Threads
         states_thread.start()
