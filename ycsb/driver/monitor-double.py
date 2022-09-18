@@ -97,8 +97,10 @@ def update_state(index, lock):
     lock.acquire()
     states[index] = 1
     lock.release()
+    logging.debug(f'Updated states: {states}')
 
     send_with_pickle()
+    logging.debug(f'States send to server')
 
 
 
