@@ -585,11 +585,11 @@ class Benchmark(object):
         # update csv after every workload
         run(['python3', 'output.py', f"results"], shell = False)
         self.update_and_check_state_change(3, 5, 3)
+        flush()
 
         print(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
 
         # set states to [0, 0, 0, 0]
-        flush()
 
     def execute_workloada_monitor_workloadc(self, thread, i):
 

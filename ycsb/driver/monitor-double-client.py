@@ -118,7 +118,7 @@ def check_state(frequency, index):
     while not states[index]:
         time.sleep(frequency)
 
-    logging.info(f"State = 1 is found on {index}")
+    logging.info(f"State = 1 is found on index {index}")
 
     return True
 
@@ -598,6 +598,7 @@ class Benchmark(object):
         # If workload finished, send a message to the server
         run(['python3', 'output.py', f"results"], shell = False)
         self.update_and_check_state_change(4, 5, 3)
+        flush()
 
         print(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
 
