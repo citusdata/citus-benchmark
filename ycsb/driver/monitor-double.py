@@ -23,6 +23,8 @@ import math
 import logging
 import sys
 
+logging.basicConfig(level=logging.NOTSET)
+
 # global variables
 states = [0, 0, 0, 0, 0, 0]
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -124,11 +126,9 @@ def set_received_state(message):
 
     try:
         msg = pickle.loads(message)
-        _sum = sum(msg)
 
-        if _sum == 0 and current_sum == 6:
+        if current_sum == 6:
             states = [0, 0, 0, 0, 0, 0]
-            return
 
         states = bitwise_or(msg, states)
 

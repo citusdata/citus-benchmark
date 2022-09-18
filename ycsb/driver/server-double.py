@@ -136,8 +136,9 @@ def clientthread(conn, addr):
         print(f"Received states in phase: {msg}, {_sum}")
         current_sum = sum(states)
 
-        if _sum == 0 and current_sum == 6:
+        if current_sum == 6:
             states = [0, 0, 0, 0, 0, 0]
+            states = bitwise_or(states, msg)
             broadcast_with_pickle(conn, states)
             continue
 

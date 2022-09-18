@@ -24,6 +24,7 @@ import sys
 import logging
 
 # global variables
+logging.basicConfig(level=logging.NOTSET)
 states = [0, 0, 0, 0, 0, 0]
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -102,7 +103,7 @@ def update_state(index):
 
     global states
 
-    print(f"Updating state on index {index}")
+    logging.info(f"Updating state on index {index}")
     states[index] = 1
 
     send_with_pickle()
@@ -116,6 +117,8 @@ def check_state(frequency, index):
 
     while not states[index]:
         time.sleep(frequency)
+
+    logging.info(f"State = 1 is found on {index}")
 
     return True
 
@@ -141,11 +144,9 @@ def set_received_state(message):
 
     try:
         msg = pickle.loads(message)
-        _sum = sum(msg)
 
-        if _sum == 0 and current_sum == 6:
+        if current_sum == 6:
             states = [0, 0, 0, 0, 0, 0]
-            return
 
         states = bitwise_or(msg, states)
 

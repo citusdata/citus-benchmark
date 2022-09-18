@@ -9,10 +9,26 @@ import subprocess
 import pickle
 import threading
 from threading import Event
+import logging
 
+logging.basicConfig(level=logging.NOTSET)
 CONFIGFILE = "config.yml"
-states = [0, 0, 0, 0]
+states = [0, 0, 0, 0, 0, 0]
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+def bitwise_or(a, b):
+
+    """ returns new list of states with bitwise or operation executed """
+
+    if len(a) != len(b):
+        raise Exception(f"length of lists are not equal\na {a}, b: {b}")
+
+    result = []
+
+    for i in range(len(a)):
+        result.append(a[i] + b[i] - (a[i] * b[i]))
+
+    return result
 
 
 def read_config_file(configfile):
@@ -28,7 +44,7 @@ def read_config_file(configfile):
             port = config['server']
 
         except yaml.YAMLError as exc:
-            print(exc)
+            logging.error(exc)
 
     return config, ycsb, cluster, port
 
@@ -58,7 +74,7 @@ def send_with_pickle():
         server.send(pickle.dumps(states))
 
     except:
-        print("Sending package to server failed")
+        logging.error("Sending package to server failed")
 
 
 def print_current_time():
@@ -74,7 +90,7 @@ def update_state(index):
 
     global states
 
-    print(f"Updating state on index {index}")
+    logging.info(f"Updating state on index {index}")
     states[index] = 1
 
     send_with_pickle()
@@ -86,7 +102,7 @@ def check_state(frequency, index):
 
     global states
 
-    while not states[index]:
+    while sum(states[:index]) != index:
         time.sleep(frequency)
 
     return True
@@ -99,7 +115,6 @@ def open_port():
     global cluster
     global port
 
-    # run(['./port.sh', cluster['resource'], port['port'], '>/dev/null', '2>&1'], shell = False)
     run(["./open-port.sh", cluster['resource'], port['port']], shell = False)
 
 
@@ -113,12 +128,12 @@ def connect_to_socket():
 
     PORT = int(port['port'])
 
-    print(f"Trying to connect with PORT: {PORT} and IP: {ip}")
+    logging.info(f"Trying to connect with PORT: {PORT} and IP: {ip}")
 
     # connect to the server
     server.connect((ip, PORT))
 
-    print('Connecting succeeded')
+    logging.debug('Connecting succeeded')
 
 
 def set_received_state(message):
@@ -127,28 +142,36 @@ def set_received_state(message):
     current_sum = sum(states)
 
     try:
-
         msg = pickle.loads(message)
-        _sum = sum(msg)
 
-        if  _sum > current_sum:
-            states = msg
-            print(f"States are updated: {msg}")
+        if current_sum == 6:
+            states = [0, 0, 0, 0, 0, 0]
 
-        if _sum == 0 and current_sum == 6:
-            states = [0, 0, 0, 0]
+        states = bitwise_or(msg, states)
 
-        elif _sum < current_sum:
-            send_with_pickle()
-
-    except:
+    except Exception as e:
+        logging.warning(e)
 
         if message == b'\x0a':
-            print("Heartbeat from server")
+            logging.info("Heartbeat from server")
 
         else:
-            print(f"Exception: {message}")
+            logging.warning(f"Exception: {message}")
 
+
+def check_where_to_resume():
+
+    while True:
+
+        # Wait for messages while connected to server
+        message = server.recv(1024)
+
+        if not message:
+            break
+
+        set_received_state(message)
+
+    pass
 
 def monitor_states(event: Event):
 
@@ -164,15 +187,15 @@ def monitor_states(event: Event):
 
     # open port for ip in the background
     open_port()
-    print(f'Port is open')
+    logging.debug('Port is open')
 
     while not event.is_set():
 
         try:
 
-            run(['echo', 'Trying to connect to socket'], shell = False)
+            logging.info("attempting to connect with socket")
             connect_to_socket()
-            run(['echo', 'Connected to socket'], shell = False)
+            logging.info("connected to socket")
 
             while True:
 
@@ -186,7 +209,7 @@ def monitor_states(event: Event):
 
         except Exception as e:
 
-            print(f'Exception: {e}')
+            logging.warning(e)
             time.sleep(10)
 
 
@@ -214,6 +237,7 @@ class Client(object):
         self.PGPORT = cluster['port']
         self.SHARD_COUNT = ycsb['shard_count']
         self.ITERATIONS = ycsb['iterations']
+        self.THREADS = [int(thread) for thread in ycsb['thread_counts'].split(',')]
         self.STATES = states
 
 
@@ -265,6 +289,10 @@ class Client(object):
     def iterations(self):
         return self.ITERATIONS
 
+    @property
+    def threads(self):
+        return self.THREADS
+
 
     def print_current_time(self):
 
@@ -283,12 +311,12 @@ class Client(object):
         time.sleep(seconds)
 
 
-    def get_logging_instance(self, iteration):
+    def get_logging_instance(self, iteration, thread):
 
         """ generates a logging instance (from class Logging) """
 
         logs = Logging(iteration = iteration, resource = self.resource, prefix = self.prefix, host = self.pghost,
-        password = self.password, port = self.pgport, shard_count = self.shards)
+        password = self.password, port = self.pgport, shard_count = self.shards, current_thread = thread)
 
         return logs
 
@@ -299,9 +327,8 @@ class Client(object):
 
         self.print_current_time()
 
-        # Wait for monitoring to be started (checks every 10 secs if index 0 contains a 2)
-        if check_state(10, 0) and check_state(10, 1):
-            print("start monitoring")
+        # Wait for monitoring to be started (checks every 1 secs if index 0 contains a 2)
+        check_state(1, 2)
 
         # truncate pg_log on every worker to reduce data size
         logs.prepare_monitor_run()
@@ -312,7 +339,7 @@ class Client(object):
         return logs
 
 
-    def finish_monitoring(self, logs, homedir, bucket, iteration):
+    def finish_monitoring(self, logs, homedir, bucket, iteration, thread):
 
         """
         - stop monitoring
@@ -321,8 +348,7 @@ class Client(object):
         """
 
         # Wait for state to be stopped  (checks every 1 secs if index 3 and 4 contains a 1)
-        if check_state(1, 3) and check_state(1, 4):
-            print("finish monitoring")
+        check_state(1, 5)
 
         # Get data from current iteration
         logs.stop_monitoring()
@@ -336,8 +362,9 @@ class Client(object):
 
         # Monitoring finished, update state 0 to 1 on index 3
         update_state(5)
+        logging.info("States updated")
 
-        return f"Iteration {iteration} finished"
+        return f"Threadcount {thread} and iteration {iteration} finished"
 
 
     def monitor_iteration(self, homedir, bucket):
@@ -348,15 +375,26 @@ class Client(object):
 
         for iteration in range(iterations):
 
-            logs = self.get_logging_instance(iteration)
+            for thread in self.threads:
 
-            print("Wait to start monitoring")
-            self.prepare_monitoring(logs)
+                logs = self.get_logging_instance(iteration, thread)
 
-            print("Finish monitoring")
-            self.finish_monitoring(logs, homedir, bucket, iteration)
+                logging.info("Wait to start monitoring")
+                self.prepare_monitoring(logs)
 
-            print(f"Monitoring finished for iteration {iteration}")
+                logging.info("Finish monitoring")
+                self.finish_monitoring(logs, homedir, bucket, iteration, thread)
+
+                os.chdir(homedir)
+
+                # collect_data for every iteration
+                collect_data(bucket)
+
+                os.chdir(homedir)
+
+                logging.debug(f"Monitoring finished for threadcount {thread}, iteration {iteration}")
+
+        logging.debug("All iterations are done")
 
 
 def client_thread(bucket, homedir, event: Event):
@@ -370,17 +408,12 @@ def client_thread(bucket, homedir, event: Event):
         # monitor iterations
         client.monitor_iteration(homedir, bucket)
 
-        # Collect data after iterations are finised
-        os.chdir(homedir)
-
-        collect_data(bucket)
-
         # set event so other thread will terminate if the deamon thread is finished
         event.set()
 
     except Exception as e:
 
-        print(f"Exception: {e}")
+        logging.warning(f"{e}")
 
         # end all threads
         event.set()
@@ -420,5 +453,6 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
 
-         run(['python3', 'output.py', "results.csv"], shell = False)
+         logging.warning("Stopping Execution")
+         sys.exit(1)
 
