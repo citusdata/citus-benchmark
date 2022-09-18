@@ -173,10 +173,11 @@ def set_received_state(message, lock):
             logging.warning(f"Exception: {message}")
 
 
-def monitor_states(event: Event, lock):
+def monitor_states(event: Event):
 
     global server
     global states
+    global lock
 
     """
     This thread connects with socket and waits for messages
@@ -729,11 +730,11 @@ if __name__ == '__main__':
         event = Event()
 
         # State Thread, monitors state and communicates with socket
-        states_thread = threading.Thread(target = monitor_states, args=([event, lock]),  daemon = True)
+        states_thread = threading.Thread(target = monitor_states, args=([event]),  daemon = True)
 
         # Benchmark Thread
         try:
-            benchmark_thread = threading.Thread(target = initiate_benchmarks, args=([event, lock]))
+            benchmark_thread = threading.Thread(target = initiate_benchmarks, args=([event]))
         except Exception as e:
             print(f"Exception {e}")
             sys.exit(1)
