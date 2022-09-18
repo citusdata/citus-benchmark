@@ -80,8 +80,7 @@ def flush():
 
     global states
     states = [0, 0, 0, 0, 0, 0]
-    send_with_pickle()
-
+    logging.debug('states flushed')
 
 def is_state_valid(states, index):
 

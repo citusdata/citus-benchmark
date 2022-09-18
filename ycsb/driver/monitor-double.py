@@ -49,9 +49,8 @@ def flush():
 
     global states
 
-    if states == [1, 1, 1, 1, 1, 1]:
-        states = [0, 0, 0, 0, 0, 0]
-        send_with_pickle()
+    states = [0, 0, 0, 0, 0, 0]
+    logging.debug('states flushed')
 
 
 def bitwise_or(a, b):
