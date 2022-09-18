@@ -77,11 +77,12 @@ def send_with_pickle():
         print("Sending package to server failed")
 
 
-def flush(lock):
+def flush():
 
     """ if all states are 1 then flush """
 
     global states
+    global lock
 
     lock.acquire()
     states = [0, 0, 0, 0, 0, 0]
@@ -103,10 +104,11 @@ def print_current_time():
     run(["date"], shell = False)
 
 
-def update_state(index, lock):
+def update_state(index):
 
     """ updates state """
 
+    global lock
     global states
 
     logging.info(f"Updating state on index {index}")
@@ -116,7 +118,6 @@ def update_state(index, lock):
     lock.release()
 
     logging.debug(f'Updated states: {states}')
-
     send_with_pickle()
     logging.debug(f'States send to server')
 
@@ -149,9 +150,11 @@ def connect_to_socket(server):
         server.connect((IP, PORT))
 
 
-def set_received_state(message, lock):
+def set_received_state(message):
 
     global states
+    global lock
+
     current_sum = sum(states)
 
     try:
@@ -163,7 +166,7 @@ def set_received_state(message, lock):
             lock.release()
 
         lock.acquire()
-        states = bitwise_or(msg, states, lock)
+        states = bitwise_or(msg, states)
         lock.release()
 
     except Exception as e:
@@ -180,7 +183,6 @@ def monitor_states(event: Event):
 
     global server
     global states
-    global lock
 
     """
     This thread connects with socket and waits for messages
@@ -205,7 +207,7 @@ def monitor_states(event: Event):
                 if not message:
                     break
 
-                set_received_state(message, lock)
+                set_received_state(message)
 
         except Exception as e:
 
@@ -592,30 +594,30 @@ class Benchmark(object):
             run(['python3', 'output.py', "results"], shell = False)
 
 
-    def update_and_check_state_change(self, update_index, check_index, lock, frequency = 2):
+    def update_and_check_state_change(self, update_index, check_index, frequency = 2):
 
         """ updates the states and subsequently wait for a respons from the client if the client is ready """
 
-        update_state(update_index, lock)
+        update_state(update_index)
         check_state(frequency, check_index)
 
 
-    def monitor_workload(self, workload, type, thread, i, lock):
+    def monitor_workload(self, workload, type, thread, i):
 
         """
         Wrapper for monitoring any workload
         """
 
         # send data to server because ready to start benchmarks
-        self.update_and_check_state_change(1, 2, 1, lock)
+        self.update_and_check_state_change(1, 2, 1)
 
         self.set_insertcount_monitor()
         self.run_workload(workload, type, self.PARALLEL)
 
         # If workload finished, send a message to the server
         run(['python3', 'output.py', f"results"], shell = False)
-        self.update_and_check_state_change(4, 5, 3, lock)
-        flush(lock)
+        self.update_and_check_state_change(4, 5, 3)
+        flush()
 
         print(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
 
@@ -625,7 +627,7 @@ class Benchmark(object):
         """ Loads data with workload a, monitors workload c """
 
         self.run_workload("workloada", "load")
-        self.monitor_workload("workloadc",  "run", thread, i, lock)
+        self.monitor_workload("workloadc",  "run", thread, i)
 
 
 
@@ -636,14 +638,12 @@ class Benchmark(object):
         Monitors workload c
         """
 
-        global lock
-
         for i in range(self.ITERATIONS):
             self.set_iterations(i)
 
             for thread in self.THREADS:
                 self.set_current_thread(thread)
-                self.execute_workloada_monitor_workloadc(thread, i, lock)
+                self.execute_workloada_monitor_workloadc(thread, i, )
 
             print(f"Done running workloadc for iteration {i}")
             print("Generating CSV")
@@ -658,14 +658,13 @@ class Benchmark(object):
         Monitors workload a
         """
 
-        global lock
 
         for i in range(self.ITERATIONS):
             self.set_iterations(i)
 
             for thread in self.THREADS:
                 self.set_current_thread(thread)
-                self.monitor_workload("workloada", "load", thread, i, lock)
+                self.monitor_workload("workloada", "load", thread, i)
 
             print(f"Done running workloadc for iteration {i}")
             print("Generating CSV")
