@@ -195,6 +195,7 @@ def set_received_state(message):
         else:
             logging.warning(f"Exception: {message}")
 
+    force_release_lock()
 
 def monitor_states(event: Event):
 
