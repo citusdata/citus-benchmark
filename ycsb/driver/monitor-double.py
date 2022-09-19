@@ -30,6 +30,18 @@ lock = Lock()
 states = [0, 0, 0, 0, 0, 0]
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+def force_release_lock():
+
+    global lock
+
+    try:
+        lock.release()
+        logging.debug("Lock released")
+
+    except:
+        logging.debug("Lock was already released")
+
+
 def send_with_pickle():
 
     """ sends pickled message to server """
@@ -38,10 +50,14 @@ def send_with_pickle():
     global states
 
     try:
+        lock.acquire()
         server.send(pickle.dumps(states))
+        lock.release()
 
     except:
         print("Sending package to server failed")
+
+    force_release_lock()
 
 
 def flush():

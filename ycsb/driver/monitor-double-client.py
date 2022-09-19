@@ -63,6 +63,18 @@ def calculate_server_ip(to_sum):
     return str(''.join(ip))
 
 
+def force_release_lock():
+
+    global lock
+
+    try:
+        lock.release()
+        logging.debug("Lock released")
+
+    except:
+        logging.debug("Lock was already released")
+
+
 def send_with_pickle():
 
     """ sends pickled message to server """
@@ -72,12 +84,15 @@ def send_with_pickle():
     global lock
 
     try:
+
         lock.acquire()
         server.send(pickle.dumps(states))
         lock.release()
 
     except:
         print("Sending package to server failed")
+
+    force_release_lock()
 
 
 def flush():
@@ -115,10 +130,12 @@ def update_state(index):
     global states
 
     logging.info(f"Updating state on index {index}")
-
+    logging.debug("waiting for lock")
     lock.acquire()
+    logging.debug("acquired lock")
     states[index] = 1
     lock.release()
+    logging.debug("released lock")
 
     logging.debug(f'Updated states: {states}')
     send_with_pickle()
@@ -737,6 +754,7 @@ def heartbeat(event: Event, frequency = 60):
             logging.warning("Failed to send states to server")
 
         time.sleep(frequency)
+
 
 
 if __name__ == '__main__':
