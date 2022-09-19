@@ -724,6 +724,21 @@ def initiate_benchmarks(event: Event):
         event.set()
 
 
+def heartbeat(event: Event, frequency = 60):
+
+    global states
+
+    while not event.is_set():
+
+        try:
+            send_with_pickle()
+
+        except:
+            logging.warning("Failed to send states to server")
+
+        time.sleep(frequency)
+
+
 if __name__ == '__main__':
 
     try:
@@ -733,6 +748,9 @@ if __name__ == '__main__':
 
         # State Thread, monitors state and communicates with socket
         states_thread = threading.Thread(target = monitor_states, args=([event]),  daemon = True)
+
+        # Heartbeat Thread, sends heartbeats to server
+        heartbeat = threading.Thread(target = heartbeat, args=([event]),  daemon = True)
 
         # Benchmark Thread
         try:
@@ -744,10 +762,12 @@ if __name__ == '__main__':
         # Start Threads
         states_thread.start()
         benchmark_thread.start()
+        heartbeat.start()
 
         # wait until benchmarks are finished
         states_thread.join()
         benchmark_thread.join()
+        heartbeat.join()
 
 
     except KeyboardInterrupt:
