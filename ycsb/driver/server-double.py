@@ -7,6 +7,7 @@ import sys
 import pickle
 import threading
 import time
+import logging
 
 # states:
 # ready to benchmark (start), prepared monitoring (prepared), finished bench finish, done collecting data (done)
@@ -103,11 +104,15 @@ def update_state(index, conn):
 
     global states
 
-    print(f"Updating state on index {index}")
+    logging.debug(f"Updating state on index {index}")
     states[index] = 1
-    print(states)
+    logging.debug(states)
 
     broadcast(states, conn)
+
+def set_states_to_ready():
+
+    global states
 
 
 def clientthread(conn, addr):
@@ -129,11 +134,12 @@ def clientthread(conn, addr):
 
             msg = pickle.loads(message)
             _sum = sum(msg)
+            logging.debug(f'received states: {msg}')
 
         except:
-            print(f"Exception: {message}")
+            logging.warning(f"Exception: {message}")
 
-        print(f"Received states in phase: {msg}, {_sum}")
+        logging.debug(f"Received states in phase: {msg}, {_sum}")
         current_sum = sum(states)
 
         if current_sum == 6:
@@ -143,14 +149,14 @@ def clientthread(conn, addr):
             continue
 
         states = bitwise_or(states, msg)
-        print(f"States updated to {states}\nBroadcasting")
+        logging.debug(f"States updated to {states}\nBroadcasting")
         broadcast_with_pickle(conn, states)
 
-    print(f"Removing connection: {conn}")
+    logging.info(f"Removing connection: {conn}")
     conn.close()
     remove(conn)
 
-    print(f"Remaining connections: {list_of_clients}")
+    logging.info(f"Remaining connections: {list_of_clients}")
 
 
 def create_server():
@@ -193,7 +199,7 @@ def keep_connections_alive(seconds = 60, msg = b'\x0a'):
             if client.getpeername()[0] == ip:
                 continue
 
-            print(f"Sending {states} as heartbeat to {client.getpeername()[0]}")
+            logging.info(f"Sending {states} as heartbeat to {client.getpeername()[0]}")
 
         try:
 
@@ -201,7 +207,7 @@ def keep_connections_alive(seconds = 60, msg = b'\x0a'):
 
         except Exception as e:
 
-            print(f'Exception: {e}')
+            logging.info(f'Exception: {e}')
 
         time.sleep(seconds)
 
@@ -234,7 +240,7 @@ if __name__ == "__main__":
         list_of_clients.append(conn)
 
         # prints the address of the user that just connected
-        print(addr[0] + " connected")
+        logging.info(addr[0] + " connected")
 
         # If local connection, make do work for benchmark.py
         start_new_thread(clientthread, (conn, addr))

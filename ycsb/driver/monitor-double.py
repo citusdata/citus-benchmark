@@ -10,7 +10,6 @@
 ### No config file needed as this script is executed on the driver VM on Azure
 
 import os
-from sys import excepthook
 import fire
 from helper import run
 import time
@@ -55,6 +54,7 @@ def flush():
     lock.acquire()
     states = [0, 0, 0, 0, 0, 0]
     lock.release()
+
     logging.debug('states flushed')
 
 
@@ -137,17 +137,16 @@ def set_received_state(message):
     try:
         msg = pickle.loads(message)
 
-        if current_sum == 6:
-            lock.acquire()
-            states = [0, 0, 0, 0, 0, 0]
-            lock.release()
+        logging.debug(f"received states: {msg}")
 
-        logging.debug("start bitwise or")
         lock.acquire()
         states = bitwise_or(msg, states)
         lock.release()
 
+        logging.debug(f"States after updated received states: {states}")
+
     except Exception as e:
+
         logging.warning(e)
 
         if message == b'\x0a':
@@ -158,7 +157,7 @@ def set_received_state(message):
 
     except:
 
-        print(f"Exception: {message}")
+        logging.warning(f"Exception: {message}")
 
 
 def monitor_states(event: Event):
@@ -600,9 +599,8 @@ class Benchmark(object):
         # update csv after every workload
         run(['python3', 'output.py', f"results"], shell = False)
         self.update_and_check_state_change(3, 5, 3)
-        flush()
-
         print(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
+        flush()
 
         # set states to [0, 0, 0, 0]
 

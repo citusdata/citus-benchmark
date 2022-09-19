@@ -69,9 +69,12 @@ def send_with_pickle():
 
     global server
     global states
+    global lock
 
     try:
+        lock.acquire()
         server.send(pickle.dumps(states))
+        lock.release()
 
     except:
         print("Sending package to server failed")
@@ -87,7 +90,7 @@ def flush():
     lock.acquire()
     states = [0, 0, 0, 0, 0, 0]
     lock.release()
-    logging.debug('states flushed')
+    logging.debug(f' Current states after flush: {states}')
 
 
 def is_state_valid(states, index):
@@ -155,19 +158,16 @@ def set_received_state(message):
     global states
     global lock
 
-    current_sum = sum(states)
-
     try:
         msg = pickle.loads(message)
 
-        if current_sum == 6:
-            lock.acquire()
-            states = [0, 0, 0, 0, 0, 0]
-            lock.release()
+        logging.debug(f"received states: {msg}")
 
         lock.acquire()
         states = bitwise_or(msg, states)
         lock.release()
+
+        logging.debug(f"States after updated received states: {states}")
 
     except Exception as e:
         logging.warning(e)
