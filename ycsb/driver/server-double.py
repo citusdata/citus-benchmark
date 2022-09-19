@@ -9,6 +9,8 @@ import threading
 import time
 import logging
 
+logging.basicConfig(level=logging.NOTSET)
+
 # states:
 # ready to benchmark (start), prepared monitoring (prepared), finished bench finish, done collecting data (done)
 
