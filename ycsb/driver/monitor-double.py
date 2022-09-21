@@ -423,11 +423,11 @@ class Benchmark(object):
 
         if wtype == "load":
 
-            return ['./ycsb-load-maxtime.sh']
+            return ['./ycsb-load.sh']
 
         else:
 
-            return ['./ycsb-run-maxtime.sh']
+            return ['./ycsb-run.sh']
 
 
     def run_ycsb_parallel(self, wtype):
@@ -627,7 +627,7 @@ class Benchmark(object):
 
         """ Loads data with workload a, monitors workload c """
 
-        self.run_workload("workloada", "load")
+        self.monitor_workload("workloada", "load", thread, i)
         self.monitor_workload("workloadc",  "run", thread, i)
 
 
