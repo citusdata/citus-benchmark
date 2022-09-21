@@ -661,7 +661,7 @@ class Benchmark(object):
 
             for thread in self.THREADS:
                 self.set_current_thread(thread)
-                self.execute_workloada_monitor_workloadc(thread, i, )
+                self.execute_workloada_monitor_workloadc(thread, i)
 
             print(f"Done running workloadc for iteration {i}")
             print("Generating CSV")
@@ -684,8 +684,8 @@ class Benchmark(object):
                 self.set_current_thread(thread)
                 self.monitor_workload("workloada", "load", thread, i)
 
-            print(f"Done running workloadc for iteration {i}")
-            print("Generating CSV")
+            logging.info(f"Done running workloada for iteration {i}")
+            logging.info("Generating CSV")
 
             # gather csv with all results
             run(['python3', 'output.py', f"results"], shell = False)
