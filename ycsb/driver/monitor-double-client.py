@@ -441,11 +441,11 @@ class Benchmark(object):
 
         if wtype == "load":
 
-            return ['./ycsb-load.sh']
+            return ['./ycsb-load-maxtime.sh']
 
         else:
 
-            return ['./ycsb-run.sh']
+            return ['./ycsb-run-maxtime.sh']
 
 
     def run_ycsb_parallel(self, wtype):
@@ -663,8 +663,8 @@ class Benchmark(object):
                 self.set_current_thread(thread)
                 self.execute_workloada_monitor_workloadc(thread, i)
 
-            print(f"Done running workloadc for iteration {i}")
-            print("Generating CSV")
+            logging.info(f"Done running workloada for iteration {i}")
+            logging.info("Generating CSV")
 
             # gather csv with all results
             run(['python3', 'output.py', f"results"], shell = False)
