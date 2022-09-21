@@ -489,7 +489,7 @@ class Benchmark(object):
 
     def set_insertcount_monitor(self):
 
-        self.INSERTCOUNT_MONITOR = self.INSERTCOUNT_MONITOR * 10
+        self.INSERTCOUNT_MONITOR = self.INSERTCOUNT_MONITOR
 
 
     def truncate_usertable(self):
