@@ -16,6 +16,7 @@ CONFIGFILE = "config.yml"
 states = [0, 0, 0, 0, 0, 0]
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+
 def bitwise_or(a, b):
 
     """ returns new list of states with bitwise or operation executed """
@@ -29,6 +30,18 @@ def bitwise_or(a, b):
         result.append(a[i] + b[i] - (a[i] * b[i]))
 
     return result
+
+
+def flush():
+
+    """
+    if all states are 1 then flush
+    after flushing all states are empty
+    """
+
+    global states
+    states = [0, 0, 0, 0, 0, 0]
+    logging.debug('states flushed')
 
 
 def read_config_file(configfile):
@@ -159,20 +172,6 @@ def set_received_state(message):
             logging.warning(f"Exception: {message}")
 
 
-def check_where_to_resume():
-
-    while True:
-
-        # Wait for messages while connected to server
-        message = server.recv(1024)
-
-        if not message:
-            break
-
-        set_received_state(message)
-
-    pass
-
 def monitor_states(event: Event):
 
     """
@@ -206,6 +205,7 @@ def monitor_states(event: Event):
                     break
 
                 set_received_state(message)
+                logging.info(f"States: {states}")
 
         except Exception as e:
 
@@ -327,7 +327,7 @@ class Client(object):
 
         self.print_current_time()
 
-        # Wait for monitoring to be started (checks every 1 secs if index 0 contains a 2)
+        # Wait for monitoring to be started (checks every 1 secs if sum :index 2 contains is)
         check_state(1, 2)
 
         # truncate pg_log on every worker to reduce data size
@@ -347,7 +347,7 @@ class Client(object):
         - initiate postprocessing
         """
 
-        # Wait for state to be stopped  (checks every 1 secs if index 3 and 4 contains a 1)
+        # Wait for state to be stopped  (checks every 1 secs if index 5 contains a 1 and sums up to 5)
         check_state(1, 5)
 
         # Get data from current iteration
@@ -362,7 +362,10 @@ class Client(object):
 
         # Monitoring finished, update state 0 to 1 on index 3
         update_state(5)
-        logging.info("States updated")
+        logging.info(f"States updated to {states}")
+        flush()
+
+        os.chdir(homedir)
 
         return f"Threadcount {thread} and iteration {iteration} finished"
 
@@ -382,19 +385,21 @@ class Client(object):
                 logging.info("Wait to start monitoring")
                 self.prepare_monitoring(logs)
 
-                logging.info("Finish monitoring")
+                logging.info("Waiting to finish monitoring")
                 self.finish_monitoring(logs, homedir, bucket, iteration, thread)
-
-                os.chdir(homedir)
-
-                # collect_data for every iteration
-                collect_data(bucket)
 
                 os.chdir(homedir)
 
                 logging.debug(f"Monitoring finished for threadcount {thread}, iteration {iteration}")
 
         logging.debug("All iterations are done")
+
+
+def collect_data(bucket, write = "no"):
+
+    """ collect resulting data after all runs are finished """
+
+    run(['python3', 'collect_data.py', bucket, drivers, write], shell = False)
 
 
 def client_thread(bucket, homedir, event: Event):
@@ -408,7 +413,7 @@ def client_thread(bucket, homedir, event: Event):
         # monitor iterations
         client.monitor_iteration(homedir, bucket)
 
-        # set event so other thread will terminate if the deamon thread is finished
+        # set event so other thread will terminate if the main thread is finished
         event.set()
 
     except Exception as e:
@@ -419,11 +424,48 @@ def client_thread(bucket, homedir, event: Event):
         event.set()
 
 
-def collect_data(bucket):
+def data_collector(bucket, homedir, event: Event):
 
-    """ collect resulting data after all runs are finished """
+    """ thread that collects data from drivers, attempting every 600 seconds (10 minutes)"""
 
-    run(['python3', 'collect_data.py', bucket, drivers], shell = False)
+    # starts gathering data if first iteration is finished
+    check_state(1, 5)
+
+    while True:
+
+        try:
+
+            logging.debug("data collector is collecting data from driver")
+
+            os.chdir(homedir)
+
+            collect_data(bucket)
+
+            os.chdir(homedir)
+
+
+        except Exception as e:
+
+            logging.warning(f"{e}")
+
+        time.sleep(600)
+
+
+def heartbeat(event: Event, frequency = 60):
+
+    """ heartbeat thread, sending heartbeat to server with most up-to-date states """
+
+    global states
+
+    while not event.is_set():
+
+        try:
+            send_with_pickle()
+
+        except:
+            logging.warning("Failed to send states to server")
+
+        time.sleep(frequency)
 
 
 if __name__ == "__main__":
@@ -440,18 +482,40 @@ if __name__ == "__main__":
         states_thread = threading.Thread(target = monitor_states, args=([event]),  daemon = True)
 
         # Client Thread
-        c_thread = threading.Thread(target = client_thread, args = ([bucket, homedir, event]))
+        c_thread = threading.Thread(target = client_thread, args = ([bucket, homedir, event]), daemon = False)
+
+        # Heartbeat Thread, sends heartbeats to server
+        heartbeat = threading.Thread(target = heartbeat, args=([event]),  daemon = True)
+
+        # Data collector thread
+        collector_thread = threading.Thread(target = data_collector, args = ([bucket, homedir, event]), daemon = True)
 
         # Start Threads
         states_thread.start()
         c_thread.start()
+        collector_thread.start()
+        heartbeat.start()
 
-        # wait until benchmarks are finished
-        states_thread.join()
         c_thread.join()
+
+        # collect data for a last time
+        os.chdir(homedir)
+        collect_data(bucket, write = "push")
+        # sys.exit(0)
+
+        # wait until all benchmarks are finished
+        states_thread.join()
+        collector_thread.join()
+        heartbeat.join()
 
 
     except KeyboardInterrupt:
+
+         logging.warning("WAIT: Collecting data from drivers")
+         os.chdir(homedir)
+
+         # colelect data
+         collect_data(bucket, write = "push")
 
          logging.warning("Stopping Execution")
          sys.exit(1)
