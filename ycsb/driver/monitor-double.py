@@ -620,7 +620,7 @@ class Benchmark(object):
         # If workload finished, send a message to the server
         # update csv after every workload
         run(['python3', 'output.py', f"results"], shell = False)
-        self.update_and_check_state_change(3, 5, 3)
+        self.update_and_check_state_change(3, 5, 1)
         print(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
         flush()
 
