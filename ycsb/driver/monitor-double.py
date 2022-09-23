@@ -155,6 +155,9 @@ def set_received_state(message):
 
         logging.debug(f"received states: {msg}")
 
+        if sum(states) == 6:
+            flush()
+
         lock.acquire()
         states = bitwise_or(msg, states)
         lock.release()

@@ -90,7 +90,7 @@ def send_with_pickle():
         lock.release()
 
     except:
-        print("Sending package to server failed")
+        logging.info("Sending package to server failed")
 
     force_release_lock()
 
@@ -179,6 +179,9 @@ def set_received_state(message):
         msg = pickle.loads(message)
 
         logging.debug(f"received states: {msg}")
+
+        if sum(states) == 6:
+            flush()
 
         lock.acquire()
         states = bitwise_or(msg, states)
@@ -570,9 +573,9 @@ class Benchmark(object):
                 self.CURRENT_THREAD = thread
                 self.run_workload(self.WORKLOAD_NAME, self.WORKLOAD_TYPE)
 
-            print(f"Done running workloadc for iteration {i}")
+            logging.info(f"Done running workloadc for iteration {i}")
             os.chdir(self.HOMEDIR)
-            print("Generating CSV")
+            logging.info("Generating CSV")
 
             # gather csv with all results after each iteration
             run(['python3', 'output.py', 'results'], shell = False)
@@ -604,8 +607,8 @@ class Benchmark(object):
                     self.run_workload("workloada", "load")
                     self.run_workload("workloadc", "run")
 
-            print(f"Done running workloadc for iteration {i}")
-            print("Generating CSV")
+            logging.info(f"Done running workloadc for iteration {i}")
+            logging.info("Generating CSV")
 
             # gather csv with all results
             os.chdir(self.HOMEDIR)
@@ -637,7 +640,7 @@ class Benchmark(object):
         self.update_and_check_state_change(4, 5, 3)
         flush()
 
-        print(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
+        logging.info(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
 
 
     def execute_workloada_monitor_workloadc(self, thread, i):
@@ -720,9 +723,9 @@ class Benchmark(object):
 
                     self.run_workload(workload, "run")
 
-            print("Done running all YCSB core workloads")
+            logging.info("Done running all YCSB core workloads")
             os.chdir(self.HOMEDIR)
-            print("Generating CSV")
+            logging.info("Generating CSV")
 
             # gather csv with all results
             run(['python3', 'output.py', f"results"], shell = False)
@@ -775,7 +778,7 @@ if __name__ == '__main__':
         try:
             benchmark_thread = threading.Thread(target = initiate_benchmarks, args=([event]))
         except Exception as e:
-            print(f"Exception {e}")
+            logging.info(f"Exception {e}")
             sys.exit(1)
 
         # Start Threads
