@@ -316,23 +316,47 @@ class Benchmark(object):
         os.chdir(self.HOMEDIR)
 
 
-    def calculate_records(self, adaptive = True):
+    def shard_workload(self):
 
-        """ calculate amount of records for sampling """
+        """ Calculate size of shards for each driver """
 
-        if adaptive:
-            # self.INSERTCOUNT_CITUS = int((1 - (self.WORKERS / self.CURRENT_THREAD * 0.5)) * self.RECORDS)
-            self.INSERTCOUNT_CITUS = int(0.5 * self.RECORDS)
+        shardsize = math.floor(self.RECORDS / self.DRIVERS)
+        self.INSERTSTART = self.DRIVER_ID * shardsize
+
+        if int(self.DRIVER_ID) + 1 == int(self.DRIVERS):
+            self.INSERTCOUNT = shardsize + (self.RECORDS % shardsize)
         else:
-            self.INSERTCOUNT_CITUS = int(0.999 * self.RECORDS)
+            self.INSERTCOUNT = shardsize
 
-        self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT_CITUS
-        self.INSERTSTART_MONITOR = self.INSERTCOUNT_CITUS
+        return self.INSERTCOUNT
+
+
+    def calculate_connections(self):
+
+        """ Calculate how many connections this driver should have to the cluster """
+
+        connections = math.floor(self.CURRENT_THREAD / self.DRIVERS)
+
+        if int(self.DRIVER_ID) + 1 == int(self.DRIVERS):
+            return connections + (self.CURRENT_THREAD % connections)
+
+        print(f"Calculated connections: {connections}")
+
+        return connections
+
+
+    def calculate_records(self, shardsize):
+
+        """ calculates records for user monitor """
+
+        self.INSERTCOUNT = int(0.999 * shardsize)
+        self.INSERTCOUNT_MONITOR = shardsize - self.INSERTCOUNT
+        self.INSERTSTART_MONITOR = self.INSERTSTART + self.INSERTCOUNT
 
 
     def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", database = "citus",
     workloadtype = "load", workloads="workloada", iterations = 1, outputfile = "results.csv", shard_count = 16,
-    workers = "2", resource = "custom", host = "localhost", parallel = False, monitorpw = "monitor", maxtime = 600):
+    workers = "2", resource = "custom", host = "localhost", parallel = False, monitorpw = "monitor", maxtime = 600, drivers = 1, id = 0):
 
         self.HOMEDIR = os.getcwd()
         self.PARALLEL = parallel
@@ -361,7 +385,14 @@ class Benchmark(object):
         self.INSERTSTART = 0
         self.INSERTSTART_MONITOR = 0
 
-        self.calculate_records()
+        # reduce self.RECORDS to the amount of the sharded workload
+        shardsize = self.shard_workload()
+
+        # Divide threads across drivers
+        self.CURRENT_THREAD = self.calculate_connections()
+
+        # Calculate records for monitor
+        self.calculate_records(shardsize)
 
         # Set environment variables
         os.environ['DATABASE'] = self.DATABASE
@@ -376,7 +407,7 @@ class Benchmark(object):
         os.environ['RESOURCE'] = str(self.RG)
         os.environ['MONITORPW'] = str(self.MONITORPW)
         os.environ['MAXTIME'] = str(self.MAXTIME)
-        os.environ['INSERTCOUNT_CITUS'] = str(self.INSERTCOUNT_CITUS)
+        os.environ['INSERTCOUNT_CITUS'] = str(self.INSERTCOUNT)
         os.environ['INSERTCOUNT_MONITOR'] = str(self.INSERTCOUNT_MONITOR)
         os.environ['INSERTSTART'] = str(self.INSERTSTART)
         os.environ['THREADS'] = str(self.CURRENT_THREAD)
