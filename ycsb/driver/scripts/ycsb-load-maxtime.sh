@@ -10,7 +10,7 @@ bin/ycsb load jdbc \
     -p threadcount=$THREADS \
     -p insertstart=$INSERTSTART  \
     -p insertcount=$INSERTCOUNT \
-    -p maxexecutiontime=$MAXTIME \
+    -p maxexecutiontime=100000 \
     -cp ./postgresql-42.2.14.jar \
     -p db.user=$PGUSER \
     -p db.passwd=$PGPASSWORD \
