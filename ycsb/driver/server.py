@@ -1,4 +1,3 @@
-
 import os
 import socket
 from _thread import *
@@ -7,6 +6,9 @@ import sys
 import pickle
 import threading
 import time
+import logging
+
+logging.basicConfig(level=logging.NOTSET)
 
 # states:
 # ready to benchmark (start), prepared monitoring (prepared), finished bench finish, done collecting data (done)
@@ -15,9 +17,24 @@ states = [0, 0, 0, 0]
 ip = socket.gethostbyname(socket.gethostname())
 
 
+def bitwise_or(a, b):
+
+    """ returns new list of states with bitwise or operation executed """
+
+    if len(a) != len(b):
+        raise Exception(f"length of lists are not equal\na {a} ({len(a)}), b: {b} ({len(b)})")
+
+    result = []
+
+    for i in range(len(a)):
+        result.append(a[i] + b[i] - (a[i] * b[i]))
+
+    return result
+
+
 def flush():
 
-    """ if all states are 1 then flush """
+    """ if all states are  1 then flush """
 
     global states
 
@@ -88,19 +105,24 @@ def update_state(index, conn):
 
     global states
 
-    print(f"Updating state on index {index}")
+    logging.debug(f"Updating state on index {index}")
     states[index] = 1
-    print(states)
+    logging.debug(states)
 
     broadcast(states, conn)
+
+def set_states_to_ready():
+
+    global states
 
 
 def clientthread(conn, addr):
 
     global states
 
-    # sends current states to client if connection has been made
-    broadcast_with_pickle(conn, states)
+    # sends current states to clients if connection has been made
+    for client in list_of_clients:
+        client.sendall(pickle.dumps(states))
 
     while True:
 
@@ -113,43 +135,29 @@ def clientthread(conn, addr):
 
             msg = pickle.loads(message)
             _sum = sum(msg)
+            logging.debug(f'received states: {msg}')
 
         except:
-            print(f"Exception: {message}")
+            logging.warning(f"Exception: {message}")
 
-        print(f"received states in phase: {msg}, {_sum}")
+        logging.debug(f"Received states in phase: {msg}, {_sum}")
         current_sum = sum(states)
 
-        if _sum == 0 and current_sum == 4:
+        if current_sum == 6:
             states = [0, 0, 0, 0]
+            states = bitwise_or(states, msg)
             broadcast_with_pickle(conn, states)
             continue
 
-        elif (current_sum - _sum) == 1:
-            print(f"Sending states back")
-            conn.send(pickle.dumps(states))
-            continue
+        states = bitwise_or(states, msg)
+        logging.debug(f"States updated to {states}\nBroadcasting")
+        broadcast_with_pickle(conn, states)
 
-        elif _sum > current_sum:
-            states = [x + y for x, y in zip(states, msg)]
-            print(f"Broadcasting states")
-            broadcast_with_pickle(conn, states)
-            continue
-
-        elif _sum == current_sum:
-            print(f"Received current states {states} from connection {conn}\nNothing to do")
-            continue
-
-        # print(f"Forwarding states")
-        # broadcast(msg, conn)
-
-
-    print(f"Removing connection: {conn}")
+    logging.info(f"Removing connection: {conn}")
     conn.close()
     remove(conn)
 
-    global list_of_clients
-    print(f"Remaining connections: {list_of_clients}")
+    logging.info(f"Remaining connections: {list_of_clients}")
 
 
 def create_server():
@@ -192,7 +200,7 @@ def keep_connections_alive(seconds = 60, msg = b'\x0a'):
             if client.getpeername()[0] == ip:
                 continue
 
-            print(f"Sending {states} as heartbeat to {client.getpeername()[0]}")
+            logging.info(f"Sending {states} as heartbeat to {client.getpeername()[0]}")
 
         try:
 
@@ -200,7 +208,7 @@ def keep_connections_alive(seconds = 60, msg = b'\x0a'):
 
         except Exception as e:
 
-            print(f'Exception: {e}')
+            logging.info(f'Exception: {e}')
 
         time.sleep(seconds)
 
@@ -233,7 +241,7 @@ if __name__ == "__main__":
         list_of_clients.append(conn)
 
         # prints the address of the user that just connected
-        print(addr[0] + " connected")
+        logging.info(addr[0] + " connected")
 
         # If local connection, make do work for benchmark.py
         start_new_thread(clientthread, (conn, addr))
