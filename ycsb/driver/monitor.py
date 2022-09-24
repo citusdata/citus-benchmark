@@ -10,7 +10,6 @@
 ### No config file needed as this script is executed on the driver VM on Azure
 
 import os
-from sys import excepthook
 import fire
 from helper import run
 import time
@@ -18,11 +17,29 @@ from os.path import exists
 import socket
 import pickle
 import threading
-from threading import Event
+from threading import Event, Lock
+import math
+import sys
+import logging
+
+
+logging.basicConfig(level=logging.NOTSET)
+lock = Lock()
 
 # global variables
 states = [0, 0, 0, 0]
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+def force_release_lock():
+
+    global lock
+
+    try:
+        lock.release()
+        logging.debug("Lock released")
+
+    except:
+        logging.debug("Lock was already released")
 
 
 def send_with_pickle():
@@ -33,10 +50,14 @@ def send_with_pickle():
     global states
 
     try:
+        lock.acquire()
         server.send(pickle.dumps(states))
+        lock.release()
 
     except:
-        print("Sending package to server failed")
+        logging.info("Sending package to server failed")
+
+    force_release_lock()
 
 
 def flush():
@@ -44,8 +65,28 @@ def flush():
     """ if all states are 1 then flush """
 
     global states
+    global lock
+
+    lock.acquire()
     states = [0, 0, 0, 0]
-    send_with_pickle()
+    lock.release()
+
+    logging.debug('states flushed')
+
+
+def bitwise_or(a, b):
+
+    """ returns new list of states with bitwise or operation executed """
+
+    if len(a) != len(b):
+        raise Exception(f"length of lists are not equal\na {a} ({len(a)}), b: {b} ({len(b)})")
+
+    result = []
+
+    for i in range(len(a)):
+        result.append(a[i] + b[i] - (a[i] * b[i]))
+
+    return result
 
 
 def is_state_valid(states, index):
@@ -67,16 +108,17 @@ def update_state(index):
     """ updates state """
 
     global states
+    global lock
 
-    if is_state_valid(states, index):
+    print(f"Updating state on index {index}")
+    lock.acquire()
+    states[index] = 1
+    lock.release()
+    logging.debug(f'Updated states: {states}')
 
-        print(f"Updating state on index {index}")
-        states[index] = 1
+    send_with_pickle()
+    logging.debug(f'States send to server')
 
-        send_with_pickle()
-
-    else:
-        print(f"WARNING: Invalid states '{states}' encountered")
 
 
 def check_state(frequency, index):
@@ -104,27 +146,40 @@ def connect_to_socket(server):
 def set_received_state(message):
 
     global states
+    global lock
+
     current_sum = sum(states)
 
     try:
-
         msg = pickle.loads(message)
-        _sum = sum(msg)
 
-        if  _sum > current_sum:
+        logging.debug(f"received states: {msg}")
 
-            states = msg
-            print(f"States are updated: {msg}")
+        if sum(states) == 6:
+            flush()
 
-        if _sum == 0 and current_sum == 4:
-            states = [0, 0, 0, 0]
+        lock.acquire()
+        states = bitwise_or(msg, states)
+        lock.release()
 
-        if _sum < current_sum:
-            send_with_pickle()
+        logging.debug(f"States after updated received states: {states}")
+
+
+    except Exception as e:
+
+        logging.warning(e)
+
+        if message == b'\x0a':
+            logging.info("Heartbeat from server")
+
+        else:
+            logging.warning(f"Exception: {message}")
 
     except:
 
-        print(f"Exception: {message}")
+        logging.warning(f"Exception: {message}")
+
+    force_release_lock()
 
 
 def monitor_states(event: Event):
@@ -144,6 +199,8 @@ def monitor_states(event: Event):
         try:
 
             connect_to_socket(server)
+            print("connected with socket")
+            send_with_pickle()
 
             while True:
 
@@ -530,9 +587,9 @@ class Benchmark(object):
         self.run_workload(workload, type, self.PARALLEL)
 
         # If workload finished, send a message to the server
-        self.update_and_check_state_change(2, 1, 3)
+        self.update_and_check_state_change(2, 3, 1)
 
-        print(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
+        logging.info(f"Execution iteration {i} finished with threadcount {thread}.\n Going to next configuration")
 
         # set states to [0, 0, 0, 0]
         flush()
@@ -560,8 +617,8 @@ class Benchmark(object):
                 self.set_current_thread(thread)
                 self.execute_workloada_monitor_workloadc(thread, i)
 
-            print(f"Done running workloadc for iteration {i}")
-            print("Generating CSV")
+            logging.info(f"Done running workloadc for iteration {i}")
+            logging.info("Generating CSV")
 
             # gather csv with all results
             run(['python3', 'output.py', "results.csv"], shell = False)
@@ -580,8 +637,8 @@ class Benchmark(object):
                 self.set_current_thread(thread)
                 self.monitor_workload("workloada", "load", thread, i)
 
-            print(f"Done running workloadc for iteration {i}")
-            print("Generating CSV")
+            logging.info(f"Done running workloadc for iteration {i}")
+            logging.info("Generating CSV")
 
             # gather csv with all results
             run(['python3', 'output.py', "results.csv"], shell = False)
@@ -616,9 +673,9 @@ class Benchmark(object):
 
                     self.run_workload(workload, "run")
 
-            print("Done running all YCSB core workloads")
+            logging.info("Done running all YCSB core workloads")
             os.chdir(self.HOMEDIR)
-            print("Generating CSV")
+            logging.info("Generating CSV")
 
             # gather csv with all results
             run(['python3', 'output.py', "results.csv"], shell = False)
