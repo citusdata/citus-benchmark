@@ -316,42 +316,14 @@ class Benchmark(object):
         os.chdir(self.HOMEDIR)
 
 
-    def shard_workload(self):
-
-        """ Calculate size of shards for each driver """
-
-        shardsize = math.floor(self.RECORDS / self.DRIVERS)
-        self.INSERTSTART = self.DRIVER_ID * shardsize
-
-        if int(self.DRIVER_ID) + 1 == int(self.DRIVERS):
-            self.INSERTCOUNT = shardsize + (self.RECORDS % shardsize)
-        else:
-            self.INSERTCOUNT = shardsize
-
-        return self.INSERTCOUNT
-
-
-    def calculate_connections(self):
-
-        """ Calculate how many connections this driver should have to the cluster """
-
-        connections = math.floor(self.CURRENT_THREAD / self.DRIVERS)
-
-        if int(self.DRIVER_ID) + 1 == int(self.DRIVERS):
-            return connections + (self.CURRENT_THREAD % connections)
-
-        print(f"Calculated connections: {connections}")
-
-        return connections
-
-
-    def calculate_records(self, shardsize):
+    def calculate_records(self):
 
         """ calculates records for user monitor """
 
-        self.INSERTCOUNT = int(0.999 * shardsize)
-        self.INSERTCOUNT_MONITOR = shardsize - self.INSERTCOUNT
+        self.INSERTCOUNT = int(0.999 * self.RECORDS)
+        self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT
         self.INSERTSTART_MONITOR = self.INSERTSTART + self.INSERTCOUNT
+        self.INSERTCOUNT_CITUS = self.INSERTCOUNT
 
 
     def __init__(self, workloadname = "workloada", threads = "248", records = 1000, operations = 10000, port = "5432", database = "citus",
@@ -385,14 +357,10 @@ class Benchmark(object):
         self.INSERTSTART = 0
         self.INSERTSTART_MONITOR = 0
 
-        # reduce self.RECORDS to the amount of the sharded workload
-        shardsize = self.shard_workload()
-
-        # Divide threads across drivers
-        self.CURRENT_THREAD = self.calculate_connections()
-
         # Calculate records for monitor
-        self.calculate_records(shardsize)
+        self.calculate_records()
+
+        logging.info(f"Records Calculated. Driver {self.INSERTCOUNT}, Monitor {self.INSERTCOUNT_CITUS}")
 
         # Set environment variables
         os.environ['DATABASE'] = self.DATABASE
@@ -414,10 +382,13 @@ class Benchmark(object):
         os.environ['HOMEDIR'] = self.HOMEDIR
         os.environ['PARALLEL'] = str(self.PARALLEL)
         os.environ['INSERTSTART_MONITOR'] = str(self.INSERTSTART_MONITOR)
+        os.environ['INSERTCOUNT'] = str(self.INSERTCOUNT)
 
         # Install YCSB and JDBC PostgreSQL driver
         self.install_ycsb()
         self.install_jdbc()
+
+        logging.info("Necessary packages installed")
 
 
     def get_workload(self, wtype):
