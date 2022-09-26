@@ -349,7 +349,7 @@ class Benchmark(object):
 
         """ calculates records for user monitor """
 
-        self.INSERTCOUNT = int(0.999 * shardsize)
+        self.INSERTCOUNT = int(0.99 * shardsize)
         self.INSERTCOUNT_MONITOR = shardsize - self.INSERTCOUNT
         self.INSERTSTART_MONITOR = self.INSERTSTART + self.INSERTCOUNT
 
