@@ -320,7 +320,7 @@ class Benchmark(object):
 
         """ calculates records for user monitor """
 
-        self.INSERTCOUNT = int(0.999 * self.RECORDS)
+        self.INSERTCOUNT = int(0.99 * self.RECORDS)
         self.INSERTCOUNT_MONITOR = self.RECORDS - self.INSERTCOUNT
         self.INSERTSTART_MONITOR = self.INSERTSTART + self.INSERTCOUNT
         self.INSERTCOUNT_CITUS = self.INSERTCOUNT
