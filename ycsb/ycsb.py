@@ -4,30 +4,12 @@ import os
 import datetime
 import fire
 import logging
+from run_and_print import run, eprint
+
 
 MAX_THREADS = 1000
 MIN_THREADS = 1
 CHECK_FREQUENCY_IN_SECONDS = 10
-
-def eprint(*args, **kwargs):
-
-    """
-    eprint prints to stderr
-    """
-
-    print(*args, file=sys.stderr, **kwargs)
-
-
-def run(command, *args, shell=True, **kwargs):
-
-    """
-    run runs the given command and prints it to stderr
-    """
-
-    eprint(f"+ {command} ")
-    result = subprocess.run(command, *args, check=True, shell=shell, **kwargs)
-
-    return result
 
 
 class StartBenchmark(object):
@@ -128,7 +110,7 @@ class StartBenchmark(object):
 
     def start_benchmark(self):
 
-        """ initiates benchmark run and corresponding infrastructure """
+        """ initiates benchmark run and infrastructure """
 
         global CHECK_FREQUENCY_IN_SECONDS
 
