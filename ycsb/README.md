@@ -4,7 +4,7 @@
 
 For the benchmarks to run, both `python2`and `python3` are required. In addition, we make use of the Python package `python fire`.
 
-E.g. a script for Linux/Ubuntu
+If you are using Ubuntu / Debian on the driver node, you can run `./install.sh`:
 
 ```
 sudo apt -y install vim bash-completion wget

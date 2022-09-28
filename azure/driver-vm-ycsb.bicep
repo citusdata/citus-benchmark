@@ -81,8 +81,8 @@ sudo apt update -y
 sudo apt install python-is-python2 -y
 sudo apt-get install python3-pip -y
 pip3 install fire
-git clone https://github.com/citusdata/citus-benchmark.git --branch ccfelius/ycsb-azure
-cd citus-benchmark/ycsb/driver
+git clone https://github.com/citusdata/citus-benchmark.git --branch ccfelius/ycsb-refactored
+cd citus-benchmark/ycsb
 while ! psql -c 'select 1'; do  echo failed; sleep 1; done
 tmux new-session -d -t main -s init-bench \; send-keys './run-azure-benchmark.sh' Enter
 '''
