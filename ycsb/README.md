@@ -36,18 +36,18 @@ cd ../azure
 ./connect.sh yourname
 ```
 
-If `autodelete` is set to false (default), make sure to manually delete your resource group:
-
-```
-cd ../azure
-./cleanup.sh yourname
-```
-
 For manually transferring the generated output from the Driver VM to your local machine:
 
 ```
 cd ../azure
 ./get-file.sh
+```
+
+**Note:** If `autodelete` is set to false (default), make sure to manually delete your resource group after the benchmark runs:
+
+```
+cd ../azure
+./cleanup.sh yourname
 ```
 
 ### Parameters explained
