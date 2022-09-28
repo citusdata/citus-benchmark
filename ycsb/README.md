@@ -15,7 +15,7 @@ pip3 install fire
 
 ### Run YCSB against Citus on Azure
 
-The YCSB scri pts will automatically take care ofthe provisioning of the Citus clusters and makes sure the the specified workloads are executed. The workloads consist of a specified amount of records behind the `--records` flag and the amount of operations specified after the `--operations` flag. A `.csv` with some interesting results of the benchmark is automatically generated afterward each benchmark. This csv file is generated on the driver VM and transferred to your local machine when the benchmark run is finished.
+The YCSB scripts will automatically take care of the provisioning of the Citus clusters and makes sure the the specified workloads are executed. The workloads consist of a specified amount of records behind the `--records` flag and the amount of operations specified after the `--operations` flag. A `.csv` with some interesting results of the benchmark is automatically generated afterward each benchmark. This csv file is generated on the driver VM and transferred to your local machine when the benchmark run is finished.
 
 For details on the flags run:
 
@@ -29,7 +29,7 @@ Example usage:
 python3 ycsb.py --resource=yourname --records=10000 --operations=10000 --threads=100,200,300 --iterations=2 --workers=2 --workload="run_all_workloads" start_benchmark
 ```
 
-To connect with your driver VM:
+After the above command is run, it takes some minutes to provision and configure the Citus cluster and driver VM. If the driver VM is configured, you can connect with your driver VM:
 
 ```
 cd ../azure
@@ -50,7 +50,7 @@ cd ../azure
 ./get-file.sh
 ```
 
-##### Parameters explained
+### Parameters explained
 
 > `resource` is the name of the resource group that will be created for running the benchmarks <br>
 > `records` the amount of records to be inserted by YCSB <br>
@@ -70,3 +70,5 @@ cd ../azure
 > > - workloadf
 > > - run_all_workloads
 >
+
+
