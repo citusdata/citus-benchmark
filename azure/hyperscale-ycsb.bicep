@@ -130,4 +130,4 @@ module driverVm 'driver-vm-ycsb.bicep' = {
   }
 }
 
-output driverPublicIp string = driverVm.outputs.publicIs
+output driverPublicIp string = driverVm.outputs.publicIp

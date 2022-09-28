@@ -95,7 +95,6 @@ module vm 'vm.bicep' = {
     adminPublicKey: adminPublicKey
     adminUsername: adminUsername
     location: location
-    zone: zone
     size: size
     vmName: vmName
     nicName: nicName

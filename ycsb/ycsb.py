@@ -135,7 +135,7 @@ class StartBenchmark(object):
         logging.info(datetime.datetime.now())
 
         # change to azure directory
-        citus_folder = os.path.abspath(os.curdir)
+        citus_folder = os.path.dirname(os.getcwd())
         os.chdir(citus_folder + "/azure")
 
         # start the benchmark
