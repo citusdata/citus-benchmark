@@ -127,7 +127,7 @@ class StartBenchmark(object):
             run(['./wait-for-results-ycsb.sh', 'benchmarks.finished', str(CHECK_FREQUENCY_IN_SECONDS)], shell = False)
 
         except KeyboardInterrupt:
-            run(['./get-file.sh', f'{self.resource}-results.csv'], shell = False)
+            run(['./get-file.sh'], shell = False)
 
         # Delete cluster if autodelete is set to true
         if self.autodelete:

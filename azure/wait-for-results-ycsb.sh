@@ -8,7 +8,7 @@ while ! test -f $SIGN; do
 	./get-file.sh $SIGN
 done
 
-./get-file.sh ${RESOURCE}-results.csv
+./get-file.sh
 
 rm $SIGN
-cat ${RESOURCE}-results.csv
+cat results.csv
