@@ -56,7 +56,7 @@ def random_string(length):
     return ''.join(random.choice(letters) for i in range(length))
 
 
-def return_csv():
+def return_csv(filename = "results"):
 
     """
     generates a csv with format:
@@ -89,7 +89,7 @@ def return_csv():
     # write results to csv file
     # values[-1].split(.) -> part (driver id)
     # values[-2] -> drivers
-    f = open(homedir + "/results.csv", 'w')
+    f = open(homedir + f"{filename}.csv", 'w')
     writer = csv.writer(f)
 
     for row in results:

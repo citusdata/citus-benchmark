@@ -9,4 +9,4 @@ ip=$(az deployment group show --resource-group "$RESOURCE" --name "$RESOURCE" --
 scp \
     -o "UserKnownHostsFile=/dev/null" \
     -o "StrictHostKeyChecking=no" \
-    ${AZURE_USER}@${ip}:citus-benchmark/ycsb/*.csv . 2>/dev/null
+    ${AZURE_USER}@${ip}:citus-benchmark/ycsb/*results.csv . 2>/dev/null

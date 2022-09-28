@@ -11,4 +11,4 @@ done
 ./get-file.sh
 
 rm $SIGN
-cat results.csv
+cat *results.csv
