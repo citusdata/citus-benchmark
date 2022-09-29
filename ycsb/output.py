@@ -89,7 +89,7 @@ def return_csv(filename = "results"):
     # write results to csv file
     # values[-1].split(.) -> part (driver id)
     # values[-2] -> drivers
-    f = open(homedir + f"{filename}.csv", 'w')
+    f = open(filename, 'w')
     writer = csv.writer(f)
 
     for row in results:
