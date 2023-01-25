@@ -10,7 +10,17 @@ if test -d "HammerDB-$1"; then
     exit
 fi
 
-if [ "$1" == 4.4 ]
+if [ "$1" == 4.6 ]
+then
+    SHA1=f1ce8891e24dba9dfa99c16781673f37d71e94df
+    OUTPUT=HammerDB-4.6-Linux.tar.gz
+    URL=https://github.com/TPC-Council/HammerDB/releases/download/v4.6/$OUTPUT
+elif [ "$1" == 4.5 ]
+then
+    SHA1=98c924ad4e99d6f55ef89f098ce638455473dba6
+    OUTPUT=HammerDB-4.5-Linux.tar.gz
+    URL=https://github.com/TPC-Council/HammerDB/releases/download/v4.5/$OUTPUT
+elif [ "$1" == 4.4 ]
 then
     SHA1=5347e06baad690336afa6d354330cd59d98343cc
     OUTPUT=HammerDB-4.4-Linux.tar.gz
@@ -31,7 +41,7 @@ then
     OUTPUT=HammerDB-3.3-Linux.tar.gz
     URL=https://github.com/TPC-Council/HammerDB/releases/download/v3.3/$OUTPUT
 else
-    echo 'Expects version parameter. Supported versions: 3.3 4.0 4.3 4.4' 1>&2
+    echo 'Expects version parameter. Supported versions: 3.3 4.0 4.3 4.4 4.5 4.6' 1>&2
     exit 1
 fi
 
