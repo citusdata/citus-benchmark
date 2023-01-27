@@ -82,6 +82,7 @@ __ssh_connection_bashrc__
 sudo apt-get install -y postgresql-client-{5}
 git clone https://github.com/citusdata/citus-benchmark.git
 cd citus-benchmark
+git checkout naisila/investigate
 
 {6}
 
