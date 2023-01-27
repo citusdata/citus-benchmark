@@ -19,7 +19,7 @@ param rampup int = 3
 param timeprofile bool = true
 
 // Configuration of the postgres server
-param pgVersion string = '14'
+param pgVersion string = '15'
 param pgSize string  = 'Standard_D8s_v3'
 param pgStorageSizeGB int = 512
 param pgConfigOptions string = ''
@@ -78,7 +78,7 @@ mkfs.xfs /dev/disk/azure/scsi1/lun0
 mkdir /datadrive
 mount /dev/disk/azure/scsi1/lun0 /datadrive
 
-mv /var/lib/postgresql/14/main/ /datadrive/pgdata
+mv /var/lib/postgresql/15/main/ /datadrive/pgdata
 
 cat >> /etc/postgresql/{0}/main/postgresql.conf << '__postgres_conf_EOF__'
 {1}
