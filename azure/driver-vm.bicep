@@ -29,11 +29,13 @@ param duration int
 param rampup int
 param delay int
 param timeprofile bool
+param vacuum bool
 
 // Interpolating booleans directly will result in capitalized words, i.e. True/False
 // instead of true/false. HammerDB needs lower cased ones
 var allWarehousesString = allWarehouses ? 'true' : 'false'
 var timeprofileString = timeprofile ? 'true' : 'false'
+var vacuumString = vacuum ? 'true' : 'false'
 
 var bashrcTmuxAutoAttach = '''
 if [[ -n "${PS1:-}" ]] && [[ -z "${TMUX:-}" ]] && [[ -n "${SSH_CONNECTION:-}" ]] ; then
@@ -55,9 +57,10 @@ sed -i -e "s/diset tpcc pg_duration .*/diset tpcc pg_duration {5}/" run.tcl
 sed -i -e "s/diset tpcc pg_rampup .*/diset tpcc pg_rampup {6}/" run.tcl
 sed -i -e "s/vuset delay .*/vuset delay {7}/" run.tcl
 sed -i -e "s/diset tpcc pg_timeprofile .*/diset tpcc pg_timeprofile {8}/" run.tcl
+sed -i -e "s/diset tpcc pg_vacuum .*/diset tpcc pg_vacuum {9}/" run.tcl
 '''
 
-var sedCommands = format(sedCommandsTemplate, buildWarehouses, runWarehouses, buildVirtualUsers, runVirtualUsers, allWarehousesString, duration, rampup, delay, timeprofileString)
+var sedCommands = format(sedCommandsTemplate, buildWarehouses, runWarehouses, buildVirtualUsers, runVirtualUsers, allWarehousesString, duration, rampup, delay, timeprofileString, vacuumString)
 
 var driverBootTemplate = '''
 echo export PGHOST='{0}' >> .bashrc

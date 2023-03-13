@@ -19,6 +19,7 @@ param allWarehouses bool = true
 param duration int = 60
 param rampup int = 5
 param timeprofile bool = true
+param vacuum bool = true
 param delay int = 20
 
 
@@ -87,6 +88,7 @@ module driverVm 'driver-vm.bicep' = {
     rampup: rampup
     delay: delay
     timeprofile: timeprofile
+    vacuum: vacuum
   }
 }
 
