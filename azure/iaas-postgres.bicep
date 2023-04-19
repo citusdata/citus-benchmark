@@ -20,14 +20,14 @@ param timeprofile bool = true
 
 // Configuration of the postgres server
 param pgVersion string = '14'
-param pgSize string  = 'Standard_D8s_v3'
+param pgSize string  = 'Standard_D8ds_v5'
 param pgStorageSizeGB int = 512
 param pgConfigOptions string = ''
 
 
 // Configuration of the VM that runs the benchmark (the driver)
 // This VM should be pretty big, to make sure it does not become the bottleneck
-param driverSize string  = 'Standard_D64s_v3'
+param driverSize string  = 'Standard_D64ds_v5'
 
 
 param sshAllowIpPrefix string = '*'

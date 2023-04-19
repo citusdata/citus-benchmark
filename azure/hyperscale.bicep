@@ -1,10 +1,12 @@
 @secure()
 param pgAdminPassword string
+param pgPort int = 5432
 @secure()
 param vmAdminPublicKey string
 param vmAdminUsername string = 'azureuser'
 
 param location string = resourceGroup().location
+param zone string = '1'
 
 param buildAndRunFlags string = ''
 param warehouses int = 1000
@@ -15,6 +17,7 @@ param runVirtualUsers int = 250
 param allWarehouses bool = true
 param duration int = 60
 param rampup int = 3
+param delay int = 20
 param timeprofile bool = true
 
 
@@ -29,7 +32,7 @@ param enableHa bool = false
 
 // Configuration of the VM that runs the benchmark (the driver)
 // This VM should be pretty big, to make sure it does not become the bottleneck
-param driverSize string  = 'Standard_D64s_v3'
+param driverSize string  = 'Standard_D64ds_v5'
 
 param sshAllowIpPrefix string = '*'
 // networking reletaed settings, usually you don't have to change this
@@ -106,6 +109,7 @@ module driverVm 'driver-vm.bicep' = {
     adminPublicKey: vmAdminPublicKey
     adminUsername: vmAdminUsername
     location: location
+    zone: zone
     size: driverSize
     vmName: driverVmName
     nicName: driverNicName
@@ -117,6 +121,7 @@ module driverVm 'driver-vm.bicep' = {
     pgUser: 'citus'
     pgPassword: pgAdminPassword
     pgVersion: pgVersion
+    pgPort: pgPort
     buildAndRunFlags: '--name "${namePrefix}" ${buildAndRunFlags}'
     buildWarehouses: buildWarehouses
     runWarehouses: runWarehouses
@@ -125,6 +130,7 @@ module driverVm 'driver-vm.bicep' = {
     allWarehouses: allWarehouses
     duration: duration
     rampup: rampup
+    delay: delay
     timeprofile: timeprofile
   }
 }

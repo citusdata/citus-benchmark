@@ -5,16 +5,8 @@ cd "$(dirname "$0")"
 
 
 # no-op if the directory already exists
-if test -d "HammerDB-$HAMMERDB_VERSION"; then
-    echo "HammerDB-$HAMMERDB_VERSION exists, skipping download" 1>&2
-    exit
-fi
-
-# no-op if the directory already exists
-if [ "$1" = "master" ]; then
-    ./download-hammerdb.sh 4.4
-    git clone https://github.com/TPC-Council/HammerDB --branch master HammerDB-master
-    cp -R HammerDB-4.4/{lib,include,bin} HammerDB-master
+if test -d "HammerDB-$1"; then
+    echo "HammerDB-$1 exists, skipping download" 1>&2
     exit
 fi
 
@@ -39,7 +31,7 @@ then
     OUTPUT=HammerDB-3.3-Linux.tar.gz
     URL=https://github.com/TPC-Council/HammerDB/releases/download/v3.3/$OUTPUT
 else
-    echo 'Expects version parameter. Supported versions: 3.3 4.0 4.3' 1>&2
+    echo 'Expects version parameter. Supported versions: 3.3 4.0 4.3 4.4' 1>&2
     exit 1
 fi
 
