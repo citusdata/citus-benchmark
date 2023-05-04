@@ -16,7 +16,7 @@ param runVirtualUsers int = 250
 param allWarehouses bool = true
 param duration int = 60
 param rampup int = 3
-param timeprofile bool = true
+param timeprofile bool = false
 
 // Configuration of the postgres server
 param pgVersion string = '15'

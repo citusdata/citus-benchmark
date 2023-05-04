@@ -18,7 +18,7 @@ param runVirtualUsers int = 250
 param allWarehouses bool = true
 param duration int = 60
 param rampup int = 5
-param timeprofile bool = true
+param timeprofile bool = false
 param vacuum bool = true
 param delay int = 20
 
