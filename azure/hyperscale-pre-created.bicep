@@ -21,7 +21,7 @@ param timeprofile bool = true
 
 
 // Configuration of the postgres server group
-param pgVersion string = '14'
+param pgVersion string = '15'
 
 // Configuration of the VM that runs the benchmark (the driver)
 // This VM should be pretty big, to make sure it does not become the bottleneck
