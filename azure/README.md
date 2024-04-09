@@ -112,3 +112,12 @@ statistically relevant results). All other values are simply the arguments that
 need to be passed to `run-benchmark.sh`. Notably the line does not contain the
 resource group name. The reason is that this name is generated randomly for each
 run, to avoid conflicts.
+
+## Running benchmarks on burstable computes
+
+Since the maximum client connections for `Standard_B2s` compute is 40 and for `Standard_B1ms` compute is 20, `buildVirtualUsers` and `runVirtualUsers` parameters should not exceed these values for burstable computes. And decrease `warehouses` value accordingly.
+
+Also, since the burstable clusters are single node, you may want to run benchmark without citus. In that case, add `--no-citus` value to `buildAndRunFlags` as below:
+
+`param buildAndRunFlags string = '--no-citus'`
+
