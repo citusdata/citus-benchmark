@@ -12,7 +12,8 @@ Apart from these arguments this script relies on the following libpq
 environment variables:
 - PGPASSWORD (required)
 - PGHOST (default: localhost)
-- PGPORT (default: 5432)
+- PGPORTBUILD (default: 5432)
+- PGPORTRUN (default: 5432)
 - PGUSER (default: postgres)
 - PGDATABASE (default: \$PGUSER)
 
@@ -128,7 +129,8 @@ if [ $IS_CH_ONLY = true ] && [ $IS_CH_AND_TPCC = true ]; then
 fi
 
 export PGHOST=${PGHOST:-localhost}
-export PGPORT=${PGPORT:-5432}
+export PGPORTBUILD=${PGPORTBUILD:-5432}
+export PGPORTRUN=${PGPORTRUN:-5432}
 export PGUSER=${PGUSER:-postgres}
 export PGDATABASE=${PGDATABASE:-$PGUSER}
 if [ -z "${PGPASSWORD+x}" ]; then
