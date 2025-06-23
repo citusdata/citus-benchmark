@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mssqlserver>
+    <connection>
+        <mssqls_server>(local)</mssqls_server>
+        <mssqls_linux_server>localhost</mssqls_linux_server>
+        <mssqls_tcp>false</mssqls_tcp>
+        <mssqls_port>1433</mssqls_port>
+        <mssqls_azure>false</mssqls_azure>
+        <mssqls_authentication>windows</mssqls_authentication>
+        <mssqls_msi_object_id>null</mssqls_msi_object_id>
+        <mssqls_linux_authent>sql</mssqls_linux_authent>
+	<mssqls_odbc_driver>ODBC Driver 18 for SQL Server</mssqls_odbc_driver>
+	<mssqls_linux_odbc>ODBC Driver 18 for SQL Server</mssqls_linux_odbc>
+        <mssqls_uid>sa</mssqls_uid>
+        <mssqls_pass>admin</mssqls_pass>
+        <mssqls_encrypt_connection>true</mssqls_encrypt_connection>
+        <mssqls_trust_server_cert>true</mssqls_trust_server_cert>
+    </connection>
+    <tpcc>
+        <schema>
+            <mssqls_count_ware>1</mssqls_count_ware>
+            <mssqls_num_vu>1</mssqls_num_vu>
+            <mssqls_dbase>tpcc</mssqls_dbase>
+            <mssqls_imdb>false</mssqls_imdb>
+            <mssqls_bucket>1</mssqls_bucket>
+            <mssqls_durability>SCHEMA_AND_DATA</mssqls_durability>
+            <mssqls_use_bcp>true</mssqls_use_bcp>
+        </schema>
+        <driver>
+            <mssqls_total_iterations>10000000</mssqls_total_iterations>
+            <mssqls_raiseerror>false</mssqls_raiseerror>
+            <mssqls_keyandthink>false</mssqls_keyandthink>
+	    <mssqls_checkpoint>false</mssqls_checkpoint>
+            <mssqls_driver>timed</mssqls_driver>
+	    <mssqls_rampup>2</mssqls_rampup>
+            <mssqls_duration>5</mssqls_duration>
+            <mssqls_allwarehouse>false</mssqls_allwarehouse>
+            <mssqls_timeprofile>false</mssqls_timeprofile>
+	    <mssqls_async_scale>false</mssqls_async_scale>
+            <mssqls_async_client>10</mssqls_async_client>
+            <mssqls_async_verbose>false</mssqls_async_verbose>
+            <mssqls_async_delay>1000</mssqls_async_delay>
+	    <mssqls_connect_pool>false</mssqls_connect_pool>
+        </driver>
+    </tpcc>
+    <tpch>
+        <schema>
+	    <mssqls_scale_fact>1</mssqls_scale_fact>
+	    <mssqls_maxdop>2</mssqls_maxdop>
+	    <mssqls_tpch_dbase>tpch</mssqls_tpch_dbase>
+	    <mssqls_num_tpch_threads>1</mssqls_num_tpch_threads> 
+	    <mssqls_colstore>false</mssqls_colstore>
+	    <mssqls_tpch_use_bcp>true</mssqls_tpch_use_bcp>
+	    <mssqls_tpch_partition_orders_and_lineitems>false</mssqls_tpch_partition_orders_and_lineitems>
+        <mssqls_tpch_advanced_stats>false</mssqls_tpch_advanced_stats>
+        </schema>
+        <driver>
+	    <mssqls_total_querysets>1</mssqls_total_querysets>
+	    <mssqls_raise_query_error>false</mssqls_raise_query_error> 
+	    <mssqls_verbose>false</mssqls_verbose> 
+	    <mssqls_refresh_on>false</mssqls_refresh_on>  
+	    <mssqls_update_sets>1</mssqls_update_sets> 
+	    <mssqls_trickle_refresh>1000</mssqls_trickle_refresh> 
+	    <mssqls_refresh_verbose>false</mssqls_refresh_verbose>
+        </driver>
+    </tpch>
+</mssqlserver>

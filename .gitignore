@@ -3,7 +3,6 @@
 HammerDB-*.*/
 HammerDB-upstream/
 HammerDB-master/
-results/
 /azure/.ssh-controlmasters
 /ycsb/host
 /ycsb/driver

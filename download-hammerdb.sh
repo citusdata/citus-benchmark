@@ -18,7 +18,12 @@ if [ "$1" = "master" ]; then
     exit
 fi
 
-if [ "$1" == 4.4 ]
+if [ "$1" == 4.12 ]
+then
+    SHA1=7bbee1987f19f9f20ff57261c1c5aaef6e1e43f3
+    OUTPUT=HammerDB-4.12-Linux.tar.gz
+    URL=https://github.com/TPC-Council/HammerDB/releases/download/v4.12/$OUTPUT
+elif [ "$1" == 4.4 ]
 then
     SHA1=5347e06baad690336afa6d354330cd59d98343cc
     OUTPUT=HammerDB-4.4-Linux.tar.gz
@@ -39,7 +44,7 @@ then
     OUTPUT=HammerDB-3.3-Linux.tar.gz
     URL=https://github.com/TPC-Council/HammerDB/releases/download/v3.3/$OUTPUT
 else
-    echo 'Expects version parameter. Supported versions: 3.3 4.0 4.3' 1>&2
+    echo 'Expects version parameter. Supported versions: 3.3 4.0 4.3 4.12' 1>&2
     exit 1
 fi
 
